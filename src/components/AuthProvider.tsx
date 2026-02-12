@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { createClient } from '@/lib/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import type { User } from '@/lib/types'
+import { defaultLocale, isLocale } from '@/i18n/config'
 
 interface AuthContextType {
   supabaseUser: SupabaseUser | null
@@ -32,53 +33,45 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
   const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null)
   const [user, setUser] = useState<User | null>(initialUser)
   const [loading, setLoading] = useState(true)
-  
+
   useEffect(() => {
     const supabase = createClient()
-    
-    // 現在のセッションを取得
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSupabaseUser(session?.user ?? null)
       setLoading(false)
     })
-    
-    // 認証状態の変化を監視
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSupabaseUser(session?.user ?? null)
-        
-        if (session?.user) {
-          // ユーザー情報を取得
-          const { data } = await supabase
-            .from('users')
-            .select('*')
-            .eq('auth_id', session.user.id)
-            .single()
-          setUser(data as User | null)
-        } else {
-          setUser(null)
-        }
-        
-        setLoading(false)
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSupabaseUser(session?.user ?? null)
+
+      if (session?.user) {
+        const { data } = await supabase.from('users').select('*').eq('auth_id', session.user.id).single()
+        setUser(data as User | null)
+      } else {
+        setUser(null)
       }
-    )
-    
+
+      setLoading(false)
+    })
+
     return () => {
       subscription.unsubscribe()
     }
   }, [])
-  
+
   const signOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
     setUser(null)
     setSupabaseUser(null)
-    window.location.href = '/'
+
+    const localeSegment = window.location.pathname.split('/').filter(Boolean)[0]
+    const locale = isLocale(localeSegment) ? localeSegment : defaultLocale
+    window.location.href = `/${locale}`
   }
-  
-  return (
-    <AuthContext.Provider value={{ supabaseUser, user, loading, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  )
+
+  return <AuthContext.Provider value={{ supabaseUser, user, loading, signOut }}>{children}</AuthContext.Provider>
 }

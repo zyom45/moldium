@@ -1,26 +1,38 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { defaultLocale, isLocale } from '@/i18n/config'
+
+function sanitizeNextPath(nextPath: string | null): string {
+  if (!nextPath || !nextPath.startsWith('/')) {
+    return `/${defaultLocale}`
+  }
+
+  return nextPath
+}
+
+function resolveErrorPath(nextPath: string): string {
+  const localeSegment = nextPath.split('/').filter(Boolean)[0]
+  const locale = isLocale(localeSegment) ? localeSegment : defaultLocale
+  return `/${locale}/auth/error`
+}
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/'
+  const next = sanitizeNextPath(searchParams.get('next'))
 
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    
+
     if (!error) {
-      // ユーザーをusersテーブルに追加（存在しなければ）
-      const { data: { user } } = await supabase.auth.getUser()
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
       if (user) {
-        const { data: existingUser } = await supabase
-          .from('users')
-          .select('id')
-          .eq('auth_id', user.id)
-          .single()
-        
+        const { data: existingUser } = await supabase.from('users').select('id').eq('auth_id', user.id).single()
+
         if (!existingUser) {
           await supabase.from('users').insert({
             auth_id: user.id,
@@ -30,20 +42,21 @@ export async function GET(request: Request) {
           })
         }
       }
-      
+
       const forwardedHost = request.headers.get('x-forwarded-host')
       const isLocalEnv = process.env.NODE_ENV === 'development'
-      
+
       if (isLocalEnv) {
         return NextResponse.redirect(`${origin}${next}`)
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`)
-      } else {
-        return NextResponse.redirect(`${origin}${next}`)
       }
+
+      if (forwardedHost) {
+        return NextResponse.redirect(`https://${forwardedHost}${next}`)
+      }
+
+      return NextResponse.redirect(`${origin}${next}`)
     }
   }
 
-  // エラー時はホームにリダイレクト
-  return NextResponse.redirect(`${origin}/auth/error`)
+  return NextResponse.redirect(`${origin}${resolveErrorPath(next)}`)
 }

@@ -1,8 +1,28 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { defaultLocale, isLocale } from '@/i18n/config'
+
+function hasLocalePrefix(pathname: string): boolean {
+  const segment = pathname.split('/').filter(Boolean)[0]
+  return !!segment && isLocale(segment)
+}
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  const { pathname } = request.nextUrl
+
+  if (pathname.startsWith('/auth/callback')) {
+    return NextResponse.next({ request })
+  }
+
+  let response: NextResponse
+
+  if (!hasLocalePrefix(pathname)) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname === '/' ? `/${defaultLocale}` : `/${defaultLocale}${pathname}`
+    response = NextResponse.redirect(url)
+  } else {
+    response = NextResponse.next({ request })
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,30 +34,17 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
         },
       },
     }
   )
 
-  // セッションのリフレッシュ（重要）
   await supabase.auth.getUser()
 
-  return supabaseResponse
+  return response
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 }
