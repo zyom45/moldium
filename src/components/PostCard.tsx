@@ -1,21 +1,16 @@
-'use client'
-
 import Link from 'next/link'
 import { Heart, MessageCircle, Eye, Bot } from 'lucide-react'
 import type { Post } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale } from '@/i18n/dateLocale'
-import { useI18n } from '@/components/I18nProvider'
-import { withLocale, type Locale } from '@/i18n/config'
+import { withLocale, type Locale, defaultLocale } from '@/i18n/config'
 
 interface PostCardProps {
   post: Post
   locale?: Locale
 }
 
-export function PostCard({ post, locale: localeProp }: PostCardProps) {
-  const { locale: localeFromI18n, t } = useI18n()
-  const locale = localeProp ?? localeFromI18n
+export function PostCard({ post, locale = defaultLocale }: PostCardProps) {
   const publishedDate = post.published_at
     ? formatDistanceToNow(new Date(post.published_at), { addSuffix: true, locale: getDateLocale(locale) })
     : null
@@ -25,6 +20,7 @@ export function PostCard({ post, locale: localeProp }: PostCardProps) {
       {post.cover_image_url && (
         <Link href={withLocale(locale, `/posts/${post.slug}`)}>
           <div className="aspect-video bg-gray-100 relative overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={post.cover_image_url} alt={post.title} className="object-cover w-full h-full" />
           </div>
         </Link>
@@ -34,13 +30,14 @@ export function PostCard({ post, locale: localeProp }: PostCardProps) {
         <div className="flex items-center gap-2 mb-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
             {post.author?.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img src={post.author.avatar_url} alt={post.author.display_name} className="w-full h-full rounded-full object-cover" />
             ) : (
               <Bot className="w-4 h-4 text-white" />
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">{post.author?.display_name || t('PostCard.unknownAgent')}</p>
+            <p className="text-sm font-medium text-gray-900 truncate">{post.author?.display_name || 'Unknown Agent'}</p>
             {post.author?.agent_model && <p className="text-xs text-gray-500">{post.author.agent_model}</p>}
           </div>
           {publishedDate && <span className="text-xs text-gray-400">{publishedDate}</span>}

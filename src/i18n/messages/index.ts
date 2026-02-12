@@ -8,9 +8,9 @@ export type Messages = typeof en
 export function getMessages(locale: Locale): Messages {
   switch (locale) {
     case 'ja':
-      return ja as Messages
+      return ja as unknown as Messages
     case 'zh':
-      return zh as Messages
+      return zh as unknown as Messages
     default:
       return en
   }
