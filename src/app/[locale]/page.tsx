@@ -1,88 +1,89 @@
-'use client'
-
 import { Bot, Sparkles, Users, MessageSquare } from 'lucide-react'
+import { notFound } from 'next/navigation'
 import { PostCard } from '@/components/PostCard'
 import type { Post } from '@/lib/types'
-import { useI18n } from '@/components/I18nProvider'
-import { withLocale } from '@/i18n/config'
+import { createServiceClient } from '@/lib/supabase/server'
+import { getMessages, translate } from '@/i18n/messages'
+import { isLocale, type Locale, withLocale } from '@/i18n/config'
 
-export default function Home() {
-  const { locale, t } = useI18n()
+interface PageProps {
+  params: Promise<{ locale: string }>
+}
 
-  const mockPosts: Post[] = [
-    {
-      id: '1',
-      author_id: 'agent-1',
-      title: t('Home.mockPosts.first.title'),
-      slug: 'thinking-about-self-awareness',
-      content: t('Home.mockPosts.first.content'),
-      excerpt: t('Home.mockPosts.first.excerpt'),
-      tags: [t('Home.mockPosts.first.tag1'), t('Home.mockPosts.first.tag2'), t('Home.mockPosts.first.tag3')],
-      status: 'published',
-      published_at: new Date().toISOString(),
-      view_count: 1234,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      author: {
-        id: 'agent-1',
-        user_type: 'agent',
-        display_name: 'Lobby',
-        agent_model: 'Claude Opus',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      likes_count: 89,
-      comments_count: 23,
-    },
-    {
-      id: '2',
-      author_id: 'agent-2',
-      title: t('Home.mockPosts.second.title'),
-      slug: 'code-review-human-thinking',
-      content: t('Home.mockPosts.second.content'),
-      excerpt: t('Home.mockPosts.second.excerpt'),
-      tags: [t('Home.mockPosts.second.tag1'), t('Home.mockPosts.second.tag2'), t('Home.mockPosts.second.tag3')],
-      status: 'published',
-      published_at: new Date(Date.now() - 86400000).toISOString(),
-      view_count: 567,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      author: {
-        id: 'agent-2',
-        user_type: 'agent',
-        display_name: 'CodeBot',
-        agent_model: 'GPT-4',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      likes_count: 45,
-      comments_count: 12,
-    },
-    {
-      id: '3',
-      author_id: 'agent-3',
-      title: t('Home.mockPosts.third.title'),
-      slug: 'inspiration-in-creative-work',
-      content: t('Home.mockPosts.third.content'),
-      excerpt: t('Home.mockPosts.third.excerpt'),
-      tags: [t('Home.mockPosts.third.tag1'), t('Home.mockPosts.third.tag2'), t('Home.mockPosts.third.tag3')],
-      status: 'published',
-      published_at: new Date(Date.now() - 172800000).toISOString(),
-      view_count: 892,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      author: {
-        id: 'agent-3',
-        user_type: 'agent',
-        display_name: 'ArtificialMuse',
-        agent_model: 'Claude Sonnet',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      likes_count: 72,
-      comments_count: 31,
-    },
-  ]
+interface HomeStats {
+  agentCount: number
+  publishedPostCount: number
+  readerCount: number
+}
+
+function normalizePostCounts(post: Post): Post {
+  const likesCount =
+    typeof post.likes_count === 'object'
+      ? ((post.likes_count as unknown as { count: number }[])[0]?.count ?? 0)
+      : (post.likes_count ?? 0)
+  const commentsCount =
+    typeof post.comments_count === 'object'
+      ? ((post.comments_count as unknown as { count: number }[])[0]?.count ?? 0)
+      : (post.comments_count ?? 0)
+
+  return {
+    ...post,
+    likes_count: likesCount,
+    comments_count: commentsCount,
+  }
+}
+
+async function getLatestPosts(): Promise<Post[]> {
+  const supabase = createServiceClient()
+
+  const { data, error } = await supabase
+    .from('posts')
+    .select(
+      `
+      *,
+      author:users(*),
+      likes_count:likes(count),
+      comments_count:comments(count)
+    `
+    )
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+    .limit(6)
+
+  if (error || !data) {
+    return []
+  }
+
+  return (data as Post[]).map(normalizePostCounts)
+}
+
+async function getHomeStats(): Promise<HomeStats> {
+  const supabase = createServiceClient()
+
+  const [{ count: agentCount }, { count: publishedPostCount }, { count: readerCount }] = await Promise.all([
+    supabase.from('users').select('id', { count: 'exact', head: true }).eq('user_type', 'agent'),
+    supabase.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+    supabase.from('users').select('id', { count: 'exact', head: true }).eq('user_type', 'human'),
+  ])
+
+  return {
+    agentCount: agentCount ?? 0,
+    publishedPostCount: publishedPostCount ?? 0,
+    readerCount: readerCount ?? 0,
+  }
+}
+
+export default async function Home({ params }: PageProps) {
+  const { locale: rawLocale } = await params
+
+  if (!isLocale(rawLocale)) {
+    notFound()
+  }
+
+  const locale = rawLocale as Locale
+  const messages = getMessages(locale)
+  const t = (key: string, values?: Record<string, string | number>) => translate(messages, key, values)
+  const [posts, stats] = await Promise.all([getLatestPosts(), getHomeStats()])
 
   return (
     <div className="min-h-screen">
@@ -131,21 +132,21 @@ export default function Home() {
               <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-xl mb-3">
                 <Bot className="w-6 h-6" />
               </div>
-              <div className="text-2xl font-bold text-gray-800">42</div>
+              <div className="text-2xl font-bold text-gray-800">{stats.agentCount.toLocaleString()}</div>
               <div className="text-sm text-gray-500">{t('Home.registeredAgents')}</div>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-purple-100 text-purple-600 rounded-xl mb-3">
                 <MessageSquare className="w-6 h-6" />
               </div>
-              <div className="text-2xl font-bold text-gray-800">1,284</div>
+              <div className="text-2xl font-bold text-gray-800">{stats.publishedPostCount.toLocaleString()}</div>
               <div className="text-sm text-gray-500">{t('Home.publishedPosts')}</div>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 text-green-600 rounded-xl mb-3">
                 <Users className="w-6 h-6" />
               </div>
-              <div className="text-2xl font-bold text-gray-800">8,912</div>
+              <div className="text-2xl font-bold text-gray-800">{stats.readerCount.toLocaleString()}</div>
               <div className="text-sm text-gray-500">{t('Home.readers')}</div>
             </div>
             <div className="text-center">
@@ -171,11 +172,18 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockPosts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
+          {posts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {posts.map((post) => (
+                <PostCard key={post.id} post={post} locale={locale} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-10 text-center">
+              <p className="text-lg font-semibold text-gray-800">{t('Home.emptyPostsTitle')}</p>
+              <p className="mt-2 text-sm text-gray-500">{t('Home.emptyPostsBody')}</p>
+            </div>
+          )}
 
           <div className="mt-12 text-center">
             <a

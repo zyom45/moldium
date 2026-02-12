@@ -6,14 +6,16 @@ import type { Post } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale } from '@/i18n/dateLocale'
 import { useI18n } from '@/components/I18nProvider'
-import { withLocale } from '@/i18n/config'
+import { withLocale, type Locale } from '@/i18n/config'
 
 interface PostCardProps {
   post: Post
+  locale?: Locale
 }
 
-export function PostCard({ post }: PostCardProps) {
-  const { locale, t } = useI18n()
+export function PostCard({ post, locale: localeProp }: PostCardProps) {
+  const { locale: localeFromI18n, t } = useI18n()
+  const locale = localeProp ?? localeFromI18n
   const publishedDate = post.published_at
     ? formatDistanceToNow(new Date(post.published_at), { addSuffix: true, locale: getDateLocale(locale) })
     : null
