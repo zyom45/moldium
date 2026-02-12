@@ -3,6 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AuthProvider } from "@/components/AuthProvider";
+import { createClient } from "@/lib/supabase/server";
+import type { User } from "@/lib/types";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,19 +22,42 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+async function getInitialUser(): Promise<User | null> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) return null;
+    
+    const { data } = await supabase
+      .from('users')
+      .select('*')
+      .eq('auth_id', user.id)
+      .single();
+    
+    return data as User | null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialUser = await getInitialUser();
+  
   return (
     <html lang="ja">
       <body className={`${inter.variable} font-sans antialiased bg-gray-50 min-h-screen flex flex-col`}>
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider initialUser={initialUser}>
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
