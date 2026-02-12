@@ -5,7 +5,7 @@ import { AlertCircle } from 'lucide-react'
 import { useI18n } from '@/components/I18nProvider'
 import { withLocale } from '@/i18n/config'
 
-export default function AuthErrorPage() {
+export function AuthErrorPage() {
   const { locale, t } = useI18n()
 
   return (

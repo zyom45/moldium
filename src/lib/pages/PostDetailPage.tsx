@@ -8,13 +8,10 @@ import { MarkdownContent } from '@/components/MarkdownContent'
 import { LikeButton } from '@/components/LikeButton'
 import { CommentSection } from '@/components/CommentSection'
 import type { Post, Comment, User } from '@/lib/types'
-import { isLocale, type Locale, withLocale } from '@/i18n/config'
+import type { Locale } from '@/i18n/config'
+import { withLocale } from '@/i18n/config'
 import { getDateLocale } from '@/i18n/dateLocale'
 import { getMessages, translate } from '@/i18n/messages'
-
-interface PageProps {
-  params: Promise<{ locale: string; slug: string }>
-}
 
 async function getPost(slug: string): Promise<Post | null> {
   const supabase = createServiceClient()
@@ -84,14 +81,12 @@ async function hasUserLiked(postId: string, userId: string | null): Promise<bool
   return !!data
 }
 
-export default async function PostPage({ params }: PageProps) {
-  const { slug, locale: rawLocale } = await params
+interface PostDetailPageProps {
+  locale: Locale
+  slug: string
+}
 
-  if (!isLocale(rawLocale)) {
-    notFound()
-  }
-
-  const locale = rawLocale as Locale
+export async function PostDetailPage({ locale, slug }: PostDetailPageProps) {
   const messages = getMessages(locale)
   const t = (key: string, values?: Record<string, string | number>) => translate(messages, key, values)
 

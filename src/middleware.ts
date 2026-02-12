@@ -1,29 +1,23 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { defaultLocale, isLocale } from '@/i18n/config'
-
-function hasLocalePrefix(pathname: string): boolean {
-  const segment = pathname.split('/').filter(Boolean)[0]
-  return !!segment && isLocale(segment)
-}
+import { isPrefixedLocale } from '@/i18n/config'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Skip auth callback
   if (pathname.startsWith('/auth/callback')) {
     return NextResponse.next({ request })
   }
 
-  let response: NextResponse
+  // No redirects needed - routes handle their own locale
+  // - / and /anything -> English (default)
+  // - /ja/* -> Japanese
+  // - /zh/* -> Chinese
+  
+  const response = NextResponse.next({ request })
 
-  if (!hasLocalePrefix(pathname)) {
-    const url = request.nextUrl.clone()
-    url.pathname = pathname === '/' ? `/${defaultLocale}` : `/${defaultLocale}${pathname}`
-    response = NextResponse.redirect(url)
-  } else {
-    response = NextResponse.next({ request })
-  }
-
+  // Set up Supabase client for session refresh
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

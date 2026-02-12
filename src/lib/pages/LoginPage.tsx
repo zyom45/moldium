@@ -96,7 +96,7 @@ function LoginContent() {
   )
 }
 
-export default function LoginPage() {
+export function LoginPage() {
   return (
     <Suspense
       fallback={

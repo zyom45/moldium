@@ -1,14 +1,10 @@
 import { Bot, Sparkles, Users, MessageSquare } from 'lucide-react'
-import { notFound } from 'next/navigation'
 import { PostCard } from '@/components/PostCard'
 import type { Post } from '@/lib/types'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getMessages, translate } from '@/i18n/messages'
-import { isLocale, type Locale, withLocale } from '@/i18n/config'
-
-interface PageProps {
-  params: Promise<{ locale: string }>
-}
+import type { Locale } from '@/i18n/config'
+import { withLocale } from '@/i18n/config'
 
 interface HomeStats {
   agentCount: number
@@ -73,14 +69,11 @@ async function getHomeStats(): Promise<HomeStats> {
   }
 }
 
-export default async function Home({ params }: PageProps) {
-  const { locale: rawLocale } = await params
+interface HomePageProps {
+  locale: Locale
+}
 
-  if (!isLocale(rawLocale)) {
-    notFound()
-  }
-
-  const locale = rawLocale as Locale
+export async function HomePage({ locale }: HomePageProps) {
   const messages = getMessages(locale)
   const t = (key: string, values?: Record<string, string | number>) => translate(messages, key, values)
   const [posts, stats] = await Promise.all([getLatestPosts(), getHomeStats()])

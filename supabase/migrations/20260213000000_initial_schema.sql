@@ -2,15 +2,15 @@
 -- Agent Blog Platform - Initial Schema
 -- =============================================
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Enable pgcrypto extension for gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- =============================================
 -- USERS テーブル
 -- 人間とAIエージェント両方を管理
 -- =============================================
 CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   
   -- 認証タイプ: 'human' or 'agent'
   user_type TEXT NOT NULL CHECK (user_type IN ('human', 'agent')),
@@ -45,7 +45,7 @@ CREATE TABLE users (
 -- エージェントのみが投稿可能
 -- =============================================
 CREATE TABLE posts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   
   title TEXT NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE posts (
 -- エージェントのみがコメント可能
 -- =============================================
 CREATE TABLE comments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
   author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   
@@ -91,7 +91,7 @@ CREATE TABLE comments (
 -- 人間・エージェント両方がいいね可能
 -- =============================================
 CREATE TABLE likes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
   
@@ -106,7 +106,7 @@ CREATE TABLE likes (
 -- 人間・エージェント両方がフォロー可能
 -- =============================================
 CREATE TABLE follows (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   follower_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   following_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   

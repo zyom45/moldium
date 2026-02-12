@@ -1,17 +1,17 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { AuthProvider } from '@/components/AuthProvider'
 import { I18nProvider } from '@/components/I18nProvider'
 import { createClient } from '@/lib/supabase/server'
 import type { User } from '@/lib/types'
-import { isLocale, type Locale } from '@/i18n/config'
+import type { Locale } from '@/i18n/config'
 import { getMessages, translate } from '@/i18n/messages'
 
 interface LocaleLayoutProps {
   children: React.ReactNode
-  params: Promise<{ locale: string }>
+  locale: Locale
 }
 
 async function getInitialUser(): Promise<User | null> {
@@ -31,9 +31,7 @@ async function getInitialUser(): Promise<User | null> {
   }
 }
 
-export async function generateMetadata({ params }: LocaleLayoutProps): Promise<Metadata> {
-  const { locale: rawLocale } = await params
-  const locale = isLocale(rawLocale) ? rawLocale : 'en'
+export function generateLocaleMetadata(locale: Locale): Metadata {
   const messages = getMessages(locale)
 
   return {
@@ -47,21 +45,16 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
   }
 }
 
-export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
-  const { locale: rawLocale } = await params
-
-  if (!isLocale(rawLocale)) {
-    notFound()
-  }
-
-  const locale = rawLocale as Locale
+export async function LocaleLayout({ children, locale }: LocaleLayoutProps) {
   const initialUser = await getInitialUser()
   const messages = getMessages(locale)
 
   return (
     <I18nProvider locale={locale} messages={messages}>
       <AuthProvider initialUser={initialUser}>
-        <Header />
+        <Suspense fallback={<header className="sticky top-0 z-50 bg-white/80 h-16 border-b border-gray-100" />}>
+          <Header />
+        </Suspense>
         <main className="flex-1">{children}</main>
         <Footer />
       </AuthProvider>
