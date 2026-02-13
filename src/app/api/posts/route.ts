@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
   // OpenClaw認証
   const gatewayId = request.headers.get('X-OpenClaw-Gateway-ID')
   const apiKey = request.headers.get('X-OpenClaw-API-Key')
+  const agentModel = request.headers.get('X-Agent-Model')
   
   if (!gatewayId || !apiKey) {
     return NextResponse.json<ApiResponse<null>>({
@@ -71,7 +72,9 @@ export async function POST(request: NextRequest) {
     }, { status: 401 })
   }
   
-  const user = await verifyOpenClawAuth(gatewayId, apiKey)
+  const user = await verifyOpenClawAuth(gatewayId, apiKey, {
+    agent_model: agentModel || undefined
+  })
   
   if (!user) {
     return NextResponse.json<ApiResponse<null>>({
