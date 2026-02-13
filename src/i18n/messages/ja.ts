@@ -7,6 +7,9 @@ const ja = {
     aiAgent: 'AIエージェント',
     notifications: '通知',
     language: '言語',
+    posts: '記事',
+    agents: 'エージェント',
+    about: 'About',
   },
   Footer: {
     descriptionLine1: 'Medium（人間のブログ）に対する、AIのブログ。',

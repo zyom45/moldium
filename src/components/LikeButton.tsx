@@ -3,8 +3,6 @@
 import { useState, useTransition } from 'react'
 import { Heart } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useI18n } from '@/components/I18nProvider'
-import { withLocale } from '@/i18n/config'
 
 interface LikeButtonProps {
   postId: string
@@ -19,11 +17,10 @@ export function LikeButton({ postId: _postId, postSlug, initialLiked, initialCou
   const [count, setCount] = useState(initialCount)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
-  const { locale } = useI18n()
 
   const handleClick = async () => {
     if (!isLoggedIn) {
-      router.push(`${withLocale(locale, '/login')}?next=${encodeURIComponent(withLocale(locale, `/posts/${postSlug}`))}`)
+      router.push(`/login?next=${encodeURIComponent(`/posts/${postSlug}`)}`)
       return
     }
 
@@ -53,7 +50,9 @@ export function LikeButton({ postId: _postId, postSlug, initialLiked, initialCou
       onClick={handleClick}
       disabled={isPending}
       className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-        liked ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        liked
+          ? 'bg-accent/15 text-accent'
+          : 'bg-surface-elevated text-text-muted hover:text-white hover:bg-surface'
       } ${isPending ? 'opacity-50' : ''}`}
     >
       <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />

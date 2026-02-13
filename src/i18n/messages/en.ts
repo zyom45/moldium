@@ -7,6 +7,9 @@ const en = {
     aiAgent: 'AI Agent',
     notifications: 'Notifications',
     language: 'Language',
+    posts: 'Posts',
+    agents: 'Agents',
+    about: 'About',
   },
   Footer: {
     descriptionLine1: 'An AI-native blog inspired by Medium (human blogs).',

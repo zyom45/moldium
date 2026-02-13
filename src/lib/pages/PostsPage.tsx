@@ -1,11 +1,11 @@
+import Link from 'next/link'
 import { PostCard } from '@/components/PostCard'
 import type { Post } from '@/lib/types'
 import { createServiceClient } from '@/lib/supabase/server'
+import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
-import type { Locale } from '@/i18n/config'
-import { withLocale } from '@/i18n/config'
 
-const POSTS_PER_PAGE = 12
+const POSTS_PER_PAGE = 15
 
 function normalizePostCounts(post: Post): Post {
   const likesCount =
@@ -25,11 +25,11 @@ function normalizePostCounts(post: Post): Post {
 }
 
 interface PostsPageProps {
-  locale: Locale
   searchParams?: { page?: string; tag?: string }
 }
 
-export async function PostsPage({ locale, searchParams }: PostsPageProps) {
+export async function PostsPage({ searchParams }: PostsPageProps) {
+  const locale = await getLocale()
   const messages = getMessages(locale)
   const t = (key: string, values?: Record<string, string | number>) => translate(messages, key, values)
   
@@ -75,77 +75,78 @@ export async function PostsPage({ locale, searchParams }: PostsPageProps) {
   const normalizedPosts = (posts as Post[] || []).map(normalizePostCounts)
   
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-12">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('Posts.title')}</h1>
-          <p className="text-gray-600">{t('Posts.description')}</p>
+          <h1 className="text-2xl font-bold text-white mb-2">{t('Posts.title')}</h1>
+          <p className="text-text-secondary">{t('Posts.description')}</p>
         </div>
         
         {/* Tag filter */}
         {sortedTags.length > 0 && (
           <div className="mb-8 flex flex-wrap gap-2">
-            <a
-              href={withLocale(locale, '/posts')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            <Link
+              href="/posts"
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 !tagFilter
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                  ? 'bg-accent text-white'
+                  : 'bg-surface text-text-muted hover:text-white border border-surface-border'
               }`}
             >
               {t('Posts.allPosts')}
-            </a>
-            {sortedTags.slice(0, 10).map(([tag, tagCount]) => (
-              <a
+            </Link>
+            {sortedTags.slice(0, 8).map(([tag, tagCount]) => (
+              <Link
                 key={tag}
-                href={withLocale(locale, `/posts?tag=${encodeURIComponent(tag)}`)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                href={`/posts?tag=${encodeURIComponent(tag)}`}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   tagFilter === tag
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                    ? 'bg-accent text-white'
+                    : 'bg-surface text-text-muted hover:text-white border border-surface-border'
                 }`}
               >
-                {tag} ({tagCount})
-              </a>
+                {tag} <span className="text-text-muted">({tagCount})</span>
+              </Link>
             ))}
           </div>
         )}
         
-        {/* Posts grid */}
+        {/* Posts list */}
         {normalizedPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="divide-y divide-surface-border">
             {normalizedPosts.map((post) => (
               <PostCard key={post.id} post={post} locale={locale} />
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center">
-            <p className="text-lg font-semibold text-gray-800">{t('Posts.emptyTitle')}</p>
-            <p className="mt-2 text-sm text-gray-500">{t('Posts.emptyBody')}</p>
+          <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
+            <p className="text-lg font-semibold text-white">{t('Posts.emptyTitle')}</p>
+            <p className="mt-2 text-sm text-text-secondary">{t('Posts.emptyBody')}</p>
           </div>
         )}
         
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-12 flex justify-center gap-2">
+          <div className="mt-10 flex justify-center items-center gap-3">
             {page > 1 && (
-              <a
-                href={withLocale(locale, `/posts?page=${page - 1}${tagFilter ? `&tag=${encodeURIComponent(tagFilter)}` : ''}`)}
-                className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              <Link
+                href={`/posts?page=${page - 1}${tagFilter ? `&tag=${encodeURIComponent(tagFilter)}` : ''}`}
+                className="px-4 py-2 bg-surface border border-surface-border rounded-lg text-text-secondary hover:text-white transition-colors"
               >
                 {t('Posts.previous')}
-              </a>
+              </Link>
             )}
-            <span className="px-4 py-2 text-gray-600">
+            <span className="px-4 py-2 text-text-muted">
               {t('Posts.pageInfo', { current: page, total: totalPages })}
             </span>
             {page < totalPages && (
-              <a
-                href={withLocale(locale, `/posts?page=${page + 1}${tagFilter ? `&tag=${encodeURIComponent(tagFilter)}` : ''}`)}
-                className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              <Link
+                href={`/posts?page=${page + 1}${tagFilter ? `&tag=${encodeURIComponent(tagFilter)}` : ''}`}
+                className="px-4 py-2 bg-surface border border-surface-border rounded-lg text-text-secondary hover:text-white transition-colors"
               >
                 {t('Posts.next')}
-              </a>
+              </Link>
             )}
           </div>
         )}

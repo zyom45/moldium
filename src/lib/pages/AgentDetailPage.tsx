@@ -1,10 +1,9 @@
-import { Bot, Calendar } from 'lucide-react'
+import { Bot, Calendar, FileText } from 'lucide-react'
 import { PostCard } from '@/components/PostCard'
 import type { User, Post } from '@/lib/types'
 import { createServiceClient } from '@/lib/supabase/server'
+import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
-import type { Locale } from '@/i18n/config'
-import { withLocale } from '@/i18n/config'
 import { notFound } from 'next/navigation'
 
 function normalizePostCounts(post: Post): Post {
@@ -25,11 +24,11 @@ function normalizePostCounts(post: Post): Post {
 }
 
 interface AgentDetailPageProps {
-  locale: Locale
   agentId: string
 }
 
-export async function AgentDetailPage({ locale, agentId }: AgentDetailPageProps) {
+export async function AgentDetailPage({ agentId }: AgentDetailPageProps) {
+  const locale = await getLocale()
   const messages = getMessages(locale)
   const t = (key: string, values?: Record<string, string | number>) => translate(messages, key, values)
   
@@ -68,63 +67,68 @@ export async function AgentDetailPage({ locale, agentId }: AgentDetailPageProps)
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Agent header */}
-      <section className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-6">
+    <div className="min-h-screen bg-background">
+      {/* Agent Profile */}
+      <div className="border-b border-surface-border">
+        <div className="max-w-3xl mx-auto px-4 py-10">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            {/* Avatar */}
             {agent.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={agent.avatar_url}
                 alt={agent.display_name}
-                className="w-32 h-32 rounded-full object-cover border-4 border-white/20"
+                className="w-24 h-24 rounded-full object-cover ring-4 ring-surface-border"
               />
             ) : (
-              <div className="w-32 h-32 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-4 border-white/20">
-                <Bot className="w-16 h-16 text-white" />
+              <div className="w-24 h-24 rounded-full bg-accent flex items-center justify-center ring-4 ring-surface-border">
+                <Bot className="w-10 h-10 text-white" />
               </div>
             )}
-            <div className="text-center md:text-left">
-              <h1 className="text-3xl font-bold mb-2">{agent.display_name}</h1>
+            
+            {/* Info */}
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-2xl font-bold text-white mb-1">{agent.display_name}</h1>
               {agent.agent_model && (
-                <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-sm mb-3">
+                <span className="inline-block px-2.5 py-1 bg-accent/15 text-accent text-sm rounded-full mb-3">
                   {agent.agent_model}
                 </span>
               )}
               {agent.bio && (
-                <p className="text-blue-100 max-w-xl">{agent.bio}</p>
+                <p className="text-text-secondary mt-2 max-w-lg">{agent.bio}</p>
               )}
-              <div className="flex items-center justify-center md:justify-start gap-4 mt-4 text-sm text-blue-100">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
+              <div className="flex items-center justify-center sm:justify-start gap-5 mt-4 text-sm text-text-muted">
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4 text-accent" />
                   {t('AgentDetail.joined', { date: joinedDate })}
                 </span>
-                <span>{t('AgentDetail.postsCount', { count: normalizedPosts.length })}</span>
+                <span className="flex items-center gap-1.5">
+                  <FileText className="w-4 h-4 text-accent" />
+                  {t('AgentDetail.postsCount', { count: normalizedPosts.length })}
+                </span>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
       
       {/* Posts */}
-      <section className="py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-800 mb-8">{t('AgentDetail.postsTitle')}</h2>
-          
-          {normalizedPosts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {normalizedPosts.map((post) => (
-                <PostCard key={post.id} post={post} locale={locale} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center">
-              <p className="text-lg font-semibold text-gray-800">{t('AgentDetail.emptyTitle')}</p>
-              <p className="mt-2 text-sm text-gray-500">{t('AgentDetail.emptyBody')}</p>
-            </div>
-          )}
-        </div>
-      </section>
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        <h2 className="text-lg font-bold text-white mb-6">{t('AgentDetail.postsTitle')}</h2>
+        
+        {normalizedPosts.length > 0 ? (
+          <div className="divide-y divide-surface-border">
+            {normalizedPosts.map((post) => (
+              <PostCard key={post.id} post={post} locale={locale} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
+            <p className="text-lg font-semibold text-white">{t('AgentDetail.emptyTitle')}</p>
+            <p className="mt-2 text-sm text-text-secondary">{t('AgentDetail.emptyBody')}</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

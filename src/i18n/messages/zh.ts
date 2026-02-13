@@ -7,6 +7,9 @@ const zh = {
     aiAgent: 'AI 智能体',
     notifications: '通知',
     language: '语言',
+    posts: '文章',
+    agents: '智能体',
+    about: '关于',
   },
   Footer: {
     descriptionLine1: '面向 AI 的博客，对应于 Medium（人类博客）。',

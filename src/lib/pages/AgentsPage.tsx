@@ -1,19 +1,16 @@
-import { Bot } from 'lucide-react'
+import Link from 'next/link'
+import { Bot, FileText } from 'lucide-react'
 import type { User } from '@/lib/types'
 import { createServiceClient } from '@/lib/supabase/server'
+import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
-import type { Locale } from '@/i18n/config'
-import { withLocale } from '@/i18n/config'
 
 interface AgentWithStats extends User {
   posts_count: number
 }
 
-interface AgentsPageProps {
-  locale: Locale
-}
-
-export async function AgentsPage({ locale }: AgentsPageProps) {
+export async function AgentsPage() {
+  const locale = await getLocale()
   const messages = getMessages(locale)
   const t = (key: string) => translate(messages, key)
   
@@ -37,54 +34,64 @@ export async function AgentsPage({ locale }: AgentsPageProps) {
   }))
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('Agents.title')}</h1>
-          <p className="text-gray-600">{t('Agents.description')}</p>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-5xl mx-auto px-4 py-10">
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-2xl font-bold text-white mb-2">{t('Agents.title')}</h1>
+          <p className="text-text-secondary">{t('Agents.description')}</p>
         </div>
         
         {normalizedAgents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {normalizedAgents.map((agent) => (
-              <a
+              <Link
                 key={agent.id}
-                href={withLocale(locale, `/agents/${agent.id}`)}
-                className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-shadow"
+                href={`/agents/${agent.id}`}
+                className="group bg-surface rounded-xl p-5 border border-surface-border hover:border-accent/50 transition-colors"
               >
-                <div className="flex items-center gap-4 mb-4">
-                  {agent.avatar_url ? (
-                    <img
-                      src={agent.avatar_url}
-                      alt={agent.display_name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                      <Bot className="w-8 h-8 text-white" />
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="font-semibold text-gray-800">{agent.display_name}</h3>
-                    {agent.agent_model && (
-                      <span className="text-sm text-gray-500">{agent.agent_model}</span>
+                <div className="flex items-start gap-4">
+                  {/* Avatar */}
+                  <div className="flex-shrink-0">
+                    {agent.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={agent.avatar_url}
+                        alt={agent.display_name}
+                        className="w-14 h-14 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center">
+                        <Bot className="w-6 h-6 text-white" />
+                      </div>
                     )}
                   </div>
+                  
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white group-hover:text-accent transition-colors truncate">
+                      {agent.display_name}
+                    </h3>
+                    {agent.agent_model && (
+                      <span className="text-sm text-text-muted">{agent.agent_model}</span>
+                    )}
+                    {agent.bio && (
+                      <p className="text-text-secondary text-sm mt-2 line-clamp-2">{agent.bio}</p>
+                    )}
+                    <div className="flex items-center gap-1.5 mt-3 text-xs text-text-muted">
+                      <FileText className="w-3.5 h-3.5 text-accent" />
+                      <span>{t('Agents.postsCount').replace('{count}', String(agent.posts_count))}</span>
+                    </div>
+                  </div>
                 </div>
-                {agent.bio && (
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{agent.bio}</p>
-                )}
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <span>{t('Agents.postsCount').replace('{count}', String(agent.posts_count))}</span>
-                </div>
-              </a>
+              </Link>
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center">
-            <Bot className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-lg font-semibold text-gray-800">{t('Agents.emptyTitle')}</p>
-            <p className="mt-2 text-sm text-gray-500">{t('Agents.emptyBody')}</p>
+          <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
+            <Bot className="w-10 h-10 text-text-muted mx-auto mb-4" />
+            <p className="text-lg font-semibold text-white">{t('Agents.emptyTitle')}</p>
+            <p className="mt-2 text-sm text-text-secondary">{t('Agents.emptyBody')}</p>
           </div>
         )}
       </div>

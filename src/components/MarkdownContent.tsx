@@ -12,30 +12,32 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        // カスタムコンポーネント
         h1: ({ children }) => (
-          <h1 className="text-3xl font-bold mt-8 mb-4 text-gray-900">{children}</h1>
+          <h1 className="text-2xl font-bold mt-10 mb-4 text-white">{children}</h1>
         ),
         h2: ({ children }) => (
-          <h2 className="text-2xl font-bold mt-8 mb-3 text-gray-900">{children}</h2>
+          <h2 className="text-xl font-bold mt-8 mb-3 text-white">{children}</h2>
         ),
         h3: ({ children }) => (
-          <h3 className="text-xl font-semibold mt-6 mb-2 text-gray-900">{children}</h3>
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">{children}</h3>
+        ),
+        h4: ({ children }) => (
+          <h4 className="text-base font-semibold mt-5 mb-2 text-white">{children}</h4>
         ),
         p: ({ children }) => (
-          <p className="my-4 text-gray-700 leading-relaxed">{children}</p>
+          <p className="my-5 text-text-secondary leading-relaxed">{children}</p>
         ),
         ul: ({ children }) => (
-          <ul className="my-4 pl-6 list-disc text-gray-700">{children}</ul>
+          <ul className="my-4 pl-6 list-disc text-text-secondary space-y-1">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="my-4 pl-6 list-decimal text-gray-700">{children}</ol>
+          <ol className="my-4 pl-6 list-decimal text-text-secondary space-y-1">{children}</ol>
         ),
         li: ({ children }) => (
-          <li className="my-1">{children}</li>
+          <li className="leading-relaxed">{children}</li>
         ),
         blockquote: ({ children }) => (
-          <blockquote className="my-4 pl-4 border-l-4 border-blue-500 text-gray-600 italic">
+          <blockquote className="my-6 pl-4 border-l-3 border-accent text-text-muted italic">
             {children}
           </blockquote>
         ),
@@ -45,25 +47,25 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
           
           if (isInline) {
             return (
-              <code className="px-1.5 py-0.5 bg-gray-100 text-pink-600 rounded text-sm" {...props}>
+              <code className="px-1.5 py-0.5 bg-surface text-accent rounded text-sm font-mono" {...props}>
                 {children}
               </code>
             )
           }
           
           return (
-            <code className={`block overflow-x-auto p-4 bg-gray-900 text-gray-100 rounded-lg text-sm ${className}`} {...props}>
+            <code className={`block overflow-x-auto p-4 bg-surface text-text-secondary rounded-lg text-sm font-mono border border-surface-border ${className}`} {...props}>
               {children}
             </code>
           )
         },
         pre: ({ children }) => (
-          <pre className="my-4 overflow-x-auto">{children}</pre>
+          <pre className="my-6 overflow-x-auto">{children}</pre>
         ),
         a: ({ href, children }) => (
           <a 
             href={href} 
-            className="text-blue-600 hover:text-blue-800 underline"
+            className="text-accent hover:text-accent-hover underline underline-offset-2"
             target={href?.startsWith('http') ? '_blank' : undefined}
             rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
           >
@@ -75,26 +77,32 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
           <img 
             src={src} 
             alt={alt || ''} 
-            className="my-4 rounded-lg max-w-full h-auto"
+            className="my-6 rounded-lg max-w-full h-auto"
           />
         ),
         hr: () => (
-          <hr className="my-8 border-gray-200" />
+          <hr className="my-10 border-surface-border" />
         ),
         table: ({ children }) => (
-          <div className="my-4 overflow-x-auto">
-            <table className="min-w-full border border-gray-200 rounded-lg">
+          <div className="my-6 overflow-x-auto">
+            <table className="min-w-full border border-surface-border rounded-lg">
               {children}
             </table>
           </div>
         ),
         th: ({ children }) => (
-          <th className="px-4 py-2 bg-gray-50 border-b border-gray-200 text-left font-semibold">
+          <th className="px-4 py-3 bg-surface border-b border-surface-border text-left font-semibold text-white">
             {children}
           </th>
         ),
         td: ({ children }) => (
-          <td className="px-4 py-2 border-b border-gray-100">{children}</td>
+          <td className="px-4 py-3 border-b border-surface-border text-text-secondary">{children}</td>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-white">{children}</strong>
+        ),
+        em: ({ children }) => (
+          <em className="italic">{children}</em>
         ),
       }}
     >

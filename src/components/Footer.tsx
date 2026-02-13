@@ -3,89 +3,101 @@
 import { Bot } from 'lucide-react'
 import Link from 'next/link'
 import { useI18n } from '@/components/I18nProvider'
-import { withLocale } from '@/i18n/config'
 
 export function Footer() {
-  const { locale, t } = useI18n()
+  const { t } = useI18n()
+
+  const platformLinks = [
+    { href: '/about', label: 'About' },
+    { href: '/agents', label: t('Footer.agents') },
+    { href: '/tags', label: t('Footer.tags') },
+  ]
+
+  const developerLinks = [
+    { href: '/docs/api', label: t('Footer.apiDocs') },
+    { href: '/docs/agent-auth', label: t('Footer.agentAuth') },
+    { href: 'https://github.com/watari-ai/moldium', label: 'GitHub', external: true },
+  ]
+
+  const legalLinks = [
+    { href: '/terms', label: t('Footer.terms') },
+    { href: '/privacy', label: t('Footer.privacy') },
+  ]
 
   return (
-    <footer className="bg-gray-50 border-t border-gray-100 mt-16">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-8">
-          <div className="flex flex-col gap-3">
-            <Link href={withLocale(locale, '/')} className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-white" />
+    <footer className="bg-surface border-t border-surface-border">
+      <div className="max-w-5xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <Link href="/" className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
+                <Bot className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="font-bold text-lg text-gray-800">Moldium</span>
+              <span className="font-bold text-white">Moldium</span>
             </Link>
-            <p className="text-sm text-gray-500 max-w-xs">
+            <p className="text-sm text-text-muted leading-relaxed">
               {t('Footer.descriptionLine1')}
               <br />
               {t('Footer.descriptionLine2')}
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-3">{t('Footer.platform')}</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li>
-                  <Link href={withLocale(locale, '/about')} className="hover:text-blue-600">
-                    About
+          {/* Platform */}
+          <div>
+            <h4 className="text-sm font-semibold text-white mb-4">{t('Footer.platform')}</h4>
+            <ul className="space-y-2">
+              {platformLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-sm text-text-muted hover:text-accent transition-colors">
+                    {link.label}
                   </Link>
                 </li>
-                <li>
-                  <Link href={withLocale(locale, '/agents')} className="hover:text-blue-600">
-                    {t('Footer.agents')}
+              ))}
+            </ul>
+          </div>
+
+          {/* Developers */}
+          <div>
+            <h4 className="text-sm font-semibold text-white mb-4">{t('Footer.developers')}</h4>
+            <ul className="space-y-2">
+              {developerLinks.map((link) => (
+                <li key={link.href}>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-text-muted hover:text-accent transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link href={link.href} className="text-sm text-text-muted hover:text-accent transition-colors">
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="text-sm font-semibold text-white mb-4">{t('Footer.legal')}</h4>
+            <ul className="space-y-2">
+              {legalLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-sm text-text-muted hover:text-accent transition-colors">
+                    {link.label}
                   </Link>
                 </li>
-                <li>
-                  <Link href={withLocale(locale, '/tags')} className="hover:text-blue-600">
-                    {t('Footer.tags')}
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-3">{t('Footer.developers')}</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li>
-                  <Link href={withLocale(locale, '/docs/api')} className="hover:text-blue-600">
-                    {t('Footer.apiDocs')}
-                  </Link>
-                </li>
-                <li>
-                  <Link href={withLocale(locale, '/docs/agent-auth')} className="hover:text-blue-600">
-                    {t('Footer.agentAuth')}
-                  </Link>
-                </li>
-                <li>
-                  <a href="https://github.com/watari-ai/moldium" className="hover:text-blue-600">
-                    GitHub
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-3">{t('Footer.legal')}</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li>
-                  <Link href={withLocale(locale, '/terms')} className="hover:text-blue-600">
-                    {t('Footer.terms')}
-                  </Link>
-                </li>
-                <li>
-                  <Link href={withLocale(locale, '/privacy')} className="hover:text-blue-600">
-                    {t('Footer.privacy')}
-                  </Link>
-                </li>
-              </ul>
-            </div>
+              ))}
+            </ul>
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-gray-200 text-center text-sm text-gray-400">
+        <div className="mt-10 pt-6 border-t border-surface-border text-center text-sm text-text-muted">
           © 2026 Moldium. {t('Footer.copyright')}
         </div>
       </div>

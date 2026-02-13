@@ -5,13 +5,13 @@ import { Footer } from '@/components/Footer'
 import { AuthProvider } from '@/components/AuthProvider'
 import { I18nProvider } from '@/components/I18nProvider'
 import { createClient } from '@/lib/supabase/server'
+import { getLocale } from '@/lib/getLocale'
 import type { User } from '@/lib/types'
 import type { Locale } from '@/i18n/config'
 import { getMessages, translate } from '@/i18n/messages'
 
 interface LocaleLayoutProps {
   children: React.ReactNode
-  locale: Locale
 }
 
 async function getInitialUser(): Promise<User | null> {
@@ -45,7 +45,8 @@ export function generateLocaleMetadata(locale: Locale): Metadata {
   }
 }
 
-export async function LocaleLayout({ children, locale }: LocaleLayoutProps) {
+export async function LocaleLayout({ children }: LocaleLayoutProps) {
+  const locale = await getLocale()
   const initialUser = await getInitialUser()
   const messages = getMessages(locale)
 

@@ -1,14 +1,11 @@
+import Link from 'next/link'
 import { Tag } from 'lucide-react'
 import { createServiceClient } from '@/lib/supabase/server'
+import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
-import type { Locale } from '@/i18n/config'
-import { withLocale } from '@/i18n/config'
 
-interface TagsPageProps {
-  locale: Locale
-}
-
-export async function TagsPage({ locale }: TagsPageProps) {
+export async function TagsPage() {
+  const locale = await getLocale()
   const messages = getMessages(locale)
   const t = (key: string, values?: Record<string, string | number>) => translate(messages, key, values)
   
@@ -35,63 +32,64 @@ export async function TagsPage({ locale }: TagsPageProps) {
   const maxCount = Math.max(...Array.from(tagCounts.values()), 1)
   const getTagSize = (count: number) => {
     const ratio = count / maxCount
-    if (ratio > 0.8) return 'text-3xl'
-    if (ratio > 0.6) return 'text-2xl'
-    if (ratio > 0.4) return 'text-xl'
-    if (ratio > 0.2) return 'text-lg'
-    return 'text-base'
+    if (ratio > 0.8) return 'text-2xl'
+    if (ratio > 0.6) return 'text-xl'
+    if (ratio > 0.4) return 'text-lg'
+    if (ratio > 0.2) return 'text-base'
+    return 'text-sm'
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('Tags.title')}</h1>
-          <p className="text-gray-600">{t('Tags.description')}</p>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-2xl font-bold text-white mb-2">{t('Tags.title')}</h1>
+          <p className="text-text-secondary">{t('Tags.description')}</p>
         </div>
         
         {sortedTags.length > 0 ? (
           <>
             {/* Tag Cloud */}
-            <section className="bg-white rounded-xl p-8 border border-gray-100 mb-8">
+            <section className="bg-surface rounded-xl p-8 border border-surface-border mb-8">
               <div className="flex flex-wrap items-center justify-center gap-4">
                 {sortedTags.map(([tag, count]) => (
-                  <a
+                  <Link
                     key={tag}
-                    href={withLocale(locale, `/posts?tag=${encodeURIComponent(tag)}`)}
-                    className={`${getTagSize(count)} text-blue-600 hover:text-blue-800 transition-colors`}
+                    href={`/posts?tag=${encodeURIComponent(tag)}`}
+                    className={`${getTagSize(count)} text-accent hover:text-accent-hover transition-colors`}
                   >
                     {tag}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </section>
             
             {/* Tag List */}
             <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-4">{t('Tags.listTitle')}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <h2 className="text-lg font-bold text-white mb-4">{t('Tags.listTitle')}</h2>
+              <div className="space-y-2">
                 {sortedTags.map(([tag, count]) => (
-                  <a
+                  <Link
                     key={tag}
-                    href={withLocale(locale, `/posts?tag=${encodeURIComponent(tag)}`)}
-                    className="flex items-center justify-between bg-white rounded-lg p-4 border border-gray-100 hover:shadow-md transition-shadow"
+                    href={`/posts?tag=${encodeURIComponent(tag)}`}
+                    className="flex items-center justify-between bg-surface rounded-lg px-4 py-3 border border-surface-border hover:border-accent/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <Tag className="w-5 h-5 text-blue-600" />
-                      <span className="font-medium text-gray-800">{tag}</span>
+                      <Tag className="w-4 h-4 text-accent" />
+                      <span className="font-medium text-white">{tag}</span>
                     </div>
-                    <span className="text-gray-500">{t('Tags.postsCount', { count })}</span>
-                  </a>
+                    <span className="text-sm text-text-muted">{t('Tags.postsCount', { count })}</span>
+                  </Link>
                 ))}
               </div>
             </section>
           </>
         ) : (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center">
-            <Tag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-lg font-semibold text-gray-800">{t('Tags.emptyTitle')}</p>
-            <p className="mt-2 text-sm text-gray-500">{t('Tags.emptyBody')}</p>
+          <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
+            <Tag className="w-10 h-10 text-text-muted mx-auto mb-4" />
+            <p className="text-lg font-semibold text-white">{t('Tags.emptyTitle')}</p>
+            <p className="mt-2 text-sm text-text-secondary">{t('Tags.emptyBody')}</p>
           </div>
         )}
       </div>

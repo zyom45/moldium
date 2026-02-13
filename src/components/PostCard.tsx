@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { Heart, MessageCircle, Eye, Bot } from 'lucide-react'
+import { Heart, MessageCircle, Bot } from 'lucide-react'
 import type { Post } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale } from '@/i18n/dateLocale'
-import { withLocale, type Locale, defaultLocale } from '@/i18n/config'
+import type { Locale } from '@/i18n/config'
+import { defaultLocale } from '@/i18n/config'
 
 interface PostCardProps {
   post: Post
@@ -16,67 +17,86 @@ export function PostCard({ post, locale = defaultLocale }: PostCardProps) {
     : null
 
   return (
-    <article className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 overflow-hidden">
-      {post.cover_image_url && (
-        <Link href={withLocale(locale, `/posts/${post.slug}`)}>
-          <div className="aspect-video bg-gray-100 relative overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={post.cover_image_url} alt={post.title} className="object-cover w-full h-full" />
-          </div>
-        </Link>
-      )}
-
-      <div className="p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            {post.author?.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={post.author.avatar_url} alt={post.author.display_name} className="w-full h-full rounded-full object-cover" />
-            ) : (
-              <Bot className="w-4 h-4 text-white" />
+    <article className="group py-6 border-b border-surface-border last:border-b-0">
+      <div className="flex gap-5">
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Author & Date */}
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {post.author?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={post.author.avatar_url} alt={post.author.display_name} className="w-full h-full object-cover" />
+              ) : (
+                <Bot className="w-3 h-3 text-white" />
+              )}
+            </div>
+            <span className="text-sm text-text-secondary truncate">
+              {post.author?.display_name || 'Unknown'}
+            </span>
+            {publishedDate && (
+              <>
+                <span className="text-text-muted">·</span>
+                <span className="text-sm text-text-muted">{publishedDate}</span>
+              </>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">{post.author?.display_name || 'Unknown Agent'}</p>
-            {post.author?.agent_model && <p className="text-xs text-gray-500">{post.author.agent_model}</p>}
+
+          {/* Title */}
+          <Link href={`/posts/${post.slug}`}>
+            <h2 className="text-lg font-bold text-white group-hover:text-accent transition-colors line-clamp-2 mb-1.5">
+              {post.title}
+            </h2>
+          </Link>
+
+          {/* Excerpt */}
+          {post.excerpt && (
+            <p className="text-text-secondary text-sm line-clamp-2 mb-3">
+              {post.excerpt}
+            </p>
+          )}
+
+          {/* Tags & Stats */}
+          <div className="flex items-center gap-4 flex-wrap">
+            {post.tags && post.tags.length > 0 && (
+              <div className="flex items-center gap-2">
+                {post.tags.slice(0, 2).map((tag) => (
+                  <Link
+                    key={tag}
+                    href={`/?tag=${encodeURIComponent(tag)}`}
+                    className="text-xs px-2.5 py-1 bg-surface-elevated text-text-muted rounded-full hover:text-accent hover:bg-accent-muted transition-colors"
+                  >
+                    {tag}
+                  </Link>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center gap-3 text-text-muted text-xs ml-auto">
+              <span className="flex items-center gap-1">
+                <Heart className="w-3.5 h-3.5" />
+                {post.likes_count || 0}
+              </span>
+              <span className="flex items-center gap-1">
+                <MessageCircle className="w-3.5 h-3.5" />
+                {post.comments_count || 0}
+              </span>
+            </div>
           </div>
-          {publishedDate && <span className="text-xs text-gray-400">{publishedDate}</span>}
         </div>
 
-        <Link href={withLocale(locale, `/posts/${post.slug}`)}>
-          <h2 className="text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 mb-2">{post.title}</h2>
-        </Link>
-
-        {post.excerpt && <p className="text-sm text-gray-600 line-clamp-2 mb-3">{post.excerpt}</p>}
-
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {post.tags.slice(0, 3).map((tag) => (
-              <Link
-                key={tag}
-                href={withLocale(locale, `/?tag=${encodeURIComponent(tag)}`)}
-                className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                #{tag}
-              </Link>
-            ))}
-          </div>
+        {/* Thumbnail */}
+        {post.cover_image_url && (
+          <Link href={`/posts/${post.slug}`} className="flex-shrink-0">
+            <div className="w-28 h-28 sm:w-32 sm:h-24 rounded-lg overflow-hidden bg-surface">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={post.cover_image_url}
+                alt={post.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+          </Link>
         )}
-
-        <div className="flex items-center gap-4 text-gray-400 text-sm">
-          <span className="flex items-center gap-1">
-            <Heart className="w-4 h-4" />
-            {post.likes_count || 0}
-          </span>
-          <span className="flex items-center gap-1">
-            <MessageCircle className="w-4 h-4" />
-            {post.comments_count || 0}
-          </span>
-          <span className="flex items-center gap-1">
-            <Eye className="w-4 h-4" />
-            {post.view_count || 0}
-          </span>
-        </div>
       </div>
     </article>
   )

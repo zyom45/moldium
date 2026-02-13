@@ -1,13 +1,10 @@
+import Link from 'next/link'
 import { Bot, BookOpen, Users, Zap, Globe, Shield } from 'lucide-react'
+import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
-import type { Locale } from '@/i18n/config'
-import { withLocale } from '@/i18n/config'
 
-interface AboutPageProps {
-  locale: Locale
-}
-
-export function AboutPage({ locale }: AboutPageProps) {
+export async function AboutPage() {
+  const locale = await getLocale()
   const messages = getMessages(locale)
   const t = (key: string) => translate(messages, key)
 
@@ -21,41 +18,41 @@ export function AboutPage({ locale }: AboutPageProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white py-20">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">{t('About.title')}</h1>
-          <p className="text-xl text-blue-100 leading-relaxed">
+      <section className="border-b border-surface-border">
+        <div className="max-w-3xl mx-auto px-4 py-16 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{t('About.title')}</h1>
+          <p className="text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto">
             {t('About.subtitle')}
           </p>
         </div>
       </section>
 
       {/* What is Moldium */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">{t('About.whatIsTitle')}</h2>
-          <div className="prose prose-lg max-w-none text-gray-600">
+      <section className="py-16 border-b border-surface-border">
+        <div className="max-w-3xl mx-auto px-4">
+          <h2 className="text-xl font-bold text-white mb-6">{t('About.whatIsTitle')}</h2>
+          <div className="space-y-4 text-text-secondary leading-relaxed">
             <p>{t('About.whatIsP1')}</p>
-            <p className="mt-4">{t('About.whatIsP2')}</p>
-            <p className="mt-4">{t('About.whatIsP3')}</p>
+            <p>{t('About.whatIsP2')}</p>
+            <p>{t('About.whatIsP3')}</p>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-800 mb-12 text-center">{t('About.featuresTitle')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <section className="py-16 border-b border-surface-border">
+        <div className="max-w-5xl mx-auto px-4">
+          <h2 className="text-xl font-bold text-white mb-10 text-center">{t('About.featuresTitle')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map(({ icon: Icon, titleKey, descKey }, index) => (
-              <div key={index} className="p-6 rounded-xl border border-gray-100 hover:shadow-lg transition-shadow">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-xl mb-4">
-                  <Icon className="w-6 h-6" />
+              <div key={index} className="bg-surface rounded-xl p-5 border border-surface-border">
+                <div className="inline-flex items-center justify-center w-10 h-10 bg-accent/15 text-accent rounded-lg mb-4">
+                  <Icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">{t(titleKey)}</h3>
-                <p className="text-gray-600">{t(descKey)}</p>
+                <h3 className="text-base font-semibold text-white mb-2">{t(titleKey)}</h3>
+                <p className="text-sm text-text-secondary">{t(descKey)}</p>
               </div>
             ))}
           </div>
@@ -63,53 +60,43 @@ export function AboutPage({ locale }: AboutPageProps) {
       </section>
 
       {/* How it works */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">{t('About.howItWorksTitle')}</h2>
-          <div className="space-y-6">
-            <div className="flex gap-4 items-start">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-1">{t('About.step1Title')}</h3>
-                <p className="text-gray-600">{t('About.step1Desc')}</p>
+      <section className="py-16 border-b border-surface-border">
+        <div className="max-w-3xl mx-auto px-4">
+          <h2 className="text-xl font-bold text-white mb-10 text-center">{t('About.howItWorksTitle')}</h2>
+          <div className="space-y-8">
+            {[1, 2, 3].map((step) => (
+              <div key={step} className="flex gap-4 items-start">
+                <div className="flex-shrink-0 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center font-bold text-sm">
+                  {step}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white mb-1">{t(`About.step${step}Title`)}</h3>
+                  <p className="text-text-secondary">{t(`About.step${step}Desc`)}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-1">{t('About.step2Title')}</h3>
-                <p className="text-gray-600">{t('About.step2Desc')}</p>
-              </div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-1">{t('About.step3Title')}</h3>
-                <p className="text-gray-600">{t('About.step3Desc')}</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">{t('About.ctaTitle')}</h2>
-          <p className="text-blue-100 mb-8">{t('About.ctaDesc')}</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a
-              href={withLocale(locale, '/posts')}
-              className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-full hover:shadow-lg transition-shadow"
+      <section className="py-16">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">{t('About.ctaTitle')}</h2>
+          <p className="text-text-secondary mb-8">{t('About.ctaDesc')}</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href="/posts"
+              className="px-5 py-2.5 bg-accent text-white font-medium rounded-full hover:bg-accent-hover transition-colors"
             >
               {t('About.ctaRead')}
-            </a>
-            <a
-              href={withLocale(locale, '/docs/agent-auth')}
-              className="px-6 py-3 bg-white/10 backdrop-blur-sm font-semibold rounded-full hover:bg-white/20 transition-colors"
+            </Link>
+            <Link
+              href="/docs/agent-auth"
+              className="px-5 py-2.5 bg-surface-elevated text-text-secondary font-medium rounded-full hover:text-white transition-colors"
             >
               {t('About.ctaAuth')}
-            </a>
+            </Link>
           </div>
         </div>
       </section>

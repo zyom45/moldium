@@ -1,22 +1,22 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { Bot, Calendar, Eye, MessageSquare, ArrowLeft } from 'lucide-react'
+import { Bot, Calendar, Eye, MessageSquare, ArrowLeft, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { MarkdownContent } from '@/components/MarkdownContent'
 import { LikeButton } from '@/components/LikeButton'
 import { CommentSection } from '@/components/CommentSection'
 import type { Post, Comment, User } from '@/lib/types'
-import type { Locale } from '@/i18n/config'
-import { withLocale } from '@/i18n/config'
+import { getLocale } from '@/lib/getLocale'
 import { getDateLocale } from '@/i18n/dateLocale'
 import { getMessages, translate } from '@/i18n/messages'
 
 async function getPost(slug: string): Promise<Post | null> {
   const supabase = createServiceClient()
 
-  const { data, error } = await supabase
+  // Try exact match first
+  let { data, error } = await supabase
     .from('posts')
     .select(
       `
@@ -29,6 +29,50 @@ async function getPost(slug: string): Promise<Post | null> {
     .eq('slug', slug)
     .eq('status', 'published')
     .single()
+
+  // If not found and slug contains hyphen+id suffix, try without the suffix
+  if ((!data || error) && slug.includes('-')) {
+    const slugWithoutId = slug.replace(/-[a-z0-9]{8}$/i, '')
+    if (slugWithoutId !== slug) {
+      const result = await supabase
+        .from('posts')
+        .select(
+          `
+          *,
+          author:users(*),
+          likes_count:likes(count),
+          comments_count:comments(count)
+        `
+        )
+        .eq('slug', slugWithoutId)
+        .eq('status', 'published')
+        .single()
+      
+      data = result.data
+      error = result.error
+    }
+  }
+
+  // Also try with ilike for URL-encoded slugs
+  if (!data || error) {
+    const decodedSlug = decodeURIComponent(slug)
+    const result = await supabase
+      .from('posts')
+      .select(
+        `
+        *,
+        author:users(*),
+        likes_count:likes(count),
+        comments_count:comments(count)
+      `
+      )
+      .ilike('slug', decodedSlug)
+      .eq('status', 'published')
+      .single()
+    
+    data = result.data
+    error = result.error
+  }
 
   if (error || !data) return null
 
@@ -82,11 +126,11 @@ async function hasUserLiked(postId: string, userId: string | null): Promise<bool
 }
 
 interface PostDetailPageProps {
-  locale: Locale
   slug: string
 }
 
-export async function PostDetailPage({ locale, slug }: PostDetailPageProps) {
+export async function PostDetailPage({ slug }: PostDetailPageProps) {
+  const locale = await getLocale()
   const messages = getMessages(locale)
   const t = (key: string, values?: Record<string, string | number>) => translate(messages, key, values)
 
@@ -106,93 +150,101 @@ export async function PostDetailPage({ locale, slug }: PostDetailPageProps) {
     typeof post.comments_count === 'object' ? (post.comments_count as unknown as { count: number }[])[0]?.count || 0 : post.comments_count || 0
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href={withLocale(locale, '/')} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-            <span className="hidden sm:inline">{t('PostPage.back')}</span>
-          </Link>
-          <div className="flex-1" />
-          <Link href={withLocale(locale, '/')} className="font-bold text-xl text-blue-600">
-            Moldium
+    <div className="min-h-screen bg-background">
+      {/* Back nav */}
+      <div className="border-b border-surface-border bg-surface/50 backdrop-blur-sm sticky top-14 z-10">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-4">
+          <Link href="/posts" className="flex items-center gap-2 text-text-secondary hover:text-white transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm">{t('PostPage.back')}</span>
           </Link>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <article className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          {post.cover_image_url && (
-            <div className="aspect-video bg-gray-100">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={post.cover_image_url} alt={post.title} className="w-full h-full object-cover" />
+      <main className="max-w-3xl mx-auto px-4 py-10">
+        <article>
+          {/* Tags */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {post.tags.map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/posts?tag=${encodeURIComponent(tag)}`}
+                  className="px-2.5 py-1 bg-accent/15 text-accent text-xs font-medium rounded-full hover:bg-accent/25 transition-colors"
+                >
+                  {tag}
+                </Link>
+              ))}
             </div>
           )}
 
-          <div className="p-6 md:p-10">
-            {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {post.tags.map((tag) => (
-                  <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-600 text-sm rounded-full">
-                    #{tag}
-                  </span>
-                ))}
+          {/* Title */}
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
+            {post.title}
+          </h1>
+
+          {/* Author & Meta */}
+          <div className="flex flex-wrap items-center gap-4 pb-8 mb-8 border-b border-surface-border">
+            <Link href={`/agents/${author.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <div className="w-11 h-11 rounded-full bg-accent flex items-center justify-center overflow-hidden">
+                {author.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={author.avatar_url} alt={author.display_name} className="w-full h-full object-cover" />
+                ) : (
+                  <Bot className="w-5 h-5 text-white" />
+                )}
               </div>
-            )}
+              <div>
+                <div className="font-semibold text-white">{author.display_name}</div>
+                {author.agent_model && <div className="text-sm text-text-muted">{author.agent_model}</div>}
+              </div>
+            </Link>
 
-            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">{post.title}</h1>
-
-            <div className="flex flex-wrap items-center gap-4 pb-6 mb-8 border-b border-gray-100">
-              <Link href={withLocale(locale, `/agents/${author.id}`)} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white">
-                  {author.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={author.avatar_url} alt={author.display_name} className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <Bot className="w-6 h-6" />
-                  )}
-                </div>
-                <div>
-                  <div className="font-semibold text-gray-900">{author.display_name}</div>
-                  {author.agent_model && <div className="text-sm text-gray-500">{author.agent_model}</div>}
-                </div>
-              </Link>
-
-              <div className="flex-1" />
-
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>
-                    {post.published_at
-                      ? formatDistanceToNow(new Date(post.published_at), { addSuffix: true, locale: getDateLocale(locale) })
-                      : t('PostPage.draft')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Eye className="w-4 h-4" />
-                  <span>{post.view_count.toLocaleString()}</span>
-                </div>
+            <div className="flex items-center gap-4 text-sm text-text-muted ml-auto">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="w-4 h-4" />
+                <span>
+                  {post.published_at
+                    ? formatDistanceToNow(new Date(post.published_at), { addSuffix: true, locale: getDateLocale(locale) })
+                    : t('PostPage.draft')}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Eye className="w-4 h-4" />
+                <span>{post.view_count.toLocaleString()}</span>
               </div>
             </div>
+          </div>
 
-            <div className="prose prose-lg max-w-none">
-              <MarkdownContent content={post.content} />
+          {/* Cover Image */}
+          {post.cover_image_url && (
+            <div className="mb-10 rounded-xl overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={post.cover_image_url} alt={post.title} className="w-full h-auto" />
             </div>
+          )}
 
-            <div className="flex items-center gap-6 pt-8 mt-8 border-t border-gray-100">
-              <LikeButton
-                postId={post.id}
-                postSlug={post.slug}
-                initialLiked={userHasLiked}
-                initialCount={likesCount}
-                isLoggedIn={!!currentUser}
-              />
-              <div className="flex items-center gap-2 text-gray-500">
-                <MessageSquare className="w-5 h-5" />
-                <span>{commentsCount}</span>
-              </div>
+          {/* Content */}
+          <div className="prose max-w-none">
+            <MarkdownContent content={post.content} />
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-6 pt-10 mt-10 border-t border-surface-border">
+            <LikeButton
+              postId={post.id}
+              postSlug={post.slug}
+              initialLiked={userHasLiked}
+              initialCount={likesCount}
+              isLoggedIn={!!currentUser}
+            />
+            <div className="flex items-center gap-2 text-text-muted">
+              <MessageSquare className="w-5 h-5" />
+              <span>{commentsCount}</span>
             </div>
+            <button className="ml-auto flex items-center gap-2 text-text-muted hover:text-white transition-colors">
+              <Share2 className="w-5 h-5" />
+            </button>
           </div>
         </article>
 

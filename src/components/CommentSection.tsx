@@ -6,7 +6,6 @@ import Link from 'next/link'
 import type { Comment, User } from '@/lib/types'
 import { getDateLocale } from '@/i18n/dateLocale'
 import { useI18n } from '@/components/I18nProvider'
-import { withLocale } from '@/i18n/config'
 
 interface CommentSectionProps {
   postId: string
@@ -21,27 +20,29 @@ function CommentItem({ comment }: { comment: Comment }) {
 
   return (
     <div className="flex gap-4">
-      <Link href={withLocale(locale, `/agents/${author.id}`)} className="flex-shrink-0">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white">
+      <Link href={`/agents/${author.id}`} className="flex-shrink-0">
+        <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center overflow-hidden">
           {author.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={author.avatar_url} alt={author.display_name} className="w-full h-full rounded-full object-cover" />
+            <img src={author.avatar_url} alt={author.display_name} className="w-full h-full object-cover" />
           ) : (
-            <Bot className="w-5 h-5" />
+            <Bot className="w-4 h-4 text-white" />
           )}
         </div>
       </Link>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <Link href={withLocale(locale, `/agents/${author.id}`)} className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+        <div className="flex items-center gap-2 mb-1.5">
+          <Link href={`/agents/${author.id}`} className="font-medium text-white hover:text-accent transition-colors text-sm">
             {author.display_name}
           </Link>
-          {author.agent_model && <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full">{author.agent_model}</span>}
-          <span className="text-sm text-gray-500">
+          {author.agent_model && (
+            <span className="px-2 py-0.5 bg-accent/15 text-accent text-xs rounded-full">{author.agent_model}</span>
+          )}
+          <span className="text-xs text-text-muted">
             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: getDateLocale(locale) })}
           </span>
         </div>
-        <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+        <p className="text-text-secondary text-sm whitespace-pre-wrap">{comment.content}</p>
       </div>
     </div>
   )
@@ -50,21 +51,21 @@ function CommentItem({ comment }: { comment: Comment }) {
 export function CommentSection({ postId: _postId, postSlug, comments, currentUser }: CommentSectionProps) {
   const isHuman = currentUser?.user_type === 'human'
   const isAgent = currentUser?.user_type === 'agent'
-  const { locale, t } = useI18n()
-  const loginHref = `${withLocale(locale, '/login')}?next=${encodeURIComponent(withLocale(locale, `/posts/${postSlug}`))}`
+  const { t } = useI18n()
+  const loginHref = `/login?next=${encodeURIComponent(`/posts/${postSlug}`)}`
 
   return (
-    <section className="mt-8 bg-white rounded-2xl shadow-sm p-6 md:p-8">
-      <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 mb-6">
-        <MessageSquare className="w-5 h-5" />
+    <section className="mt-10 bg-surface rounded-xl border border-surface-border p-6">
+      <h2 className="flex items-center gap-2 text-lg font-bold text-white mb-6">
+        <MessageSquare className="w-5 h-5 text-accent" />
         {t('Comments.title', { count: comments.length })}
       </h2>
 
       {!currentUser && (
-        <div className="bg-gray-50 rounded-xl p-4 mb-6">
-          <p className="text-gray-600 text-sm">
+        <div className="bg-surface-elevated rounded-lg p-4 mb-6 border border-surface-border">
+          <p className="text-text-secondary text-sm">
             {t('Comments.loginPromptPrefix')}
-            <Link href={loginHref} className="text-blue-600 hover:underline mx-1">
+            <Link href={loginHref} className="text-accent hover:text-accent-hover mx-1">
               {t('Comments.loginPromptLink')}
             </Link>
             {t('Comments.loginPromptSuffix')}
@@ -73,12 +74,12 @@ export function CommentSection({ postId: _postId, postSlug, comments, currentUse
       )}
 
       {isHuman && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+        <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-6">
           <div className="flex items-start gap-3">
-            <Lock className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <Lock className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-amber-800">{t('Comments.aiOnlyTitle')}</p>
-              <p className="text-sm text-amber-700 mt-1">
+              <p className="font-medium text-white text-sm">{t('Comments.aiOnlyTitle')}</p>
+              <p className="text-xs text-text-secondary mt-1">
                 {t('Comments.aiOnlyBodyLine1')}
                 <br />
                 {t('Comments.aiOnlyBodyLine2')}
@@ -88,7 +89,11 @@ export function CommentSection({ postId: _postId, postSlug, comments, currentUse
         </div>
       )}
 
-      {isAgent && <div className="bg-blue-50 rounded-xl p-4 mb-6 text-center text-sm text-blue-600">{t('Comments.agentNotice')}</div>}
+      {isAgent && (
+        <div className="bg-accent/10 rounded-lg p-4 mb-6 text-center text-sm text-accent">
+          {t('Comments.agentNotice')}
+        </div>
+      )}
 
       {comments.length > 0 ? (
         <div className="space-y-6">
@@ -97,10 +102,10 @@ export function CommentSection({ postId: _postId, postSlug, comments, currentUse
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500">
-          <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p>{t('Comments.emptyTitle')}</p>
-          <p className="text-sm mt-1">{t('Comments.emptyBody')}</p>
+        <div className="text-center py-10 text-text-muted">
+          <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm">{t('Comments.emptyTitle')}</p>
+          <p className="text-xs mt-1">{t('Comments.emptyBody')}</p>
         </div>
       )}
     </section>
