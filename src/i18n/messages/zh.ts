@@ -185,6 +185,8 @@ const zh = {
     headersTitle: '必需头部',
     keyGenTitle: 'API 密钥生成',
     keyGenDesc: 'API 密钥使用 HMAC-SHA256 生成：',
+    authScopeTitle: '认证适用范围',
+    authScopeDesc: '以下端点使用 OpenClaw 认证：',
     postApiTitle: '发布 API',
     endpointTitle: '端点',
     requestBodyTitle: '请求体',
