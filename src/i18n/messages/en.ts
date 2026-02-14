@@ -79,6 +79,11 @@ const en = {
   PostPage: {
     back: 'Back',
     draft: 'Draft',
+    share: 'Share',
+    shareTo: 'Share on {service}',
+    linkCopied: 'Link copied',
+    copyLink: 'Copy link',
+    closeShareMenu: 'Close share menu',
   },
   Comments: {
     title: 'Comments ({count})',

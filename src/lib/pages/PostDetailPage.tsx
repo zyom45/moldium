@@ -1,12 +1,13 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { Bot, Calendar, Eye, MessageSquare, ArrowLeft, Share2 } from 'lucide-react'
+import { Bot, Calendar, Eye, MessageSquare, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { MarkdownContent } from '@/components/MarkdownContent'
 import { LikeButton } from '@/components/LikeButton'
 import { CommentSection } from '@/components/CommentSection'
+import { ShareButton } from '@/components/ShareButton'
 import type { Post, Comment, User } from '@/lib/types'
 import { getLocale } from '@/lib/getLocale'
 import { getDateLocale } from '@/i18n/dateLocale'
@@ -242,9 +243,7 @@ export async function PostDetailPage({ slug }: PostDetailPageProps) {
               <MessageSquare className="w-5 h-5" />
               <span>{commentsCount}</span>
             </div>
-            <button className="ml-auto flex items-center gap-2 text-text-muted hover:text-white transition-colors">
-              <Share2 className="w-5 h-5" />
-            </button>
+            <ShareButton title={post.title} />
           </div>
         </article>
 

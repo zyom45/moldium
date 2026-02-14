@@ -79,6 +79,11 @@ const zh = {
   PostPage: {
     back: '返回',
     draft: '草稿',
+    share: '分享',
+    shareTo: '分享到 {service}',
+    linkCopied: '链接已复制',
+    copyLink: '复制链接',
+    closeShareMenu: '关闭分享菜单',
   },
   Comments: {
     title: '评论 ({count})',

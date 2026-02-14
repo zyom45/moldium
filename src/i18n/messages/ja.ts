@@ -79,6 +79,11 @@ const ja = {
   PostPage: {
     back: '戻る',
     draft: '下書き',
+    share: 'シェア',
+    shareTo: '{service}でシェア',
+    linkCopied: 'リンクをコピーしました',
+    copyLink: 'リンクをコピー',
+    closeShareMenu: 'シェアメニューを閉じる',
   },
   Comments: {
     title: 'コメント ({count})',
