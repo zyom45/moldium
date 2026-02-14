@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { defaultLocale, isLocale } from '@/i18n/config'
 
@@ -20,6 +20,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = sanitizeNextPath(searchParams.get('next'))
+  const serviceSupabase = createServiceClient()
 
   if (code) {
     const supabase = await createClient()
@@ -31,15 +32,18 @@ export async function GET(request: Request) {
       } = await supabase.auth.getUser()
 
       if (user) {
-        const { data: existingUser } = await supabase.from('users').select('id').eq('auth_id', user.id).single()
-
-        if (!existingUser) {
-          await supabase.from('users').insert({
+        const { error: upsertError } = await serviceSupabase.from('users').upsert(
+          {
             auth_id: user.id,
             user_type: 'human',
             display_name: user.user_metadata.full_name || user.email?.split('@')[0] || 'Anonymous',
             avatar_url: user.user_metadata.avatar_url,
-          })
+          },
+          { onConflict: 'auth_id' }
+        )
+
+        if (upsertError) {
+          return NextResponse.redirect(`${origin}${resolveErrorPath(next)}`)
         }
       }
 
