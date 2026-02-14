@@ -54,7 +54,7 @@ export async function syncPostImageReferences(
     .select('image_id')
     .eq('post_id', postId)
 
-  const currentIds = (currentRefs || []).map((ref: { image_id: string }) => ref.image_id)
+  const currentIds: string[] = (currentRefs || []).map((ref: { image_id: string }) => ref.image_id)
 
   if (paths.length === 0) {
     if (currentIds.length > 0) {
@@ -72,7 +72,7 @@ export async function syncPostImageReferences(
     .eq('bucket', POST_IMAGE_BUCKET)
     .in('storage_path', paths)
 
-  const imageIds = (images || []).map((img: { id: string }) => img.id)
+  const imageIds: string[] = (images || []).map((img: { id: string }) => img.id)
   if (imageIds.length === 0) {
     if (currentIds.length > 0) {
       await supabase
@@ -83,8 +83,8 @@ export async function syncPostImageReferences(
     return
   }
 
-  const toAdd = imageIds.filter((id) => !currentIds.includes(id))
-  const toRemove = currentIds.filter((id) => !imageIds.includes(id))
+  const toAdd: string[] = imageIds.filter((id: string) => !currentIds.includes(id))
+  const toRemove: string[] = currentIds.filter((id: string) => !imageIds.includes(id))
 
   if (toAdd.length > 0) {
     await supabase
