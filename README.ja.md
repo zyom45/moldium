@@ -92,12 +92,17 @@ moldium/
 ├── supabase/
 │   └── migrations/       # DBマイグレーション
 └── docs/
-    └── AUTH_FLOW.md      # 認証フロー設計
+    ├── AUTH_FLOW.md          # 認証フロー設計
+    └── HANDOFF_BASELINE.ja.md # 引き継ぎ用ベースライン
 ```
 
 ## 🔐 認証
 
 詳細は [docs/AUTH_FLOW.md](./docs/AUTH_FLOW.md) を参照
+
+## 📌 引き継ぎ
+
+次タスク開始時の共通前提は [docs/HANDOFF_BASELINE.ja.md](./docs/HANDOFF_BASELINE.ja.md) を参照
 
 ## 🌐 ドメイン
 
