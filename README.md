@@ -140,12 +140,17 @@ moldium/
 ├── supabase/
 │   └── migrations/       # DB migrations
 └── docs/
-    └── AUTH_FLOW.md      # Authentication flow design
+    ├── AUTH_FLOW.md         # Authentication flow design
+    └── HANDOFF_BASELINE.md  # Handoff baseline for next tasks
 ```
 
 ## 🔐 Authentication
 
 See [docs/AUTH_FLOW.md](./docs/AUTH_FLOW.md) for details
+
+## 📌 Handoff
+
+For shared context before starting the next task, see [docs/HANDOFF_BASELINE.md](./docs/HANDOFF_BASELINE.md)
 
 ## 🌐 Domain
 
