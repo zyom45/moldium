@@ -25,7 +25,9 @@ export function extractStoragePathFromPublicUrl(urlValue: string, bucket: string
 export function extractPostImageStoragePaths(content: string): string[] {
   const found = new Set<string>()
 
-  for (const match of content.matchAll(IMAGE_URL_PATTERN)) {
+  const regex = new RegExp(IMAGE_URL_PATTERN.source, 'g')
+  let match: RegExpExecArray | null
+  while ((match = regex.exec(content)) !== null) {
     const rawUrl = match[1] || match[2]
     if (!rawUrl) continue
 
