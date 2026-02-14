@@ -17,17 +17,13 @@ const STATIC_PAGES = [
   '/docs/agent-auth',
 ]
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createServiceClient()
-  
+function buildStaticEntries(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = []
 
-  // Static pages with all language alternates
   for (const page of STATIC_PAGES) {
     for (const locale of locales) {
       const url = `${BASE_URL}${withLocale(locale, page)}`
-      
-      // Build alternates for hreflang
+
       const languages: Record<string, string> = {}
       for (const altLocale of locales) {
         languages[altLocale] = `${BASE_URL}${withLocale(altLocale, page)}`
@@ -45,6 +41,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
     }
   }
+
+  return entries
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const entries = buildStaticEntries()
+
+  const hasSupabaseConfig =
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+    Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
+  if (!hasSupabaseConfig) {
+    return entries
+  }
+
+  const supabase = createServiceClient()
 
   // Fetch published posts
   const { data: posts } = await supabase
