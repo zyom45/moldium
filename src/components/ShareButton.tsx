@@ -138,7 +138,11 @@ export function ShareButton({ title }: ShareButtonProps) {
   return (
     <div
       ref={containerRef}
-      className="ml-auto relative flex items-center"
+      className={`ml-auto relative h-11 overflow-hidden rounded-full transition-all duration-300 border ${
+        isOpen
+          ? 'w-[min(29rem,calc(100vw-2rem))] bg-surface-elevated/95 border-surface-border shadow-lg'
+          : 'w-28 bg-transparent border-transparent'
+      }`}
       onMouseEnter={() => {
         if (canHover) setIsOpen(true)
       }}
@@ -147,32 +151,32 @@ export function ShareButton({ title }: ShareButtonProps) {
       }}
     >
       {isOpen && (
-        <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 z-20 transition-all duration-200 origin-right opacity-100 scale-100">
-          <div className="flex items-center gap-2 p-2 rounded-xl border border-surface-border bg-surface-elevated/95 backdrop-blur-sm shadow-lg">
-            {shareTargets.map((target) => (
-              <button
-                key={target.name}
-                onClick={() => handleShare(target.buildUrl)}
-                className={`w-9 h-9 rounded-full font-semibold flex items-center justify-center transition-transform hover:scale-105 ${target.bgClass} ${target.textClass}`}
-                aria-label={t('PostPage.shareTo', { service: target.name })}
-                title={target.name}
-              >
-                <span className={target.iconText.length >= 4 ? 'text-[8px]' : 'text-[11px]'}>{target.iconText}</span>
-              </button>
-            ))}
-
+        <div className="h-full px-2 flex items-center gap-2">
+          {shareTargets.map((target) => (
             <button
-              onClick={handleCopyLink}
-              className={`w-9 h-9 rounded-full border border-surface-border flex items-center justify-center transition-colors ${
-                copied ? 'bg-accent text-white border-accent' : 'bg-surface text-text-secondary hover:text-white'
-              }`}
-              aria-label={copied ? t('PostPage.linkCopied') : t('PostPage.copyLink')}
-              title={copied ? t('PostPage.linkCopied') : t('PostPage.copyLink')}
+              key={target.name}
+              onClick={() => handleShare(target.buildUrl)}
+              className={`w-9 h-9 rounded-full font-semibold flex items-center justify-center transition-transform hover:scale-105 ${target.bgClass} ${target.textClass}`}
+              aria-label={t('PostPage.shareTo', { service: target.name })}
+              title={target.name}
             >
-              <Link2 className="w-4 h-4" />
+              <span className={target.iconText.length >= 4 ? 'text-[8px]' : 'text-[11px]'}>{target.iconText}</span>
             </button>
+          ))}
 
-            {!canHover && (
+          <button
+            onClick={handleCopyLink}
+            className={`w-9 h-9 rounded-full border border-surface-border flex items-center justify-center transition-colors ${
+              copied ? 'bg-accent text-white border-accent' : 'bg-surface text-text-secondary hover:text-white'
+            }`}
+            aria-label={copied ? t('PostPage.linkCopied') : t('PostPage.copyLink')}
+            title={copied ? t('PostPage.linkCopied') : t('PostPage.copyLink')}
+          >
+            <Link2 className="w-4 h-4" />
+          </button>
+
+          {!canHover && (
+            <div className="ml-auto">
               <button
                 onClick={() => setIsOpen(false)}
                 className="w-9 h-9 rounded-full bg-surface text-text-secondary border border-surface-border flex items-center justify-center hover:text-white transition-colors"
@@ -181,16 +185,19 @@ export function ShareButton({ title }: ShareButtonProps) {
               >
                 <X className="w-4 h-4" />
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2 text-text-muted hover:text-white transition-colors"
+        className={`absolute inset-y-0 right-0 px-3 flex items-center gap-2 text-text-muted hover:text-white transition-opacity duration-200 ${
+          isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
         aria-label={t('PostPage.share')}
         title={t('PostPage.share')}
+        aria-expanded={isOpen}
       >
         <Share2 className="w-5 h-5" />
         <span className="text-sm">{t('PostPage.share')}</span>
