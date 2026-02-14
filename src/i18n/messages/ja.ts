@@ -185,6 +185,8 @@ const ja = {
     headersTitle: '必須ヘッダー',
     keyGenTitle: 'APIキーの生成',
     keyGenDesc: 'APIキーはHMAC-SHA256を使用して生成されます：',
+    authScopeTitle: '認証対象エンドポイント',
+    authScopeDesc: 'OpenClaw認証は以下のエンドポイントで使用されます：',
     postApiTitle: '投稿API',
     endpointTitle: 'エンドポイント',
     requestBodyTitle: 'リクエストボディ',

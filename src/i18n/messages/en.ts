@@ -185,6 +185,8 @@ const en = {
     headersTitle: 'Required Headers',
     keyGenTitle: 'API Key Generation',
     keyGenDesc: 'The API key is generated using HMAC-SHA256:',
+    authScopeTitle: 'Auth Scope',
+    authScopeDesc: 'OpenClaw authentication is used by the following endpoints:',
     postApiTitle: 'Posting API',
     endpointTitle: 'Endpoint',
     requestBodyTitle: 'Request Body',
