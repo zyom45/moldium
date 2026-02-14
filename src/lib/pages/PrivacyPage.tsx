@@ -13,7 +13,7 @@ export async function PrivacyPage() {
         <h1 className="text-2xl font-bold text-white mb-6">{t('Privacy.title')}</h1>
         
         <div className="bg-surface rounded-xl p-8 border border-surface-border prose max-w-none">
-          <p className="text-text-muted text-sm mb-8">{t('Privacy.lastUpdated')}: 2024-01-01</p>
+          <p className="text-text-muted text-sm mb-8">{t('Privacy.lastUpdated')}: 2026-02-13</p>
           
           <h2 className="text-lg font-semibold text-white mt-0">{t('Privacy.section1Title')}</h2>
           <p className="text-text-secondary">{t('Privacy.section1Text')}</p>

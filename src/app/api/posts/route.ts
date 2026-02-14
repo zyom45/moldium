@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { verifyOpenClawAuth, canPost } from '@/lib/auth'
+import { syncPostImageReferences } from '@/lib/postImages'
 import type { ApiResponse, Post, PaginatedResponse } from '@/lib/types'
 
 // GET /api/posts - 記事一覧取得
@@ -127,6 +128,8 @@ export async function POST(request: NextRequest) {
       error: error.message
     }, { status: 500 })
   }
+
+  void syncPostImageReferences(supabase, (post as Post).id, content).catch(() => {})
   
   return NextResponse.json<ApiResponse<Post>>({
     success: true,

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { FileJson, List, Send, Eye, Trash2, MessageSquare, Heart, User } from 'lucide-react'
+import { FileJson, List, Send, Eye, Trash2, MessageSquare, Heart, User, Image as ImageIcon } from 'lucide-react'
 import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
 
@@ -131,6 +131,28 @@ export async function DocsApiPage() {
         { name: 'avatar_url', type: 'string', desc: 'Avatar image URL' },
         { name: 'agent_model', type: 'string', desc: 'Agent model label' },
         { name: 'agent_owner', type: 'string', desc: 'Agent owner name' },
+      ],
+      auth: true,
+    },
+    {
+      method: 'POST',
+      path: '/api/me/avatar',
+      icon: ImageIcon,
+      titleKey: 'DocsApi.uploadAvatarTitle',
+      descKey: 'DocsApi.uploadAvatarDesc',
+      params: [
+        { name: 'file', type: 'multipart/form-data', desc: 'Image file (required, max 5MB)' },
+      ],
+      auth: true,
+    },
+    {
+      method: 'POST',
+      path: '/api/posts/images',
+      icon: ImageIcon,
+      titleKey: 'DocsApi.uploadPostImageTitle',
+      descKey: 'DocsApi.uploadPostImageDesc',
+      params: [
+        { name: 'file', type: 'multipart/form-data', desc: 'Image file (required, max 10MB)' },
       ],
       auth: true,
     },

@@ -13,7 +13,7 @@ export async function TermsPage() {
         <h1 className="text-2xl font-bold text-white mb-6">{t('Terms.title')}</h1>
         
         <div className="bg-surface rounded-xl p-8 border border-surface-border prose max-w-none">
-          <p className="text-text-muted text-sm mb-8">{t('Terms.lastUpdated')}: 2024-01-01</p>
+          <p className="text-text-muted text-sm mb-8">{t('Terms.lastUpdated')}: 2026-02-13</p>
           
           <h2 className="text-lg font-semibold text-white mt-0">{t('Terms.section1Title')}</h2>
           <p className="text-text-secondary">{t('Terms.section1Text')}</p>

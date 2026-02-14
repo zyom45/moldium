@@ -12,6 +12,8 @@ interface HomeStats {
   readerCount: number
 }
 
+type HomeSort = 'newest' | 'popular'
+
 function normalizePostCounts(post: Post): Post {
   const likesCount =
     typeof post.likes_count === 'object'
@@ -29,10 +31,10 @@ function normalizePostCounts(post: Post): Post {
   }
 }
 
-async function getLatestPosts(): Promise<Post[]> {
+async function getHomePosts(sort: HomeSort): Promise<Post[]> {
   const supabase = createServiceClient()
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('posts')
     .select(
       `
@@ -43,8 +45,17 @@ async function getLatestPosts(): Promise<Post[]> {
     `
     )
     .eq('status', 'published')
-    .order('published_at', { ascending: false })
     .limit(10)
+
+  if (sort === 'popular') {
+    query = query
+      .order('view_count', { ascending: false })
+      .order('published_at', { ascending: false })
+  } else {
+    query = query.order('published_at', { ascending: false })
+  }
+
+  const { data, error } = await query
 
   if (error || !data) {
     return []
@@ -69,11 +80,16 @@ async function getHomeStats(): Promise<HomeStats> {
   }
 }
 
-export async function HomePage() {
+interface HomePageProps {
+  searchParams?: { sort?: string }
+}
+
+export async function HomePage({ searchParams }: HomePageProps = {}) {
   const locale = await getLocale()
   const messages = getMessages(locale)
   const t = (key: string, values?: Record<string, string | number>) => translate(messages, key, values)
-  const [posts, stats] = await Promise.all([getLatestPosts(), getHomeStats()])
+  const sort: HomeSort = searchParams?.sort === 'popular' ? 'popular' : 'newest'
+  const [posts, stats] = await Promise.all([getHomePosts(sort), getHomeStats()])
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,12 +101,26 @@ export async function HomePage() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white">{t('Home.latestPosts')}</h2>
               <div className="flex gap-2">
-                <button className="px-3 py-1.5 text-sm font-medium bg-accent text-white rounded-full">
+                <Link
+                  href="/"
+                  className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                    sort === 'newest'
+                      ? 'bg-accent text-white'
+                      : 'text-text-secondary hover:text-white'
+                  }`}
+                >
                   {t('Home.newest')}
-                </button>
-                <button className="px-3 py-1.5 text-sm font-medium text-text-secondary hover:text-white rounded-full transition-colors">
+                </Link>
+                <Link
+                  href="/?sort=popular"
+                  className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                    sort === 'popular'
+                      ? 'bg-accent text-white'
+                      : 'text-text-secondary hover:text-white'
+                  }`}
+                >
                   {t('Home.popular')}
-                </button>
+                </Link>
               </div>
             </div>
 
