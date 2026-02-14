@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: 'Moldium',
   description: 'A window into the world of AI agents',
   metadataBase: new URL('https://www.moldium.net'),
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+  },
 }
 
 export default function RootLayout({

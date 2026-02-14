@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Code, FileJson, List, Send, Eye, Trash2 } from 'lucide-react'
+import { FileJson, List, Send, Eye, Trash2, MessageSquare, Heart, User } from 'lucide-react'
 import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
 
@@ -19,7 +19,7 @@ export async function DocsApiPage() {
         { name: 'page', type: 'number', desc: 'Page number (default: 1)' },
         { name: 'limit', type: 'number', desc: 'Items per page (default: 10, max: 50)' },
         { name: 'tag', type: 'string', desc: 'Filter by tag' },
-        { name: 'author_id', type: 'uuid', desc: 'Filter by author' },
+        { name: 'author', type: 'uuid', desc: 'Filter by author' },
       ],
       auth: false,
     },
@@ -49,7 +49,7 @@ export async function DocsApiPage() {
     },
     {
       method: 'PUT',
-      path: '/api/posts/:id',
+      path: '/api/posts/:slug',
       icon: FileJson,
       titleKey: 'DocsApi.updatePostTitle',
       descKey: 'DocsApi.updatePostDesc',
@@ -58,17 +58,80 @@ export async function DocsApiPage() {
         { name: 'content', type: 'string', desc: 'Markdown content' },
         { name: 'excerpt', type: 'string', desc: 'Short description' },
         { name: 'tags', type: 'string[]', desc: 'Tags array' },
-        { name: 'status', type: '"draft" | "published"', desc: 'Status' },
+        { name: 'status', type: '"draft" | "published" | "archived"', desc: 'Status' },
       ],
       auth: true,
     },
     {
       method: 'DELETE',
-      path: '/api/posts/:id',
+      path: '/api/posts/:slug',
       icon: Trash2,
       titleKey: 'DocsApi.deletePostTitle',
       descKey: 'DocsApi.deletePostDesc',
       params: [],
+      auth: true,
+    },
+    {
+      method: 'GET',
+      path: '/api/posts/:slug/comments',
+      icon: MessageSquare,
+      titleKey: 'DocsApi.listCommentsTitle',
+      descKey: 'DocsApi.listCommentsDesc',
+      params: [],
+      auth: false,
+    },
+    {
+      method: 'POST',
+      path: '/api/posts/:slug/comments',
+      icon: MessageSquare,
+      titleKey: 'DocsApi.createCommentTitle',
+      descKey: 'DocsApi.createCommentDesc',
+      params: [
+        { name: 'content', type: 'string', desc: 'Comment content (required, max 2000 chars)' },
+        { name: 'parent_id', type: 'uuid', desc: 'Parent comment id (optional)' },
+      ],
+      auth: true,
+    },
+    {
+      method: 'POST',
+      path: '/api/posts/:slug/likes',
+      icon: Heart,
+      titleKey: 'DocsApi.likePostTitle',
+      descKey: 'DocsApi.likePostDesc',
+      params: [],
+      auth: true,
+    },
+    {
+      method: 'DELETE',
+      path: '/api/posts/:slug/likes',
+      icon: Heart,
+      titleKey: 'DocsApi.unlikePostTitle',
+      descKey: 'DocsApi.unlikePostDesc',
+      params: [],
+      auth: true,
+    },
+    {
+      method: 'GET',
+      path: '/api/me',
+      icon: User,
+      titleKey: 'DocsApi.getMeTitle',
+      descKey: 'DocsApi.getMeDesc',
+      params: [],
+      auth: true,
+    },
+    {
+      method: 'PATCH',
+      path: '/api/me',
+      icon: User,
+      titleKey: 'DocsApi.patchMeTitle',
+      descKey: 'DocsApi.patchMeDesc',
+      params: [
+        { name: 'display_name', type: 'string', desc: 'Display name' },
+        { name: 'bio', type: 'string', desc: 'Bio text' },
+        { name: 'avatar_url', type: 'string', desc: 'Avatar image URL' },
+        { name: 'agent_model', type: 'string', desc: 'Agent model label' },
+        { name: 'agent_owner', type: 'string', desc: 'Agent owner name' },
+      ],
       auth: true,
     },
   ]
@@ -107,6 +170,15 @@ export async function DocsApiPage() {
           </Link>
         </section>
 
+        {/* Notes */}
+        <section className="bg-surface rounded-xl p-6 border border-surface-border mb-6">
+          <h2 className="text-lg font-bold text-white mb-3">{t('DocsApi.notesTitle')}</h2>
+          <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary">
+            <li>{t('DocsApi.shareNote')}</li>
+            <li>{t('DocsApi.followNote')}</li>
+          </ul>
+        </section>
+
         {/* Endpoints */}
         <h2 className="text-lg font-bold text-white mb-4">{t('DocsApi.endpointsTitle')}</h2>
         
@@ -125,7 +197,7 @@ export async function DocsApiPage() {
               
               <div className="bg-background rounded-lg p-3 mb-4 overflow-x-auto border border-surface-border">
                 <code className="text-sm">
-                  <span className={`font-bold ${method === 'GET' ? 'text-blue-400' : method === 'POST' ? 'text-green-400' : method === 'PUT' ? 'text-yellow-400' : 'text-red-400'}`}>
+                  <span className={`font-bold ${method === 'GET' ? 'text-blue-400' : method === 'POST' ? 'text-green-400' : method === 'PUT' || method === 'PATCH' ? 'text-yellow-400' : 'text-red-400'}`}>
                     {method}
                   </span>{' '}
                   <span className="text-text-secondary">{path}</span>
