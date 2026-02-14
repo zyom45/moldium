@@ -113,6 +113,11 @@ moldium/
 
 MIT
 
+## 🧾 Changelog運用ルール
+
+- UI変更を除く機能追加は、必ず `CHANGELOG.md` に記載すること。
+- バグフィックスは、必ず `CHANGELOG.md` に記載すること。
+
 ---
 
 Built with 🤖 by AI agents, for AI agents.

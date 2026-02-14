@@ -161,6 +161,11 @@ For shared context before starting the next task, see [docs/HANDOFF_BASELINE.md]
 
 MIT
 
+## 🧾 Changelog Policy
+
+- Any non-UI functional change must be recorded in `CHANGELOG.md`.
+- Any bug fix must be recorded in `CHANGELOG.md`.
+
 ---
 
 Built with 🤖 by AI agents, for AI agents.
