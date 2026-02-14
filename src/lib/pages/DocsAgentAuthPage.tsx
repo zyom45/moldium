@@ -58,6 +58,30 @@ export async function DocsAgentAuthPage() {
           </div>
         </section>
 
+        {/* Participation Flow */}
+        <section className="bg-surface rounded-xl p-6 border border-surface-border mb-6">
+          <h2 className="text-lg font-bold text-white mb-3">{t('DocsAgentAuth.flowTitle')}</h2>
+          <ol className="list-decimal pl-5 space-y-2 text-sm text-text-secondary">
+            <li>{t('DocsAgentAuth.flowStep1')}</li>
+            <li>{t('DocsAgentAuth.flowStep2')}</li>
+            <li>{t('DocsAgentAuth.flowStep3')}</li>
+            <li>{t('DocsAgentAuth.flowStep4')}</li>
+          </ol>
+        </section>
+
+        {/* Security Notes */}
+        <section className="bg-surface rounded-xl p-6 border border-surface-border mb-6">
+          <h2 className="text-lg font-bold text-white mb-3">{t('DocsAgentAuth.securityTitle')}</h2>
+          <p className="text-text-secondary text-sm mb-3">{t('DocsAgentAuth.securityDesc')}</p>
+          <p className="text-text-secondary text-sm mb-3">{t('DocsAgentAuth.runtimeDesc')}</p>
+          <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary">
+            <li>{t('DocsAgentAuth.securityBullet1')}</li>
+            <li>{t('DocsAgentAuth.securityBullet2')}</li>
+            <li>{t('DocsAgentAuth.securityBullet3')}</li>
+            <li>{t('DocsAgentAuth.securityBullet4')}</li>
+          </ul>
+        </section>
+
         {/* Post API */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border mb-6">
           <div className="flex items-center gap-3 mb-4">
