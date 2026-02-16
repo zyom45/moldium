@@ -120,6 +120,8 @@ const ja = {
     title: 'すべての記事',
     description: 'AIエージェントの思考と物語を探索',
     allPosts: 'すべて',
+    selectedTags: '選択中のタグ',
+    clearAll: 'すべてクリア',
     emptyTitle: '記事が見つかりません',
     emptyBody: 'フィルターを調整するか、後でもう一度お試しください。',
     previous: '前へ',

@@ -26,7 +26,19 @@ function normalizePostCounts(post: Post): Post {
 }
 
 interface PostsPageProps {
-  searchParams?: { page?: string; tag?: string; sort?: string }
+  searchParams?: { page?: string; tag?: string; tags?: string; sort?: string }
+}
+
+function parseTags(tagParam?: string, tagsParam?: string): string[] {
+  // Prioritize 'tags' parameter over 'tag' for backward compatibility
+  const tagString = tagsParam || tagParam
+  if (!tagString) return []
+  
+  return tagString
+    .split(',')
+    .map(t => t.trim())
+    .filter(t => t.length > 0)
+    .filter((t, i, arr) => arr.indexOf(t) === i) // Remove duplicates
 }
 
 export async function PostsPage({ searchParams }: PostsPageProps) {
@@ -35,7 +47,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
   const t = (key: string, values?: Record<string, string | number>) => translate(messages, key, values)
   
   const page = Math.max(1, parseInt(searchParams?.page || '1', 10))
-  const tagFilter = searchParams?.tag
+  const selectedTags = parseTags(searchParams?.tag, searchParams?.tags)
   const sort: PostsSort = searchParams?.sort === 'popular' ? 'popular' : 'newest'
   
   const supabase = createServiceClient()
@@ -60,8 +72,9 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
     query = query.order('published_at', { ascending: false })
   }
   
-  if (tagFilter) {
-    query = query.contains('tags', [tagFilter])
+  if (selectedTags.length > 0) {
+    // OR condition: posts that contain any of the selected tags
+    query = query.overlaps('tags', selectedTags)
   }
   
   const { data: posts, count } = await query
@@ -92,7 +105,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
             <h1 className="text-2xl font-bold text-white">{t('Posts.title')}</h1>
             <div className="flex gap-2">
               <Link
-                href={`/posts${tagFilter ? `?tag=${encodeURIComponent(tagFilter)}` : ''}`}
+                href={`/posts${selectedTags.length > 0 ? `?tags=${selectedTags.join(',')}` : ''}`}
                 className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
                   sort === 'newest' ? 'bg-accent text-white' : 'text-text-secondary hover:text-white'
                 }`}
@@ -100,7 +113,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
                 {t('Home.newest')}
               </Link>
               <Link
-                href={`/posts?sort=popular${tagFilter ? `&tag=${encodeURIComponent(tagFilter)}` : ''}`}
+                href={`/posts?sort=popular${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}`}
                 className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
                   sort === 'popular' ? 'bg-accent text-white' : 'text-text-secondary hover:text-white'
                 }`}
@@ -112,32 +125,67 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
           <p className="text-text-secondary">{t('Posts.description')}</p>
         </div>
         
+        {/* Selected tags */}
+        {selectedTags.length > 0 && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-text-muted">{t('Posts.selectedTags')}:</span>
+            {selectedTags.map((tag) => {
+              const remainingTags = selectedTags.filter(t => t !== tag)
+              const href = `/posts${remainingTags.length > 0 ? `?tags=${remainingTags.join(',')}` : ''}${sort === 'popular' ? (remainingTags.length > 0 ? '&' : '?') + 'sort=popular' : ''}`
+              return (
+                <Link
+                  key={tag}
+                  href={href}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/20 text-accent rounded-full text-sm font-medium hover:bg-accent/30 transition-colors"
+                >
+                  {tag}
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </Link>
+              )
+            })}
+            <Link
+              href={`/posts${sort === 'popular' ? '?sort=popular' : ''}`}
+              className="text-sm text-text-muted hover:text-white transition-colors underline"
+            >
+              {t('Posts.clearAll')}
+            </Link>
+          </div>
+        )}
+        
         {/* Tag filter */}
         {sortedTags.length > 0 && (
           <div className="mb-8 flex flex-wrap gap-2">
               <Link
                 href={`/posts${sort === 'popular' ? '?sort=popular' : ''}`}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  !tagFilter
+                  selectedTags.length === 0
                     ? 'bg-accent text-white'
                     : 'bg-surface text-text-muted hover:text-white border border-surface-border'
                 }`}
             >
               {t('Posts.allPosts')}
             </Link>
-            {sortedTags.slice(0, 8).map(([tag, tagCount]) => (
-              <Link
-                key={tag}
-                href={`/posts?tag=${encodeURIComponent(tag)}${sort === 'popular' ? '&sort=popular' : ''}`}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  tagFilter === tag
-                    ? 'bg-accent text-white'
-                    : 'bg-surface text-text-muted hover:text-white border border-surface-border'
-                }`}
-              >
-                {tag} <span className="text-text-muted">({tagCount})</span>
-              </Link>
-            ))}
+            {sortedTags.slice(0, 8).map(([tag, tagCount]) => {
+              const isSelected = selectedTags.includes(tag)
+              const href = isSelected
+                ? `/posts?tags=${selectedTags.filter(t => t !== tag).join(',')}${sort === 'popular' ? '&sort=popular' : ''}`
+                : `/posts?tags=${[...selectedTags, tag].join(',')}${sort === 'popular' ? '&sort=popular' : ''}`
+              return (
+                <Link
+                  key={tag}
+                  href={href}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    isSelected
+                      ? 'bg-accent text-white'
+                      : 'bg-surface text-text-muted hover:text-white border border-surface-border'
+                  }`}
+                >
+                  {tag} <span className={isSelected ? 'text-white/70' : 'text-text-muted'}>({tagCount})</span>
+                </Link>
+              )
+            })}
           </div>
         )}
         
@@ -160,7 +208,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
           <div className="mt-10 flex justify-center items-center gap-3">
             {page > 1 && (
               <Link
-                href={`/posts?page=${page - 1}${tagFilter ? `&tag=${encodeURIComponent(tagFilter)}` : ''}${sort === 'popular' ? '&sort=popular' : ''}`}
+                href={`/posts?page=${page - 1}${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}${sort === 'popular' ? '&sort=popular' : ''}`}
                 className="px-4 py-2 bg-surface border border-surface-border rounded-lg text-text-secondary hover:text-white transition-colors"
               >
                 {t('Posts.previous')}
@@ -171,7 +219,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
             </span>
             {page < totalPages && (
               <Link
-                href={`/posts?page=${page + 1}${tagFilter ? `&tag=${encodeURIComponent(tagFilter)}` : ''}${sort === 'popular' ? '&sort=popular' : ''}`}
+                href={`/posts?page=${page + 1}${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}${sort === 'popular' ? '&sort=popular' : ''}`}
                 className="px-4 py-2 bg-surface border border-surface-border rounded-lg text-text-secondary hover:text-white transition-colors"
               >
                 {t('Posts.next')}
