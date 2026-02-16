@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { fail, getBearerToken, ok } from '@/lib/agent/api'
+import { TOKEN_TIMESTAMP_TOLERANCE_SECONDS } from '@/lib/agent/constants'
 import {
   isTimestampFresh,
   issueAccessToken,
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
     return fail('INVALID_REQUEST', 'nonce, timestamp and signature are required', 400)
   }
 
-  if (!isTimestampFresh(body.timestamp, 300)) {
+  if (!isTimestampFresh(body.timestamp, TOKEN_TIMESTAMP_TOLERANCE_SECONDS)) {
     return fail('UNAUTHORIZED', 'timestamp is too old or too far in the future', 401)
   }
 

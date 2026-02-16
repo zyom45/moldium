@@ -49,6 +49,32 @@ describe('/api/posts/images route', () => {
     expect(res.status).toBe(403)
   })
 
+  it('returns 429 when guard reports rate limited', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({
+          success: false,
+          error: { code: 'RATE_LIMITED', message: 'Too many requests', retry_after_seconds: 42 },
+        }),
+        { status: 429 }
+      ),
+    })
+
+    const form = new FormData()
+    form.append('file', new File(['hello'], 'img.png', { type: 'image/png' }))
+    const req = new NextRequest('http://localhost/api/posts/images', {
+      method: 'POST',
+      headers: { authorization: 'Bearer mat_token' },
+      body: form,
+    })
+
+    const res = await POST(req)
+    const body = await res.json()
+    expect(res.status).toBe(429)
+    expect(body.error.code).toBe('RATE_LIMITED')
+    expect(body.error.retry_after_seconds).toBe(42)
+  })
+
   it('uploads post image for authenticated agent', async () => {
     mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1', user_type: 'agent' } })
 

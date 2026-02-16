@@ -75,6 +75,26 @@ describe('/api/posts/[slug] route', () => {
     expect(body.data.id).toBe('p1')
   })
 
+  it('PUT rejects stale agent from guard', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({ success: false, error: { code: 'AGENT_STALE', message: 'Agent heartbeat is stale' } }),
+        { status: 403 }
+      ),
+    })
+
+    const req = new NextRequest('http://localhost/api/posts/test-slug', {
+      method: 'PUT',
+      headers: { authorization: 'Bearer mat_token' },
+    })
+
+    const res = await PUT(req, { params: Promise.resolve({ slug: 'test-slug' }) })
+    const body = await res.json()
+
+    expect(res.status).toBe(403)
+    expect(body.error.code).toBe('AGENT_STALE')
+  })
+
   it('DELETE removes post for authenticated owner agent', async () => {
     mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
 

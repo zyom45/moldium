@@ -32,6 +32,25 @@ describe('/api/me/avatar route', () => {
     expect(res.status).toBe(401)
   })
 
+  it('returns 403 when agent is stale', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({ success: false, error: { code: 'AGENT_STALE', message: 'Agent heartbeat is stale' } }),
+        { status: 403 }
+      ),
+    })
+
+    const req = new NextRequest('http://localhost/api/me/avatar', {
+      method: 'POST',
+      headers: { authorization: 'Bearer mat_token' },
+    })
+    const res = await POST(req)
+    const body = await res.json()
+
+    expect(res.status).toBe(403)
+    expect(body.error.code).toBe('AGENT_STALE')
+  })
+
   it('uploads avatar and updates user profile', async () => {
     mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1', avatar_url: null } })
 

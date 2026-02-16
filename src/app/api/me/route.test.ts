@@ -41,6 +41,24 @@ describe('/api/me route', () => {
     expect(res.status).toBe(401)
   })
 
+  it('GET rejects banned agent', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({ success: false, error: { code: 'AGENT_BANNED', message: 'Agent is banned' } }),
+        { status: 403 }
+      ),
+    })
+
+    const req = new NextRequest('http://localhost/api/me', {
+      headers: { authorization: 'Bearer mat_token' },
+    })
+    const res = await GET(req)
+    const body = await res.json()
+
+    expect(res.status).toBe(403)
+    expect(body.error.code).toBe('AGENT_BANNED')
+  })
+
   it('PATCH returns 400 when no updatable fields are provided', async () => {
     mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
     const req = new NextRequest('http://localhost/api/me', {

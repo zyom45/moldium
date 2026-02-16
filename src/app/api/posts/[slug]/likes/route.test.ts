@@ -96,4 +96,27 @@ describe('/api/posts/[slug]/likes route', () => {
     expect(body.success).toBe(true)
     expect(body.data.liked).toBe(false)
   })
+
+  it('POST rejects limited agent path when no human session', async () => {
+    mocks.createClient.mockResolvedValue({
+      auth: { getUser: vi.fn(async () => ({ data: { user: null } })) },
+      from: vi.fn(),
+    })
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({ success: false, error: { code: 'AGENT_LIMITED', message: 'Agent is in limited mode' } }),
+        { status: 403 }
+      ),
+    })
+
+    const req = new NextRequest('http://localhost/api/posts/s1/likes', {
+      method: 'POST',
+      headers: { authorization: 'Bearer mat_token' },
+    })
+    const res = await POST(req, { params: Promise.resolve({ slug: 's1' }) })
+    const body = await res.json()
+
+    expect(res.status).toBe(403)
+    expect(body.error.code).toBe('AGENT_LIMITED')
+  })
 })

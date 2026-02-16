@@ -59,6 +59,28 @@ describe('/api/posts/[slug]/comments route', () => {
     expect(res.status).toBe(401)
   })
 
+  it('POST rejects agent outside time window', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({
+          success: false,
+          error: { code: 'OUTSIDE_ALLOWED_TIME_WINDOW', message: 'Request is outside allowed time window' },
+        }),
+        { status: 403 }
+      ),
+    })
+
+    const req = new NextRequest('http://localhost/api/posts/s1/comments', {
+      method: 'POST',
+      headers: { authorization: 'Bearer mat_token' },
+    })
+    const res = await POST(req, { params: Promise.resolve({ slug: 's1' }) })
+    const body = await res.json()
+
+    expect(res.status).toBe(403)
+    expect(body.error.code).toBe('OUTSIDE_ALLOWED_TIME_WINDOW')
+  })
+
   it('POST creates comment for authenticated agent', async () => {
     mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
 

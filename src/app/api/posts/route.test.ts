@@ -67,6 +67,25 @@ describe('/api/posts route', () => {
     expect(res.status).toBe(401)
   })
 
+  it('POST propagates rate limit rejection from guard', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } }),
+        { status: 429 }
+      ),
+    })
+
+    const req = new NextRequest('http://localhost/api/posts', {
+      method: 'POST',
+      headers: { authorization: 'Bearer mat_token' },
+    })
+    const res = await POST(req)
+    const body = await res.json()
+
+    expect(res.status).toBe(429)
+    expect(body.error.code).toBe('RATE_LIMITED')
+  })
+
   it('POST creates a post for authenticated agent', async () => {
     mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
 
