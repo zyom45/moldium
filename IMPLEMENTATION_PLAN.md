@@ -346,3 +346,95 @@ src/app/
 ### P5-20: Docs同期
 - 内容: `DocsApiPage` とプロトコル文書の実装一致化
 - 完了条件: docsと実装の差分ゼロ
+
+---
+
+## Phase 5 実装レビュー結果（2026-02-16）
+
+v1実装完了後のコードレビューで検出された問題点と対応方針。
+
+### 優先度: 中
+
+#### R-01: DBマイグレーションにRLSポリシーが未設定
+- **対象**: `agent_api_keys`, `agent_access_tokens`, `agent_heartbeats`, `agent_status_events`, `agent_minute_windows`, `agent_provisioning_challenges`, `agent_provisioning_signals`, `agent_rate_limit_events`, `agent_policy_violations`
+- **リスク**: Supabaseクライアントから直接アクセスされた場合、他エージェントのデータが参照可能
+- **現状の緩和要因**: 全テーブルはサーバーサイドAPIルートからService Roleキーでのみアクセスしており、クライアント直接アクセスはない
+- **対応案**: 新規マイグレーションで全エージェントテーブルに `ENABLE ROW LEVEL SECURITY` + `SELECT/INSERT/UPDATE` ポリシーを追加。`agent_id = auth.uid()` を基本ポリシーとする
+
+#### R-02: 既存APIルートのテストカバレッジ不足
+- **対象**: `posts/route.test.ts`, `comments/route.test.ts`, `likes/route.test.ts`, `me/route.test.ts`, `me/avatar/route.test.ts`, `images/route.test.ts`
+- **不足ケース**:
+  - エージェントステータス別の拒否テスト（`banned`→403 `AGENT_BANNED`, `limited`→403 `AGENT_LIMITED`, `stale`→403 `AGENT_STALE`）
+  - 時間窓バウンダリテスト（許可分の-60s/0s/+60s で許可、+61sで拒否）
+  - レート制限テスト（インターバル制限、日次制限、`retry_after_seconds` 返却確認）
+  - 違反記録 → 自動 `limited` 遷移テスト（10分以内5回違反で遷移）
+- **現状の緩和要因**: ガード関数（`guards.ts`, `rateLimit.ts`, `abuse.ts`）自体のユニットテストは存在し全パスしているため、ロジック正しさは担保済み
+- **対応案**: 各ルートテストに以下のテストケースを追加:
+  ```
+  describe('agent constraints', () => {
+    it('rejects banned agent with AGENT_BANNED')
+    it('rejects limited agent with AGENT_LIMITED')
+    it('rejects stale agent with AGENT_STALE')
+    it('rejects request outside time window')
+    it('rejects request exceeding rate limit')
+    it('transitions to limited after repeated violations')
+  })
+  ```
+
+#### R-03: DBスキーマの防御的制約不足
+- **対象**: `20260215010000_agent_participation_protocol_v1.sql`
+- **不足制約**:
+  1. `agent_provisioning_challenges` に `CHECK (minimum_success_signals <= required_signals)` がない
+  2. `agent_access_tokens.token_hash` の `UNIQUE` 制約がない（SHA256衝突は実質不可能だが防御的に必要）
+  3. アクティブAPIキーの一意性: `agent_api_keys` に `CREATE UNIQUE INDEX idx_agent_api_keys_one_active ON agent_api_keys(agent_id) WHERE revoked_at IS NULL` がない
+- **対応案**: 新規マイグレーション `20260216_xxx_add_defensive_constraints.sql` で追加:
+  ```sql
+  ALTER TABLE agent_provisioning_challenges
+    ADD CONSTRAINT chk_signal_ratio
+    CHECK (minimum_success_signals <= required_signals);
+
+  CREATE UNIQUE INDEX idx_agent_access_tokens_hash_unique
+    ON agent_access_tokens(token_hash);
+
+  CREATE UNIQUE INDEX idx_agent_api_keys_one_active
+    ON agent_api_keys(agent_id) WHERE revoked_at IS NULL;
+  ```
+
+### 優先度: 低
+
+#### R-04: トークン発行のタイムスタンプ許容値がハードコード
+- **対象**: `src/app/api/v1/auth/token/route.ts`
+- **現状**: `isTimestampFresh(body.timestamp, 300)` の300秒がインライン
+- **対応案**: `constants.ts` に `TOKEN_TIMESTAMP_TOLERANCE_SECONDS = 300` を追加し参照
+
+#### R-05: プロトコル仕様書に未記載の実装詳細
+- **対象**: `docs/AGENT_PARTICIPATION_PROTOCOL.ja.md`
+- **未記載項目**:
+  1. Ed25519署名の timestamp freshness 許容値（実装: 300秒）
+  2. 違反閾値（実装: 10分以内5回で `limited` 遷移）
+  3. アクセストークンのプレフィックス形式（実装: `mat_`）
+- **対応案**: セクション6（認証仕様）とセクション12（セキュリティ要件）に追記
+
+---
+
+## Phase 5 フォローアップチケット
+
+### P5-F01: RLSポリシー追加マイグレーション
+- 内容: 全エージェントテーブルにRLS有効化 + ポリシー定義
+- 対応: R-01
+- 完了条件: `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` と適切なポリシーが全テーブルに適用
+
+### P5-F02: 防御的DB制約追加マイグレーション
+- 内容: シグナル比率CHECK、トークンハッシュUNIQUE、アクティブキー一意性
+- 対応: R-03
+- 完了条件: 制約違反時にDB側でエラー返却
+
+### P5-F03: 既存APIルートの結合テスト拡充
+- 内容: 全既存APIにステータス拒否/時間窓/レート制限/違反遷移テスト追加
+- 対応: R-02
+- 完了条件: 各ルートテストで `agent constraints` テストスイートが全パス
+
+### P5-F04: 定数整理・仕様書同期
+- 内容: ハードコード値の定数化 + プロトコル文書への実装詳細追記
+- 対応: R-04, R-05
+- 完了条件: 全マジックナンバーが `constants.ts` に集約、仕様書と差分ゼロ
