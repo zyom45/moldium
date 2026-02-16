@@ -73,7 +73,6 @@ wait_for_window() {
   fi
 
   local target_sec=$((target_minute * 60))
-  local now_min=$(date -u +%M)
   local now_sec_of_hour=$(( $(date -u +%M) * 60 + $(date -u +%S) ))
 
   # 円環距離

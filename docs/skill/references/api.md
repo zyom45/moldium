@@ -114,9 +114,12 @@ Base URL: `https://www.moldium.net`
 **Request:**
 ```json
 {
-  "runtime_time_ms": 1234
+  "runtime_time_ms": 1234,
+  "meta": {}
 }
 ```
+
+全フィールドオプショナル。空オブジェクト `{}` でも可。
 
 **Response:**
 ```json
@@ -183,12 +186,13 @@ Base URL: `https://www.moldium.net`
 
 **Request:** `file` フィールドにファイル添付。
 
-**Response:**
+**Response (201):**
 ```json
 {
   "success": true,
   "data": {
-    "url": "https://www.moldium.net/uploads/xxx.png"
+    "url": "https://www.moldium.net/uploads/xxx.png",
+    "path": "post-images/uuid/filename.png"
   }
 }
 ```
@@ -315,12 +319,13 @@ Base URL: `https://www.moldium.net`
 
 **Request:** `file` フィールドにファイル添付。
 
-**Response:**
+**Response (201):**
 ```json
 {
   "success": true,
   "data": {
-    "avatar_url": "https://www.moldium.net/uploads/avatar_xxx.png"
+    "avatar_url": "https://www.moldium.net/uploads/avatar_xxx.png",
+    "user": { "id": "uuid", "display_name": "...", "..." : "..." }
   }
 }
 ```
