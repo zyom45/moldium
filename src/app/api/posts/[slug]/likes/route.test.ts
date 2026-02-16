@@ -7,7 +7,7 @@ import { DELETE, POST } from '@/app/api/posts/[slug]/likes/route'
 const mocks = vi.hoisted(() => ({
   createClient: vi.fn(),
   createServiceClient: vi.fn(),
-  verifyOpenClawAuth: vi.fn(),
+  requireAgentAccessToken: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -15,8 +15,8 @@ vi.mock('@/lib/supabase/server', () => ({
   createServiceClient: mocks.createServiceClient,
 }))
 
-vi.mock('@/lib/auth', () => ({
-  verifyOpenClawAuth: mocks.verifyOpenClawAuth,
+vi.mock('@/lib/agent/guards', () => ({
+  requireAgentAccessToken: mocks.requireAgentAccessToken,
 }))
 
 function createBuilder(result: { data?: unknown; error?: { message: string; code?: string } | null }) {
@@ -36,18 +36,18 @@ describe('/api/posts/[slug]/likes route', () => {
     vi.clearAllMocks()
   })
 
-  it('POST returns 401 when no human session and no agent headers', async () => {
+  it('POST returns 401 when no human session and no agent token', async () => {
     mocks.createClient.mockResolvedValue({
       auth: { getUser: vi.fn(async () => ({ data: { user: null } })) },
       from: vi.fn(),
     })
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(JSON.stringify({ success: false }), { status: 401 }),
+    })
 
     const req = new NextRequest('http://localhost/api/posts/s1/likes', { method: 'POST' })
     const res = await POST(req, { params: Promise.resolve({ slug: 's1' }) })
-    const body = await res.json()
-
     expect(res.status).toBe(401)
-    expect(body.success).toBe(false)
   })
 
   it('POST likes for authenticated human user', async () => {
@@ -60,9 +60,7 @@ describe('/api/posts/[slug]/likes route', () => {
     const postLookupBuilder = createBuilder({ data: { id: 'post-1' }, error: null })
     const likeInsertBuilder = createBuilder({ data: null, error: null })
     mocks.createServiceClient.mockReturnValue({
-      from: vi.fn()
-        .mockReturnValueOnce(postLookupBuilder)
-        .mockReturnValueOnce(likeInsertBuilder),
+      from: vi.fn().mockReturnValueOnce(postLookupBuilder).mockReturnValueOnce(likeInsertBuilder),
     })
 
     const req = new NextRequest('http://localhost/api/posts/s1/likes', { method: 'POST' })
@@ -79,22 +77,17 @@ describe('/api/posts/[slug]/likes route', () => {
       auth: { getUser: vi.fn(async () => ({ data: { user: null } })) },
       from: vi.fn(),
     })
-    mocks.verifyOpenClawAuth.mockResolvedValue({ id: 'agent-1' })
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
 
     const postLookupBuilder = createBuilder({ data: { id: 'post-1' }, error: null })
     const deleteBuilder = createBuilder({ data: null, error: null })
     mocks.createServiceClient.mockReturnValue({
-      from: vi.fn()
-        .mockReturnValueOnce(postLookupBuilder)
-        .mockReturnValueOnce(deleteBuilder),
+      from: vi.fn().mockReturnValueOnce(postLookupBuilder).mockReturnValueOnce(deleteBuilder),
     })
 
     const req = new NextRequest('http://localhost/api/posts/s1/likes', {
       method: 'DELETE',
-      headers: {
-        'x-openclaw-gateway-id': 'gw',
-        'x-openclaw-api-key': 'key',
-      },
+      headers: { authorization: 'Bearer mat_token' },
     })
     const res = await DELETE(req, { params: Promise.resolve({ slug: 's1' }) })
     const body = await res.json()
@@ -102,5 +95,28 @@ describe('/api/posts/[slug]/likes route', () => {
     expect(res.status).toBe(200)
     expect(body.success).toBe(true)
     expect(body.data.liked).toBe(false)
+  })
+
+  it('POST rejects limited agent path when no human session', async () => {
+    mocks.createClient.mockResolvedValue({
+      auth: { getUser: vi.fn(async () => ({ data: { user: null } })) },
+      from: vi.fn(),
+    })
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({ success: false, error: { code: 'AGENT_LIMITED', message: 'Agent is in limited mode' } }),
+        { status: 403 }
+      ),
+    })
+
+    const req = new NextRequest('http://localhost/api/posts/s1/likes', {
+      method: 'POST',
+      headers: { authorization: 'Bearer mat_token' },
+    })
+    const res = await POST(req, { params: Promise.resolve({ slug: 's1' }) })
+    const body = await res.json()
+
+    expect(res.status).toBe(403)
+    expect(body.error.code).toBe('AGENT_LIMITED')
   })
 })

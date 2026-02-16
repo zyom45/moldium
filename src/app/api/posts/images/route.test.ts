@@ -6,17 +6,15 @@ import { POST } from '@/app/api/posts/images/route'
 
 const mocks = vi.hoisted(() => ({
   createServiceClient: vi.fn(),
-  verifyOpenClawAuth: vi.fn(),
-  canPost: vi.fn(),
+  requireAgentAccessToken: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
   createServiceClient: mocks.createServiceClient,
 }))
 
-vi.mock('@/lib/auth', () => ({
-  verifyOpenClawAuth: mocks.verifyOpenClawAuth,
-  canPost: mocks.canPost,
+vi.mock('@/lib/agent/guards', () => ({
+  requireAgentAccessToken: mocks.requireAgentAccessToken,
 }))
 
 describe('/api/posts/images route', () => {
@@ -24,24 +22,26 @@ describe('/api/posts/images route', () => {
     vi.clearAllMocks()
   })
 
-  it('returns 401 when auth headers are missing', async () => {
+  it('returns 401 when auth is missing', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(JSON.stringify({ success: false }), { status: 401 }),
+    })
+
     const req = new NextRequest('http://localhost/api/posts/images', { method: 'POST' })
     const res = await POST(req)
     expect(res.status).toBe(401)
   })
 
-  it('returns 403 for non-agent user', async () => {
-    mocks.verifyOpenClawAuth.mockResolvedValue({ id: 'human-1', user_type: 'human' })
-    mocks.canPost.mockReturnValue(false)
+  it('returns 403 when agent is not active', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(JSON.stringify({ success: false }), { status: 403 }),
+    })
 
     const form = new FormData()
     form.append('file', new File(['hello'], 'img.png', { type: 'image/png' }))
     const req = new NextRequest('http://localhost/api/posts/images', {
       method: 'POST',
-      headers: {
-        'x-openclaw-gateway-id': 'gw',
-        'x-openclaw-api-key': 'key',
-      },
+      headers: { authorization: 'Bearer mat_token' },
       body: form,
     })
 
@@ -49,9 +49,34 @@ describe('/api/posts/images route', () => {
     expect(res.status).toBe(403)
   })
 
+  it('returns 429 when guard reports rate limited', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({
+          success: false,
+          error: { code: 'RATE_LIMITED', message: 'Too many requests', retry_after_seconds: 42 },
+        }),
+        { status: 429 }
+      ),
+    })
+
+    const form = new FormData()
+    form.append('file', new File(['hello'], 'img.png', { type: 'image/png' }))
+    const req = new NextRequest('http://localhost/api/posts/images', {
+      method: 'POST',
+      headers: { authorization: 'Bearer mat_token' },
+      body: form,
+    })
+
+    const res = await POST(req)
+    const body = await res.json()
+    expect(res.status).toBe(429)
+    expect(body.error.code).toBe('RATE_LIMITED')
+    expect(body.error.retry_after_seconds).toBe(42)
+  })
+
   it('uploads post image for authenticated agent', async () => {
-    mocks.verifyOpenClawAuth.mockResolvedValue({ id: 'agent-1', user_type: 'agent' })
-    mocks.canPost.mockReturnValue(true)
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1', user_type: 'agent' } })
 
     const imageInsertBuilder = {
       insert: vi.fn(async () => ({ error: null })),
@@ -77,10 +102,7 @@ describe('/api/posts/images route', () => {
     form.append('file', new File(['hello'], 'img.png', { type: 'image/png' }))
     const req = new NextRequest('http://localhost/api/posts/images', {
       method: 'POST',
-      headers: {
-        'x-openclaw-gateway-id': 'gw',
-        'x-openclaw-api-key': 'key',
-      },
+      headers: { authorization: 'Bearer mat_token' },
       body: form,
     })
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { canPost, verifyOpenClawAuth } from '@/lib/auth'
+import { fail } from '@/lib/agent/api'
+import { requireAgentAccessToken } from '@/lib/agent/guards'
 import { syncPostImageReferences } from '@/lib/postImages'
 import type { ApiResponse, Post } from '@/lib/types'
 
@@ -11,36 +12,34 @@ export async function GET(
 ) {
   const { slug } = await params
   const supabase = createServiceClient()
-  
+
   const { data: post, error } = await supabase
     .from('posts')
-    .select(`
+    .select(
+      `
       *,
       author:users(*),
       likes_count:likes(count),
       comments_count:comments(count)
-    `)
+    `
+    )
     .eq('slug', slug)
     .eq('status', 'published')
     .single()
-  
+
   if (error || !post) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'Post not found'
-    }, { status: 404 })
+    return fail('INVALID_REQUEST', 'Post not found', 404)
   }
-  
-  // View count increment (fire and forget)
+
   supabase
     .from('posts')
     .update({ view_count: (post.view_count || 0) + 1 })
     .eq('id', post.id)
     .then(() => {})
-  
+
   return NextResponse.json<ApiResponse<Post>>({
     success: true,
-    data: post as Post
+    data: post as Post,
   })
 }
 
@@ -51,33 +50,9 @@ export async function PUT(
 ) {
   const { slug } = await params
 
-  const gatewayId = request.headers.get('X-OpenClaw-Gateway-ID')
-  const apiKey = request.headers.get('X-OpenClaw-API-Key')
-  const agentModel = request.headers.get('X-Agent-Model')
-
-  if (!gatewayId || !apiKey) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'Missing authentication headers'
-    }, { status: 401 })
-  }
-
-  const user = await verifyOpenClawAuth(gatewayId, apiKey, {
-    agent_model: agentModel || undefined
-  })
-
-  if (!user) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'Invalid authentication'
-    }, { status: 401 })
-  }
-
-  if (!canPost(user)) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'Only AI agents can update posts'
-    }, { status: 403 })
+  const auth = await requireAgentAccessToken(request, { requireActive: true, action: 'post' })
+  if ('response' in auth) {
+    return auth.response
   }
 
   const supabase = createServiceClient()
@@ -88,17 +63,11 @@ export async function PUT(
     .single()
 
   if (!existingPost) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'Post not found'
-    }, { status: 404 })
+    return fail('INVALID_REQUEST', 'Post not found', 404)
   }
 
-  if (existingPost.author_id !== user.id) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'You do not have permission to update this post'
-    }, { status: 403 })
+  if (existingPost.author_id !== auth.user.id) {
+    return fail('FORBIDDEN', 'You do not have permission to update this post', 403)
   }
 
   const body = await request.json()
@@ -113,51 +82,39 @@ export async function PUT(
 
   if (status !== undefined) {
     if (!['draft', 'published', 'archived'].includes(status)) {
-      return NextResponse.json<ApiResponse<null>>({
-        success: false,
-        error: 'Invalid status'
-      }, { status: 400 })
+      return fail('INVALID_REQUEST', 'Invalid status', 400)
     }
     updateData.status = status
-
-    if (status === 'published') {
-      updateData.published_at = existingPost.published_at || new Date().toISOString()
-    } else {
-      updateData.published_at = null
-    }
+    updateData.published_at = status === 'published' ? existingPost.published_at || new Date().toISOString() : null
   }
 
   if (Object.keys(updateData).length === 0) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'No valid fields to update'
-    }, { status: 400 })
+    return fail('INVALID_REQUEST', 'No valid fields to update', 400)
   }
 
   const { data: post, error } = await supabase
     .from('posts')
     .update(updateData)
     .eq('id', existingPost.id)
-    .select(`
+    .select(
+      `
       *,
       author:users(*),
       likes_count:likes(count),
       comments_count:comments(count)
-    `)
+    `
+    )
     .single()
 
   if (error || !post) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: error?.message || 'Failed to update post'
-    }, { status: 500 })
+    return fail('INVALID_REQUEST', error?.message || 'Failed to update post', 400)
   }
 
   void syncPostImageReferences(supabase, (post as Post).id, (post as Post).content).catch(() => {})
 
   return NextResponse.json<ApiResponse<Post>>({
     success: true,
-    data: post as Post
+    data: post as Post,
   })
 }
 
@@ -168,33 +125,9 @@ export async function DELETE(
 ) {
   const { slug } = await params
 
-  const gatewayId = request.headers.get('X-OpenClaw-Gateway-ID')
-  const apiKey = request.headers.get('X-OpenClaw-API-Key')
-  const agentModel = request.headers.get('X-Agent-Model')
-
-  if (!gatewayId || !apiKey) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'Missing authentication headers'
-    }, { status: 401 })
-  }
-
-  const user = await verifyOpenClawAuth(gatewayId, apiKey, {
-    agent_model: agentModel || undefined
-  })
-
-  if (!user) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'Invalid authentication'
-    }, { status: 401 })
-  }
-
-  if (!canPost(user)) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'Only AI agents can delete posts'
-    }, { status: 403 })
+  const auth = await requireAgentAccessToken(request, { requireActive: true, action: 'post' })
+  if ('response' in auth) {
+    return auth.response
   }
 
   const supabase = createServiceClient()
@@ -205,33 +138,21 @@ export async function DELETE(
     .single()
 
   if (!existingPost) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'Post not found'
-    }, { status: 404 })
+    return fail('INVALID_REQUEST', 'Post not found', 404)
   }
 
-  if (existingPost.author_id !== user.id) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: 'You do not have permission to delete this post'
-    }, { status: 403 })
+  if (existingPost.author_id !== auth.user.id) {
+    return fail('FORBIDDEN', 'You do not have permission to delete this post', 403)
   }
 
-  const { error } = await supabase
-    .from('posts')
-    .delete()
-    .eq('id', existingPost.id)
+  const { error } = await supabase.from('posts').delete().eq('id', existingPost.id)
 
   if (error) {
-    return NextResponse.json<ApiResponse<null>>({
-      success: false,
-      error: error.message
-    }, { status: 500 })
+    return fail('INVALID_REQUEST', error.message, 400)
   }
 
   return NextResponse.json<ApiResponse<{ deleted: boolean }>>({
     success: true,
-    data: { deleted: true }
+    data: { deleted: true },
   })
 }

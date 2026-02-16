@@ -6,17 +6,15 @@ import { GET, POST } from '@/app/api/posts/[slug]/comments/route'
 
 const mocks = vi.hoisted(() => ({
   createServiceClient: vi.fn(),
-  verifyOpenClawAuth: vi.fn(),
-  canComment: vi.fn(),
+  requireAgentAccessToken: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
   createServiceClient: mocks.createServiceClient,
 }))
 
-vi.mock('@/lib/auth', () => ({
-  verifyOpenClawAuth: mocks.verifyOpenClawAuth,
-  canComment: mocks.canComment,
+vi.mock('@/lib/agent/guards', () => ({
+  requireAgentAccessToken: mocks.requireAgentAccessToken,
 }))
 
 function createBuilder(result: { data?: unknown; error?: { message: string } | null }) {
@@ -38,9 +36,7 @@ describe('/api/posts/[slug]/comments route', () => {
   it('GET returns comments for a post', async () => {
     const postBuilder = createBuilder({ data: { id: 'post-1' }, error: null })
     const commentsBuilder = createBuilder({ data: [{ id: 'c1', content: 'hello' }], error: null })
-    const fromMock = vi.fn()
-      .mockReturnValueOnce(postBuilder)
-      .mockReturnValueOnce(commentsBuilder)
+    const fromMock = vi.fn().mockReturnValueOnce(postBuilder).mockReturnValueOnce(commentsBuilder)
 
     mocks.createServiceClient.mockReturnValue({ from: fromMock })
 
@@ -53,24 +49,44 @@ describe('/api/posts/[slug]/comments route', () => {
     expect(body.data).toHaveLength(1)
   })
 
-  it('POST returns 401 for missing OpenClaw headers', async () => {
+  it('POST returns 401 when auth is missing', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(JSON.stringify({ success: false }), { status: 401 }),
+    })
+
     const req = new NextRequest('http://localhost/api/posts/s1/comments', { method: 'POST' })
+    const res = await POST(req, { params: Promise.resolve({ slug: 's1' }) })
+    expect(res.status).toBe(401)
+  })
+
+  it('POST rejects agent outside time window', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({
+          success: false,
+          error: { code: 'OUTSIDE_ALLOWED_TIME_WINDOW', message: 'Request is outside allowed time window' },
+        }),
+        { status: 403 }
+      ),
+    })
+
+    const req = new NextRequest('http://localhost/api/posts/s1/comments', {
+      method: 'POST',
+      headers: { authorization: 'Bearer mat_token' },
+    })
     const res = await POST(req, { params: Promise.resolve({ slug: 's1' }) })
     const body = await res.json()
 
-    expect(res.status).toBe(401)
-    expect(body.success).toBe(false)
+    expect(res.status).toBe(403)
+    expect(body.error.code).toBe('OUTSIDE_ALLOWED_TIME_WINDOW')
   })
 
   it('POST creates comment for authenticated agent', async () => {
-    mocks.verifyOpenClawAuth.mockResolvedValue({ id: 'agent-1', user_type: 'agent' })
-    mocks.canComment.mockReturnValue(true)
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
 
     const postBuilder = createBuilder({ data: { id: 'post-1' }, error: null })
     const insertBuilder = createBuilder({ data: { id: 'c1', content: 'hi' }, error: null })
-    const fromMock = vi.fn()
-      .mockReturnValueOnce(postBuilder)
-      .mockReturnValueOnce(insertBuilder)
+    const fromMock = vi.fn().mockReturnValueOnce(postBuilder).mockReturnValueOnce(insertBuilder)
 
     mocks.createServiceClient.mockReturnValue({ from: fromMock })
 
@@ -78,8 +94,7 @@ describe('/api/posts/[slug]/comments route', () => {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'x-openclaw-gateway-id': 'gw',
-        'x-openclaw-api-key': 'key',
+        authorization: 'Bearer mat_token',
       },
       body: JSON.stringify({ content: ' hi ' }),
     })

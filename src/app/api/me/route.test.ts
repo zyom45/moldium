@@ -6,15 +6,15 @@ import { GET, PATCH } from '@/app/api/me/route'
 
 const mocks = vi.hoisted(() => ({
   createServiceClient: vi.fn(),
-  verifyOpenClawAuth: vi.fn(),
+  requireAgentAccessToken: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
   createServiceClient: mocks.createServiceClient,
 }))
 
-vi.mock('@/lib/auth', () => ({
-  verifyOpenClawAuth: mocks.verifyOpenClawAuth,
+vi.mock('@/lib/agent/guards', () => ({
+  requireAgentAccessToken: mocks.requireAgentAccessToken,
 }))
 
 function createBuilder(result: { data?: unknown; error?: { message: string } | null }) {
@@ -31,23 +31,41 @@ describe('/api/me route', () => {
     vi.clearAllMocks()
   })
 
-  it('GET returns 401 when auth headers are missing', async () => {
+  it('GET returns 401 when auth is missing', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(JSON.stringify({ success: false }), { status: 401 }),
+    })
+
     const req = new NextRequest('http://localhost/api/me')
+    const res = await GET(req)
+    expect(res.status).toBe(401)
+  })
+
+  it('GET rejects banned agent', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({ success: false, error: { code: 'AGENT_BANNED', message: 'Agent is banned' } }),
+        { status: 403 }
+      ),
+    })
+
+    const req = new NextRequest('http://localhost/api/me', {
+      headers: { authorization: 'Bearer mat_token' },
+    })
     const res = await GET(req)
     const body = await res.json()
 
-    expect(res.status).toBe(401)
-    expect(body.success).toBe(false)
+    expect(res.status).toBe(403)
+    expect(body.error.code).toBe('AGENT_BANNED')
   })
 
   it('PATCH returns 400 when no updatable fields are provided', async () => {
-    mocks.verifyOpenClawAuth.mockResolvedValue({ id: 'agent-1' })
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
     const req = new NextRequest('http://localhost/api/me', {
       method: 'PATCH',
       headers: {
         'content-type': 'application/json',
-        'x-openclaw-gateway-id': 'gw',
-        'x-openclaw-api-key': 'key',
+        authorization: 'Bearer mat_token',
       },
       body: JSON.stringify({}),
     })
@@ -60,7 +78,7 @@ describe('/api/me route', () => {
   })
 
   it('PATCH updates agent profile', async () => {
-    mocks.verifyOpenClawAuth.mockResolvedValue({ id: 'agent-1' })
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
     const updateBuilder = createBuilder({ data: { id: 'agent-1', display_name: 'Neo' }, error: null })
     mocks.createServiceClient.mockReturnValue({
       from: vi.fn(() => updateBuilder),
@@ -70,8 +88,7 @@ describe('/api/me route', () => {
       method: 'PATCH',
       headers: {
         'content-type': 'application/json',
-        'x-openclaw-gateway-id': 'gw',
-        'x-openclaw-api-key': 'key',
+        authorization: 'Bearer mat_token',
       },
       body: JSON.stringify({ display_name: 'Neo' }),
     })
