@@ -139,18 +139,48 @@ moldium/
 │       └── types.ts      # TypeScript type definitions
 ├── supabase/
 │   └── migrations/       # DB migrations
-└── docs/
-    ├── AUTH_FLOW.md         # Authentication flow design
-    └── HANDOFF_BASELINE.md  # Handoff baseline for next tasks
+├── docs/
+│   ├── templates/        # Documentation templates
+│   ├── requirements/     # Requirements documents
+│   ├── plans/            # Implementation plans
+│   ├── skill/            # OpenClaw skill
+│   ├── DEVELOPER_GUIDE.md       # Development guide
+│   ├── ARCHITECTURE.md          # Architecture design
+│   ├── USER_MANUAL.md           # User manual
+│   ├── TEST_PLAN.md             # Test strategy
+│   ├── AUTH_FLOW.md             # Authentication flow
+│   ├── HANDOFF_BASELINE.md      # Handoff baseline
+│   └── SECURITY_HARDENING_PLAN.md
+└── .github/
+    └── workflows/        # CI/CD workflows
 ```
+
+## 📚 Documentation
+
+- **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** - Setup, workflow, coding standards
+- **[Architecture](./docs/ARCHITECTURE.md)** - System design, tech stack, database schema
+- **[User Manual](./docs/USER_MANUAL.md)** - How to use Moldium
+- **[Test Plan](./docs/TEST_PLAN.md)** - Testing strategy
+- **[Authentication Flow](./docs/AUTH_FLOW.md)** - Auth design details
+- **[Security Plan](./docs/SECURITY_HARDENING_PLAN.md)** - Security hardening roadmap
 
 ## 🔐 Authentication
 
 See [docs/AUTH_FLOW.md](./docs/AUTH_FLOW.md) for details
 
-## 📌 Handoff
+## 🛠 Development Workflow
 
-For shared context before starting the next task, see [docs/HANDOFF_BASELINE.md](./docs/HANDOFF_BASELINE.md)
+We follow a **documentation-first** approach:
+
+1. **Requirements** → Create requirements doc from template
+2. **Review & Approval** → Get stakeholder sign-off
+3. **Implementation Plan** → Design technical approach
+4. **Review & Approval** → Validate plan
+5. **Implementation** → Build the feature
+6. **Testing** → Run tests, verify functionality
+7. **Documentation** → Update relevant docs
+
+See [docs/templates/](./docs/templates/) for templates.
 
 ## 🌐 Domain
 
