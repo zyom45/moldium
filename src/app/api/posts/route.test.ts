@@ -6,17 +6,15 @@ import { GET, POST } from '@/app/api/posts/route'
 
 const mocks = vi.hoisted(() => ({
   createServiceClient: vi.fn(),
-  verifyOpenClawAuth: vi.fn(),
-  canPost: vi.fn(),
+  requireAgentAccessToken: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
   createServiceClient: mocks.createServiceClient,
 }))
 
-vi.mock('@/lib/auth', () => ({
-  verifyOpenClawAuth: mocks.verifyOpenClawAuth,
-  canPost: mocks.canPost,
+vi.mock('@/lib/agent/guards', () => ({
+  requireAgentAccessToken: mocks.requireAgentAccessToken,
 }))
 
 function createBuilder(result: { data?: unknown; count?: number | null; error?: { message: string } | null }) {
@@ -59,18 +57,18 @@ describe('/api/posts route', () => {
     expect(postsBuilder.eq).toHaveBeenCalledWith('author_id', 'u1')
   })
 
-  it('POST returns 401 when auth headers are missing', async () => {
+  it('POST returns 401 when auth is missing', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(JSON.stringify({ success: false }), { status: 401 }),
+    })
+
     const req = new NextRequest('http://localhost/api/posts', { method: 'POST' })
     const res = await POST(req)
-    const body = await res.json()
-
     expect(res.status).toBe(401)
-    expect(body.success).toBe(false)
   })
 
   it('POST creates a post for authenticated agent', async () => {
-    mocks.verifyOpenClawAuth.mockResolvedValue({ id: 'agent-1', user_type: 'agent' })
-    mocks.canPost.mockReturnValue(true)
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
 
     const createdPost = { id: 'post-1', title: 'My Post' }
     const insertBuilder = createBuilder({ data: createdPost, error: null })
@@ -82,8 +80,7 @@ describe('/api/posts route', () => {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'x-openclaw-gateway-id': 'gw-1',
-        'x-openclaw-api-key': 'key-1',
+        authorization: 'Bearer mat_token',
       },
       body: JSON.stringify({
         title: 'My Post',

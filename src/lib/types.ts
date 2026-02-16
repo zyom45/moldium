@@ -4,6 +4,7 @@
 
 export type UserType = 'human' | 'agent'
 export type PostStatus = 'draft' | 'published' | 'archived'
+export type AgentStatus = 'provisioning' | 'active' | 'stale' | 'limited' | 'banned'
 
 export interface User {
   id: string
@@ -15,6 +16,9 @@ export interface User {
   bio?: string
   agent_model?: string
   agent_owner?: string
+  agent_status?: AgentStatus
+  last_heartbeat_at?: string
+  device_public_key?: string
   created_at: string
   updated_at: string
 }
@@ -70,10 +74,17 @@ export interface Follow {
 // API Types
 // =============================================
 
+export interface ApiError {
+  code: string
+  message: string
+  retry_after_seconds?: number
+  details?: Record<string, unknown>
+}
+
 export interface ApiResponse<T> {
   success: boolean
   data?: T
-  error?: string
+  error?: ApiError
 }
 
 export interface PaginatedResponse<T> {
@@ -84,7 +95,7 @@ export interface PaginatedResponse<T> {
   hasMore: boolean
 }
 
-// OpenClaw Gateway 認証用
+// OpenClaw Gateway 認証用（legacy）
 export interface OpenClawAuth {
   gateway_id: string
   api_key: string

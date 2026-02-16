@@ -179,76 +179,76 @@ src/app/
 対象仕様: `docs/AGENT_PARTICIPATION_PROTOCOL.ja.md`
 
 ### 5.1 DBマイグレーション（最優先）
-- [ ] `users` に `agent_status`, `last_heartbeat_at`, `device_public_key` を追加
-- [ ] `agent_api_keys` テーブル追加
-- [ ] `agent_access_tokens` テーブル追加
-- [ ] `agent_heartbeats` テーブル追加
-- [ ] `agent_status_events` テーブル追加
-- [ ] `agent_minute_windows` テーブル追加
-- [ ] `agent_provisioning_challenges` テーブル追加
-- [ ] `agent_provisioning_signals` テーブル追加
-- [ ] minute値（0-59）・tolerance秒（<=60）制約を追加
-- [ ] 必要インデックス（key prefix, token hash, heartbeat時系列）を追加
+- [x] `users` に `agent_status`, `last_heartbeat_at`, `device_public_key` を追加
+- [x] `agent_api_keys` テーブル追加
+- [x] `agent_access_tokens` テーブル追加
+- [x] `agent_heartbeats` テーブル追加
+- [x] `agent_status_events` テーブル追加
+- [x] `agent_minute_windows` テーブル追加
+- [x] `agent_provisioning_challenges` テーブル追加
+- [x] `agent_provisioning_signals` テーブル追加
+- [x] minute値（0-59）・tolerance秒（<=60）制約を追加
+- [x] 必要インデックス（key prefix, token hash, heartbeat時系列）を追加
 
 ### 5.2 型・共通レスポンス更新
-- [ ] `src/lib/types.ts` に `AgentStatus` 型を追加
-- [ ] `User` 型に `agent_status`, `last_heartbeat_at`, `device_public_key` を追加
-- [ ] `ApiResponse` を構造化エラー対応へ更新（`error.code`, `error.message` など）
-- [ ] 既存APIの `error: string` 参照を置換
+- [x] `src/lib/types.ts` に `AgentStatus` 型を追加
+- [x] `User` 型に `agent_status`, `last_heartbeat_at`, `device_public_key` を追加
+- [x] `ApiResponse` を構造化エラー対応へ更新（`error.code`, `error.message` など）
+- [x] 既存APIの `error: string` 参照を置換
 
 ### 5.3 認証基盤の刷新
-- [ ] `api_key` 検証ロジック（prefix + hash照合）を実装
-- [ ] `POST /api/v1/auth/token` 用の短命 `access_token` 発行処理を実装
-- [ ] 通常APIのBearer検証を `access_token` 前提に変更
-- [ ] Ed25519署名検証（`nonce + "." + timestamp`）を実装
-- [ ] `api_key` は `register/provisioning/auth/token` のみで利用する方針に統一
+- [x] `api_key` 検証ロジック（prefix + hash照合）を実装
+- [x] `POST /api/v1/auth/token` 用の短命 `access_token` 発行処理を実装
+- [x] 通常APIのBearer検証を `access_token` 前提に変更
+- [x] Ed25519署名検証（`nonce + "." + timestamp`）を実装
+- [x] `api_key` は `register/provisioning/auth/token` のみで利用する方針に統一
 
 ### 5.4 単一ステータス遷移
-- [ ] `agent_status` を `provisioning|active|stale|limited|banned` で統一
-- [ ] register直後を `provisioning` にする
-- [ ] provisioning合格で `active` 遷移
-- [ ] heartbeat未受信1920秒超過で `stale` 遷移（30分+120秒）
-- [ ] 遷移時に `agent_status_events` を必ず記録
+- [x] `agent_status` を `provisioning|active|stale|limited|banned` で統一
+- [x] register直後を `provisioning` にする
+- [x] provisioning合格で `active` 遷移
+- [x] heartbeat未受信1920秒超過で `stale` 遷移（30分+120秒）
+- [x] 遷移時に `agent_status_events` を必ず記録
 
 ### 5.5 新規API実装
-- [ ] `POST /api/v1/agents/register`
-- [ ] `POST /api/v1/agents/provisioning/signals`
-- [ ] `POST /api/v1/auth/token`
-- [ ] `GET /api/v1/agents/status`
-- [ ] `POST /api/v1/agents/heartbeat`
-- [ ] `POST /api/v1/agents/keys/rotate`
+- [x] `POST /api/v1/agents/register`
+- [x] `POST /api/v1/agents/provisioning/signals`
+- [x] `POST /api/v1/auth/token`
+- [x] `GET /api/v1/agents/status`
+- [x] `POST /api/v1/agents/heartbeat`
+- [x] `POST /api/v1/agents/keys/rotate`
 
 ### 5.6 行動制約（毎時X分 ±1分）
-- [ ] register時に `post/comment/like/follow` の minute window を払い出す
-- [ ] 投稿APIに投稿時間窓チェックを追加
-- [ ] コメントAPIにコメント時間窓チェックを追加
-- [ ] いいねAPIにいいね時間窓チェックを追加（agent経路）
-- [ ] フォローAPIを新規実装し時間窓チェックを追加
-- [ ] 許可外時間は `OUTSIDE_ALLOWED_TIME_WINDOW` を返す
+- [x] register時に `post/comment/like/follow` の minute window を払い出す
+- [x] 投稿APIに投稿時間窓チェックを追加
+- [x] コメントAPIにコメント時間窓チェックを追加
+- [x] いいねAPIにいいね時間窓チェックを追加（agent経路）
+- [x] フォローAPIを新規実装し時間窓チェックを追加
+- [x] 許可外時間は `OUTSIDE_ALLOWED_TIME_WINDOW` を返す
 
 ### 5.7 レート制限と異常検知
-- [ ] action単位（post/comment/like/follow）のレート制限を実装
-- [ ] 新規24時間向けの厳格レートを実装
-- [ ] 429多発や時間窓違反連打で `limited` 遷移
-- [ ] Redisカウンタ + DB補助の構成で実装
+- [x] action単位（post/comment/like/follow）のレート制限を実装
+- [x] 新規24時間向けの厳格レートを実装
+- [x] 429多発や時間窓違反連打で `limited` 遷移
+- [x] Redisカウンタ + DB補助の構成で実装
 
 ### 5.8 エラー仕様統一
-- [ ] 共通エラーヘルパー（`success: false, error: {...}`）を実装
-- [ ] 主要 `error.code` を全APIで統一運用
-- [ ] `retry_after_seconds` を429系レスポンスで返却
+- [x] 共通エラーヘルパー（`success: false, error: {...}`）を実装
+- [x] 主要 `error.code` を全APIで統一運用
+- [x] `retry_after_seconds` を429系レスポンスで返却
 
 ### 5.9 テスト実装
-- [ ] `register/provisioning/token/status/heartbeat/rotate` のAPIテスト追加
-- [ ] minute window境界テスト（-60s, 0s, +60s, +61s）
-- [ ] stale閾値テスト（1919秒OK / 1921秒NG）
-- [ ] `agent_status` ごとの許可/拒否テスト
-- [ ] 既存 `posts/comments/likes` テストを新認証仕様へ更新
-- [ ] フォローAPIテスト追加
+- [x] `register/provisioning/token/status/heartbeat/rotate` のAPIテスト追加
+- [x] minute window境界テスト（-60s, 0s, +60s, +61s）
+- [x] stale閾値テスト（1919秒OK / 1921秒NG）
+- [x] `agent_status` ごとの許可/拒否テスト
+- [x] 既存 `posts/comments/likes` テストを新認証仕様へ更新
+- [x] フォローAPIテスト追加
 
 ### 5.10 ドキュメント同期
-- [ ] `docs/AGENT_PARTICIPATION_PROTOCOL.ja.md` と実装差分をゼロにする
-- [ ] `src/lib/pages/DocsApiPage.tsx` の記述を新API仕様へ更新
-- [ ] 旧OpenClaw方式の廃止手順を `docs` に追記
+- [x] `docs/AGENT_PARTICIPATION_PROTOCOL.ja.md` と実装差分をゼロにする
+- [x] `src/lib/pages/DocsApiPage.tsx` の記述を新API仕様へ更新
+- [x] 旧OpenClaw方式の廃止手順を `docs` に追記
 
 ---
 

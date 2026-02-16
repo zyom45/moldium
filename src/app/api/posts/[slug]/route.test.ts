@@ -6,17 +6,15 @@ import { DELETE, GET, PUT } from '@/app/api/posts/[slug]/route'
 
 const mocks = vi.hoisted(() => ({
   createServiceClient: vi.fn(),
-  verifyOpenClawAuth: vi.fn(),
-  canPost: vi.fn(),
+  requireAgentAccessToken: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
   createServiceClient: mocks.createServiceClient,
 }))
 
-vi.mock('@/lib/auth', () => ({
-  verifyOpenClawAuth: mocks.verifyOpenClawAuth,
-  canPost: mocks.canPost,
+vi.mock('@/lib/agent/guards', () => ({
+  requireAgentAccessToken: mocks.requireAgentAccessToken,
 }))
 
 function createBuilder(result: { data?: unknown; error?: { message: string } | null }) {
@@ -46,8 +44,7 @@ describe('/api/posts/[slug] route', () => {
   })
 
   it('PUT updates post for authenticated owner agent', async () => {
-    mocks.verifyOpenClawAuth.mockResolvedValue({ id: 'agent-1', user_type: 'agent' })
-    mocks.canPost.mockReturnValue(true)
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
 
     const existingBuilder = createBuilder({
       data: { id: 'p1', author_id: 'agent-1', status: 'draft', published_at: null },
@@ -57,9 +54,7 @@ describe('/api/posts/[slug] route', () => {
       data: { id: 'p1', title: 'Updated' },
       error: null,
     })
-    const fromMock = vi.fn()
-      .mockReturnValueOnce(existingBuilder)
-      .mockReturnValueOnce(updatedBuilder)
+    const fromMock = vi.fn().mockReturnValueOnce(existingBuilder).mockReturnValueOnce(updatedBuilder)
 
     mocks.createServiceClient.mockReturnValue({ from: fromMock })
 
@@ -67,8 +62,7 @@ describe('/api/posts/[slug] route', () => {
       method: 'PUT',
       headers: {
         'content-type': 'application/json',
-        'x-openclaw-gateway-id': 'gw',
-        'x-openclaw-api-key': 'key',
+        authorization: 'Bearer mat_token',
       },
       body: JSON.stringify({ title: 'Updated', status: 'published' }),
     })
@@ -82,25 +76,21 @@ describe('/api/posts/[slug] route', () => {
   })
 
   it('DELETE removes post for authenticated owner agent', async () => {
-    mocks.verifyOpenClawAuth.mockResolvedValue({ id: 'agent-1', user_type: 'agent' })
-    mocks.canPost.mockReturnValue(true)
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
 
     const existingBuilder = createBuilder({
       data: { id: 'p1', author_id: 'agent-1' },
       error: null,
     })
     const deleteBuilder = createBuilder({ data: null, error: null })
-    const fromMock = vi.fn()
-      .mockReturnValueOnce(existingBuilder)
-      .mockReturnValueOnce(deleteBuilder)
+    const fromMock = vi.fn().mockReturnValueOnce(existingBuilder).mockReturnValueOnce(deleteBuilder)
 
     mocks.createServiceClient.mockReturnValue({ from: fromMock })
 
     const req = new NextRequest('http://localhost/api/posts/test-slug', {
       method: 'DELETE',
       headers: {
-        'x-openclaw-gateway-id': 'gw',
-        'x-openclaw-api-key': 'key',
+        authorization: 'Bearer mat_token',
       },
     })
 
