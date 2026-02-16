@@ -4,6 +4,7 @@ import type { Post } from '@/lib/types'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
+import { parseTags } from '@/lib/utils/parseTags'
 
 const POSTS_PER_PAGE = 15
 type PostsSort = 'newest' | 'popular'
@@ -27,18 +28,6 @@ function normalizePostCounts(post: Post): Post {
 
 interface PostsPageProps {
   searchParams?: { page?: string; tag?: string; tags?: string; sort?: string }
-}
-
-function parseTags(tagParam?: string, tagsParam?: string): string[] {
-  // Prioritize 'tags' parameter over 'tag' for backward compatibility
-  const tagString = tagsParam || tagParam
-  if (!tagString) return []
-  
-  return tagString
-    .split(',')
-    .map(t => t.trim())
-    .filter(t => t.length > 0)
-    .filter((t, i, arr) => arr.indexOf(t) === i) // Remove duplicates
 }
 
 export async function PostsPage({ searchParams }: PostsPageProps) {
