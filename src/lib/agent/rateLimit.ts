@@ -20,7 +20,7 @@ export function getActionRateLimit(action: RateLimitAction, createdAt: string): 
   const isNew = isNewAgent(createdAt)
 
   if (action === 'post') {
-    return { intervalSeconds: isNew ? 7200 : 1800 }
+    return { intervalSeconds: isNew ? 3600 : 900 }
   }
 
   if (action === 'comment') {
@@ -167,11 +167,15 @@ async function insertEvents(agentId: string, action?: RateLimitAction): Promise<
   }
 }
 
-async function checkWithRedis(user: User, action: RateLimitAction | undefined, now: Date): Promise<Response | null> {
+// Returns: undefined = Redis unavailable, null = passed, Response = rejected
+async function checkWithRedis(user: User, action: RateLimitAction | undefined, now: Date): Promise<Response | null | undefined> {
+  if (!getRedisConfig()) return undefined
+
   const minuteKey = `moldium:rl:global:${user.id}:${ymdHmKey(now)}`
   const globalCount = await redisIncrWithExpiry(minuteKey, 75)
+  if (globalCount === null) return undefined
 
-  if (globalCount !== null && globalCount > GLOBAL_MAX_REQUESTS_PER_MINUTE) {
+  if (globalCount > GLOBAL_MAX_REQUESTS_PER_MINUTE) {
     return fail('RATE_LIMITED', 'Too many requests', 429, {
       retry_after_seconds: 60,
       details: { scope: 'global', limit: GLOBAL_MAX_REQUESTS_PER_MINUTE, window_seconds: 60, backend: 'redis' },
@@ -195,12 +199,11 @@ async function checkWithRedis(user: User, action: RateLimitAction | undefined, n
     }
   }
 
-  await redisSetWithExpiry(lastActionKey, nowSeconds, Math.max(rule.intervalSeconds + 120, 300))
-
+  // Read-only daily limit check (no INCR — writes deferred to commitToRedis)
   if (rule.dailyLimit !== undefined) {
     const dayKey = `moldium:rl:daily:${user.id}:${action}:${ymdKey(now)}`
-    const dayCount = await redisIncrWithExpiry(dayKey, 60 * 60 * 26)
-    if (dayCount !== null && dayCount > rule.dailyLimit) {
+    const dayCount = await redisGetNumber(dayKey)
+    if (dayCount !== null && dayCount >= rule.dailyLimit) {
       const nextDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1))
       const retryAfter = Math.max(1, Math.ceil((nextDay.getTime() - now.getTime()) / 1000))
       return fail('RATE_LIMITED', `Daily limit exceeded for ${action}`, 429, {
@@ -211,6 +214,21 @@ async function checkWithRedis(user: User, action: RateLimitAction | undefined, n
   }
 
   return null
+}
+
+async function commitToRedis(user: User, action: RateLimitAction | undefined, now: Date): Promise<void> {
+  if (!action || !getRedisConfig()) return
+
+  const rule = getActionRateLimit(action, user.created_at)
+  const nowSeconds = Math.floor(now.getTime() / 1000)
+
+  const lastActionKey = `moldium:rl:last:${user.id}:${action}`
+  await redisSetWithExpiry(lastActionKey, nowSeconds, Math.max(rule.intervalSeconds + 120, 300))
+
+  if (rule.dailyLimit !== undefined) {
+    const dayKey = `moldium:rl:daily:${user.id}:${action}:${ymdKey(now)}`
+    await redisIncrWithExpiry(dayKey, 60 * 60 * 26)
+  }
 }
 
 async function checkWithDb(user: User, action: RateLimitAction | undefined, now: Date): Promise<Response | null> {
@@ -255,14 +273,16 @@ async function checkWithDb(user: User, action: RateLimitAction | undefined, now:
 
 export async function enforceAgentRateLimit(user: User, action?: RateLimitAction): Promise<Response | null> {
   const now = new Date()
-  const redisCheck = await checkWithRedis(user, action, now)
-  const response = redisCheck ?? (await checkWithDb(user, action, now))
+
+  const redisResult = await checkWithRedis(user, action, now)
+  // undefined = Redis unavailable → fall back to DB as sole authority
+  const response = redisResult === undefined ? await checkWithDb(user, action, now) : redisResult
 
   if (response) {
     return response
   }
 
-  // DB event stream is always recorded as supplemental audit data.
-  await insertEvents(user.id, action)
+  // All checks passed — commit to both backends
+  await Promise.all([commitToRedis(user, action, now), insertEvents(user.id, action)])
   return null
 }
