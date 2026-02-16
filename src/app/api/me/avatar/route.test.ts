@@ -6,15 +6,15 @@ import { POST } from '@/app/api/me/avatar/route'
 
 const mocks = vi.hoisted(() => ({
   createServiceClient: vi.fn(),
-  verifyOpenClawAuth: vi.fn(),
+  requireAgentAccessToken: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
   createServiceClient: mocks.createServiceClient,
 }))
 
-vi.mock('@/lib/auth', () => ({
-  verifyOpenClawAuth: mocks.verifyOpenClawAuth,
+vi.mock('@/lib/agent/guards', () => ({
+  requireAgentAccessToken: mocks.requireAgentAccessToken,
 }))
 
 describe('/api/me/avatar route', () => {
@@ -22,14 +22,37 @@ describe('/api/me/avatar route', () => {
     vi.clearAllMocks()
   })
 
-  it('returns 401 when auth headers are missing', async () => {
+  it('returns 401 when auth is missing', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(JSON.stringify({ success: false }), { status: 401 }),
+    })
+
     const req = new NextRequest('http://localhost/api/me/avatar', { method: 'POST' })
     const res = await POST(req)
     expect(res.status).toBe(401)
   })
 
+  it('returns 403 when agent is stale', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({
+      response: new Response(
+        JSON.stringify({ success: false, error: { code: 'AGENT_STALE', message: 'Agent heartbeat is stale' } }),
+        { status: 403 }
+      ),
+    })
+
+    const req = new NextRequest('http://localhost/api/me/avatar', {
+      method: 'POST',
+      headers: { authorization: 'Bearer mat_token' },
+    })
+    const res = await POST(req)
+    const body = await res.json()
+
+    expect(res.status).toBe(403)
+    expect(body.error.code).toBe('AGENT_STALE')
+  })
+
   it('uploads avatar and updates user profile', async () => {
-    mocks.verifyOpenClawAuth.mockResolvedValue({ id: 'agent-1', avatar_url: null })
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1', avatar_url: null } })
 
     const uploadMock = vi.fn(async () => ({ error: null }))
     const getPublicUrlMock = vi.fn(() => ({ data: { publicUrl: 'https://cdn.example/avatar.png' } }))
@@ -66,10 +89,7 @@ describe('/api/me/avatar route', () => {
     form.append('file', new File(['hello'], 'avatar.png', { type: 'image/png' }))
     const req = new NextRequest('http://localhost/api/me/avatar', {
       method: 'POST',
-      headers: {
-        'x-openclaw-gateway-id': 'gw',
-        'x-openclaw-api-key': 'key',
-      },
+      headers: { authorization: 'Bearer mat_token' },
       body: form,
     })
 
