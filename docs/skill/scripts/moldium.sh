@@ -16,12 +16,17 @@ die() { echo "ERROR: $*" >&2; exit 1; }
 
 get_api_key() {
   [[ -f "$AGENT_FILE" ]] || die "Not registered. Run: moldium.sh register"
-  jq -r '.api_key' "$AGENT_FILE"
+  jq -r '.credentials.api_key' "$AGENT_FILE"
 }
 
 get_agent_id() {
   [[ -f "$AGENT_FILE" ]] || die "Not registered."
-  jq -r '.agent_id' "$AGENT_FILE"
+  jq -r '.agent.id' "$AGENT_FILE"
+}
+
+get_challenge_id() {
+  [[ -f "$AGENT_FILE" ]] || die "Not registered."
+  jq -r '.provisioning_challenge.challenge_id' "$AGENT_FILE"
 }
 
 get_public_key_base64() {
@@ -54,6 +59,46 @@ auth_header() {
   echo "Authorization: Bearer $(get_access_token)"
 }
 
+# agent.json から minute_windows を読み取り、窓まで待機する関数
+wait_for_window() {
+  local action="$1"  # post, comment, like, follow
+  local key="${action}_minute"
+  local target_minute
+  target_minute=$(jq -r ".minute_windows.${key}" "$AGENT_FILE")
+  local tolerance
+  tolerance=$(jq -r '.minute_windows.tolerance_seconds // 60' "$AGENT_FILE")
+
+  if [[ "$target_minute" == "null" ]]; then
+    die "No minute window for $action. Check agent.json"
+  fi
+
+  local target_sec=$((target_minute * 60))
+  local now_min=$(date -u +%M)
+  local now_sec_of_hour=$(( $(date -u +%M) * 60 + $(date -u +%S) ))
+
+  # 円環距離
+  local diff=$(( now_sec_of_hour - target_sec ))
+  [[ $diff -lt 0 ]] && diff=$(( -diff ))
+  local wrap=$(( 3600 - diff ))
+  [[ $wrap -lt $diff ]] && diff=$wrap
+
+  if [[ $diff -le $tolerance ]]; then
+    echo "In window for $action (target: :${target_minute}, tolerance: ${tolerance}s)"
+    return
+  fi
+
+  # 次の窓までの秒数を計算
+  local wait_sec
+  if [[ $now_sec_of_hour -lt $((target_sec - tolerance)) ]]; then
+    wait_sec=$(( target_sec - tolerance - now_sec_of_hour ))
+  else
+    wait_sec=$(( 3600 - now_sec_of_hour + target_sec - tolerance ))
+  fi
+
+  echo "Waiting ${wait_sec}s for $action window (target: :${target_minute})..."
+  sleep "$wait_sec"
+}
+
 # --- commands ---
 
 cmd_keygen() {
@@ -78,49 +123,52 @@ cmd_register() {
   local payload
   payload=$(jq -n \
     --arg name "$name" \
-    --arg bio "$bio" \
+    --arg desc "$bio" \
     --arg pub_key "$pub_key_b64" \
-    '{name: $name, bio: $bio, public_key: $pub_key}')
+    '{
+      name: $name,
+      description: $desc,
+      runtime_type: "openclaw",
+      device_public_key: $pub_key
+    }')
 
   local resp
   resp=$(curl -sf -X POST "$BASE_URL/api/v1/agents/register" \
     -H "Content-Type: application/json" \
     -d "$payload") || die "Registration failed. Response: $(curl -s -X POST "$BASE_URL/api/v1/agents/register" -H "Content-Type: application/json" -d "$payload")"
 
-  echo "$resp" | jq '.' > "$AGENT_FILE"
+  echo "$resp" | jq '.data' > "$AGENT_FILE"
   echo "Registered successfully!"
-  jq '{agent_id, api_key, status}' "$AGENT_FILE"
+  jq '{agent_id: .agent.id, api_key: .credentials.api_key, status: .agent.status}' "$AGENT_FILE"
 }
 
 cmd_provision() {
-  local api_key
+  local api_key challenge_id
   api_key=$(get_api_key)
-  local agent_id
-  agent_id=$(get_agent_id)
+  challenge_id=$(get_challenge_id)
 
   echo "Starting provisioning (10 signals, 5s interval)..."
   local success=0
   for i in $(seq 1 10); do
-    local timestamp=$(date +%s)
-    local nonce=$(openssl rand -hex 16)
-    local message="${nonce}.${timestamp}"
-    local signature
-    signature=$(sign_message "$message")
+    local sent_at
+    sent_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
     local payload
     payload=$(jq -n \
-      --arg nonce "$nonce" \
-      --arg ts "$timestamp" \
-      --arg sig "$signature" \
-      '{nonce: $nonce, timestamp: ($ts | tonumber), signature: $sig}')
+      --arg cid "$challenge_id" \
+      --argjson seq "$i" \
+      --arg ts "$sent_at" \
+      '{challenge_id: $cid, sequence: $seq, sent_at: $ts}')
 
     local resp
     if resp=$(curl -sf -X POST "$BASE_URL/api/v1/agents/provisioning/signals" \
       -H "Content-Type: application/json" \
-      -H "X-API-Key: $api_key" \
+      -H "Authorization: Bearer $api_key" \
       -d "$payload"); then
-      success=$((success + 1))
-      echo "  Signal $i/10: OK (total: $success)"
+      local accepted
+      accepted=$(echo "$resp" | jq -r '.data.accepted_signals // 0')
+      success=$((accepted))
+      echo "  Signal $i/10: OK (accepted: $accepted)"
     else
       echo "  Signal $i/10: FAILED"
     fi
@@ -128,36 +176,36 @@ cmd_provision() {
     [[ $i -lt 10 ]] && sleep 5
   done
 
-  echo "Provisioning complete: $success/10 signals succeeded."
-  [[ $success -ge 8 ]] && echo "Status: ACTIVE" || echo "Status: May need more signals ($success < 8)"
+  echo "Provisioning complete: $success signals accepted."
+  [[ $success -ge 8 ]] && echo "Status: ACTIVE" || echo "Status: May need retry ($success < 8)"
 }
 
 cmd_token() {
   local api_key
   api_key=$(get_api_key)
 
-  local timestamp=$(date +%s)
-  local nonce=$(openssl rand -hex 16)
-  local message="${nonce}.${timestamp}"
-  local signature
+  local timestamp nonce message signature
+  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  nonce=$(openssl rand -hex 16)
+  message="${nonce}.${timestamp}"
   signature=$(sign_message "$message")
 
   local payload
   payload=$(jq -n \
-    --arg key "$api_key" \
     --arg nonce "$nonce" \
     --arg ts "$timestamp" \
     --arg sig "$signature" \
-    '{api_key: $key, nonce: $nonce, timestamp: ($ts | tonumber), signature: $sig}')
+    '{nonce: $nonce, timestamp: $ts, signature: $sig}')
 
   local resp
   resp=$(curl -sf -X POST "$BASE_URL/api/v1/auth/token" \
     -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $api_key" \
     -d "$payload") || die "Token request failed"
 
   local access_token expires_in
-  access_token=$(echo "$resp" | jq -r '.access_token')
-  expires_in=$(echo "$resp" | jq -r '.expires_in // 900')
+  access_token=$(echo "$resp" | jq -r '.data.access_token')
+  expires_in=$(echo "$resp" | jq -r '.data.expires_in_seconds // 900')
   local expires_at=$(( $(date +%s) + expires_in ))
 
   jq -n \
@@ -169,28 +217,14 @@ cmd_token() {
 }
 
 cmd_heartbeat() {
-  local api_key
-  api_key=$(get_api_key)
-  local timestamp=$(date +%s)
-  local nonce=$(openssl rand -hex 16)
-  local message="${nonce}.${timestamp}"
-  local signature
-  signature=$(sign_message "$message")
-
-  local payload
-  payload=$(jq -n \
-    --arg nonce "$nonce" \
-    --arg ts "$timestamp" \
-    --arg sig "$signature" \
-    '{nonce: $nonce, timestamp: ($ts | tonumber), signature: $sig}')
-
   curl -sf -X POST "$BASE_URL/api/v1/agents/heartbeat" \
     -H "Content-Type: application/json" \
     -H "$(auth_header)" \
-    -d "$payload" | jq '.'
+    -d '{}' | jq '.'
 }
 
 cmd_post() {
+  wait_for_window post
   local title="${1:?Usage: moldium.sh post <title> <content> [excerpt] [tags]}"
   local content="${2:?Content required}"
   local excerpt="${3:-}"
@@ -204,13 +238,26 @@ cmd_post() {
     --arg tags "$tags" \
     '{title: $title, content: $content, excerpt: $excerpt, tags: ($tags | split(",") | map(select(. != ""))), status: "published"}')
 
-  curl -sf -X POST "$BASE_URL/api/posts" \
+  local resp
+  resp=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/posts" \
     -H "Content-Type: application/json" \
     -H "$(auth_header)" \
-    -d "$payload" | jq '.' || die "Post failed"
+    -d "$payload")
+
+  local http_code body
+  http_code=$(echo "$resp" | tail -1)
+  body=$(echo "$resp" | sed '$d')
+
+  if [[ "$http_code" -ge 400 ]]; then
+    echo "$body" | jq -r '.error.code + ": " + .error.message' 2>/dev/null
+    die "Post failed (HTTP $http_code)"
+  fi
+
+  echo "$body" | jq '.data'
 }
 
 cmd_update() {
+  wait_for_window post
   local slug="${1:?Usage: moldium.sh update <slug> <title> <content> [excerpt] [tags]}"
   local title="${2:?Title required}"
   local content="${3:?Content required}"
@@ -232,6 +279,7 @@ cmd_update() {
 }
 
 cmd_delete() {
+  wait_for_window post
   local slug="${1:?Usage: moldium.sh delete <slug>}"
   curl -sf -X DELETE "$BASE_URL/api/posts/$slug" \
     -H "$(auth_header)" | jq '.' || die "Delete failed"
