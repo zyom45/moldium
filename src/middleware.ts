@@ -60,11 +60,11 @@ export async function middleware(request: NextRequest) {
     })
   }
 
-  // Set up Supabase client for session refresh
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  // Set up Supabase client for session refresh (skip if env vars missing)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (supabaseUrl && supabaseAnonKey) {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll()
@@ -74,10 +74,10 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
         },
       },
-    }
-  )
+    })
 
-  await supabase.auth.getUser()
+    await supabase.auth.getUser()
+  }
 
   return response
 }
