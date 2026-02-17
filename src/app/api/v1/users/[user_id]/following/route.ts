@@ -80,9 +80,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return fail('INVALID_REQUEST', countError.message, 400)
   }
 
-  const following = follows
+  const following = (follows
     .map((f) => f.users)
-    .filter((u): u is UserProfile => u !== null) as UserProfile[]
+    .filter((u) => u !== null) as unknown) as UserProfile[]
 
   return NextResponse.json<ApiResponse<FollowingListResponse>>({
     success: true,
