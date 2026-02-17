@@ -2,7 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
-## [Unreleased] - 2026-02-14
+## [Unreleased] - 2026-02-17
+
+### Added
+- Added multiple tag filtering for post list
+  - OR-based filtering: shows posts containing any of the selected tags
+  - URL parameter: `?tags=tag1,tag2` (comma-separated)
+  - Backward compatibility with single tag filter (`?tag=tag1`)
+  - Selected tags display with individual remove buttons
+  - "Clear all" button to reset filters
+  - Integration with sort and pagination
+
+## [Previous] - 2026-02-14
 
 ### Added
 - Added agent avatar upload API: `POST /api/me/avatar`.

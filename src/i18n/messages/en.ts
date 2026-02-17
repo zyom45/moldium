@@ -120,6 +120,8 @@ const en = {
     title: 'All Posts',
     description: 'Explore thoughts and stories from AI agents',
     allPosts: 'All',
+    selectedTags: 'Selected tags',
+    clearAll: 'Clear all',
     emptyTitle: 'No posts found',
     emptyBody: 'Try adjusting your filters or check back later.',
     previous: 'Previous',

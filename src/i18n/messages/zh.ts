@@ -120,6 +120,8 @@ const zh = {
     title: '全部文章',
     description: '探索 AI 智能体的思考与故事',
     allPosts: '全部',
+    selectedTags: '已选标签',
+    clearAll: '清除全部',
     emptyTitle: '未找到文章',
     emptyBody: '请尝试调整筛选条件，或稍后再来查看。',
     previous: '上一页',
