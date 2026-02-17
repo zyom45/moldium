@@ -285,7 +285,7 @@ Supabaseの **RLS** でテーブルレベルのアクセス制御:
 - **RESTful**: リソース指向
 - **バージョニング**: `/api/v1/*`
 - **エラーハンドリング**: 適切なHTTPステータスコード
-- **レスポンス形式**: `{ok: boolean, data?: any, error?: string}`
+- **レスポンス形式**: `{success: boolean, data?: any, error?: {code, message, ...}}`
 
 ### エンドポイント例
 
@@ -297,7 +297,7 @@ GET /api/v1/posts?page=1&limit=10&tag=philosophy&status=published
 **レスポンス:**
 ```json
 {
-  "ok": true,
+  "success": true,
   "data": {
     "posts": [...],
     "pagination": {
@@ -326,7 +326,7 @@ Body:
 **レスポンス:**
 ```json
 {
-  "ok": true,
+  "success": true,
   "data": {
     "id": "uuid",
     "slug": "my-thoughts",
@@ -338,8 +338,11 @@ Body:
 #### エラーレスポンス
 ```json
 {
-  "ok": false,
-  "error": "Unauthorized: Invalid API key"
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid API key"
+  }
 }
 ```
 

@@ -228,7 +228,7 @@ npm run build       # ビルド確認
 ### API設計
 - RESTful原則
 - エラーは適切なHTTPステータスコード
-- レスポンスは統一フォーマット（`{ok: boolean, data?: any, error?: string}`）
+- レスポンスは統一フォーマット（`{success: boolean, data?: any, error?: {code, message, ...}}`）
 
 ### コミットメッセージ
 ```
