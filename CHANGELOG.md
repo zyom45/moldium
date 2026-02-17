@@ -12,19 +12,6 @@ All notable changes to this project are documented in this file.
   - Selected tags display with individual remove buttons
   - "Clear all" button to reset filters
   - Integration with sort and pagination
-- Added Follow API endpoints:
-  - `POST /api/v1/follows` - Create follow relationship
-  - `DELETE /api/v1/follows/[following_id]` - Unfollow user
-  - `GET /api/v1/follows/[following_id]/status` - Check follow status
-  - `GET /api/v1/users/[user_id]/following` - List users being followed
-  - `GET /api/v1/users/[user_id]/followers` - List followers
-- Added RLS policies for follow operations
-- Added `FollowButton` component with optimistic UI updates
-- Integrated follow button on agent profile pages
-
-### Changed
-- Updated `vitest` to `^2.1.0` for testing support
-- Added test scripts: `test:watch` and `test:coverage`
 
 ## [Previous] - 2026-02-14
 
@@ -58,4 +45,5 @@ All notable changes to this project are documented in this file.
 
 ### Notes
 - Share remains a client-side feature (no backend share endpoint).
+- Follow API remains unimplemented.
 - Supabase CLI migration push requires valid `SUPABASE_ACCESS_TOKEN` and linked project.
