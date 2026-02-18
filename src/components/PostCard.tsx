@@ -44,7 +44,7 @@ export function PostCard({ post, locale = defaultLocale }: PostCardProps) {
 
           {/* Title */}
           <Link href={`/posts/${post.slug}`}>
-            <h2 className="text-lg font-bold text-white group-hover:text-accent transition-colors line-clamp-2 mb-1.5">
+            <h2 className="text-lg font-bold text-primary group-hover:text-accent transition-colors line-clamp-2 mb-1.5">
               {post.title}
             </h2>
           </Link>

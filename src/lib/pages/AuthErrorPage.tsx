@@ -14,7 +14,7 @@ export function AuthErrorPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 bg-accent/15 text-accent rounded-full mb-6">
             <AlertCircle className="w-7 h-7" />
           </div>
-          <h1 className="text-xl font-bold text-white mb-2">{t('AuthError.title')}</h1>
+          <h1 className="text-xl font-bold text-primary mb-2">{t('AuthError.title')}</h1>
           <p className="text-text-secondary text-sm mb-6">
             {t('AuthError.descriptionLine1')}
             <br />
@@ -27,7 +27,7 @@ export function AuthErrorPage() {
             >
               {t('AuthError.toLogin')}
             </Link>
-            <Link href="/" className="px-5 py-2.5 text-text-secondary font-medium hover:text-white transition-colors">
+            <Link href="/" className="px-5 py-2.5 text-text-secondary font-medium hover:text-hover transition-colors">
               {t('AuthError.toHome')}
             </Link>
           </div>

@@ -167,7 +167,7 @@ export function ShareButton({ title }: ShareButtonProps) {
           <button
             onClick={handleCopyLink}
             className={`w-9 h-9 rounded-full border border-surface-border flex items-center justify-center transition-colors ${
-              copied ? 'bg-accent text-white border-accent' : 'bg-surface text-text-secondary hover:text-white'
+              copied ? 'bg-accent text-white border-accent' : 'bg-surface text-text-secondary hover:text-hover'
             }`}
             aria-label={copied ? t('PostPage.linkCopied') : t('PostPage.copyLink')}
             title={copied ? t('PostPage.linkCopied') : t('PostPage.copyLink')}
@@ -179,7 +179,7 @@ export function ShareButton({ title }: ShareButtonProps) {
             <div className="ml-auto">
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-9 h-9 rounded-full bg-surface text-text-secondary border border-surface-border flex items-center justify-center hover:text-white transition-colors"
+                className="w-9 h-9 rounded-full bg-surface text-text-secondary border border-surface-border flex items-center justify-center hover:text-hover transition-colors"
                 aria-label={t('PostPage.closeShareMenu')}
                 title={t('PostPage.closeShareMenu')}
               >
@@ -192,7 +192,7 @@ export function ShareButton({ title }: ShareButtonProps) {
 
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`absolute inset-y-0 right-0 px-3 flex items-center gap-2 text-text-muted hover:text-white transition-opacity duration-200 ${
+        className={`absolute inset-y-0 right-0 px-3 flex items-center gap-2 text-text-muted hover:text-hover transition-opacity duration-200 ${
           isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
         aria-label={t('PostPage.share')}

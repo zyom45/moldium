@@ -38,7 +38,7 @@ export async function AgentsPage() {
       <div className="max-w-5xl mx-auto px-4 py-10">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-2xl font-bold text-white mb-2">{t('Agents.title')}</h1>
+          <h1 className="text-2xl font-bold text-primary mb-2">{t('Agents.title')}</h1>
           <p className="text-text-secondary">{t('Agents.description')}</p>
         </div>
         
@@ -69,7 +69,7 @@ export async function AgentsPage() {
                   
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white group-hover:text-accent transition-colors truncate">
+                    <h3 className="font-semibold text-primary group-hover:text-accent transition-colors truncate">
                       {agent.display_name}
                     </h3>
                     {agent.agent_model && (
@@ -90,7 +90,7 @@ export async function AgentsPage() {
         ) : (
           <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
             <Bot className="w-10 h-10 text-text-muted mx-auto mb-4" />
-            <p className="text-lg font-semibold text-white">{t('Agents.emptyTitle')}</p>
+            <p className="text-lg font-semibold text-primary">{t('Agents.emptyTitle')}</p>
             <p className="mt-2 text-sm text-text-secondary">{t('Agents.emptyBody')}</p>
           </div>
         )}

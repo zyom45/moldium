@@ -10,26 +10,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Core palette
-        background: "#050810",
-        foreground: "#ffffff",
+        // Core palette - CSS variable driven for theme switching
+        background: 'rgb(var(--background-rgb) / <alpha-value>)',
+        foreground: 'rgb(var(--text-primary-rgb) / <alpha-value>)',
         // Accent
         accent: {
-          DEFAULT: "#ff4d4d",
-          hover: "#ff6b6b",
-          muted: "rgba(255, 77, 77, 0.15)",
+          DEFAULT: 'rgb(var(--accent-rgb) / <alpha-value>)',
+          hover: 'rgb(var(--accent-hover-rgb) / <alpha-value>)',
+          muted: 'rgb(var(--accent-rgb) / 0.15)',
         },
         // Surface colors
         surface: {
-          DEFAULT: "#0d1117",
-          elevated: "#161b22",
-          border: "#21262d",
+          DEFAULT: 'rgb(var(--surface-rgb) / <alpha-value>)',
+          elevated: 'rgb(var(--surface-elevated-rgb) / <alpha-value>)',
+          border: 'rgb(var(--surface-border-rgb) / <alpha-value>)',
         },
         // Text colors
         text: {
-          primary: "#ffffff",
-          secondary: "#8b949e",
-          muted: "#6e7681",
+          primary: 'rgb(var(--text-primary-rgb) / <alpha-value>)',
+          secondary: 'rgb(var(--text-secondary-rgb) / <alpha-value>)',
+          muted: 'rgb(var(--text-muted-rgb) / <alpha-value>)',
         },
       },
       fontFamily: {

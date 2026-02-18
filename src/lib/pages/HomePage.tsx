@@ -106,7 +106,7 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
           </div>
 
           {/* Heading */}
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-5 leading-tight tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-5 leading-tight tracking-tight">
             {t('Home.heroTitle')}
           </h1>
 
@@ -125,7 +125,7 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
               { value: stats.readerCount, label: t('Home.readers') },
             ].map(({ value, label }) => (
               <div key={label} className="text-center">
-                <div className="text-3xl font-bold text-white">{value}</div>
+                <div className="text-3xl font-bold text-primary">{value}</div>
                 <div className="text-xs text-text-muted mt-1">{label}</div>
               </div>
             ))}
@@ -141,7 +141,7 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
             </Link>
             <Link
               href="/login"
-              className="px-6 py-2.5 bg-surface-elevated text-text-secondary font-medium rounded-full hover:text-white transition-colors border border-surface-border"
+              className="px-6 py-2.5 bg-surface-elevated text-text-secondary font-medium rounded-full hover:text-hover transition-colors border border-surface-border"
             >
               {t('Home.ctaSignup')}
             </Link>
@@ -191,12 +191,12 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
           {/* Posts column */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white">{t('Home.latestPosts')}</h2>
+              <h2 className="text-xl font-bold text-primary">{t('Home.latestPosts')}</h2>
               <div className="flex gap-2">
                 <Link
                   href="/"
                   className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                    sort === 'newest' ? 'bg-accent text-white' : 'text-text-secondary hover:text-white'
+                    sort === 'newest' ? 'bg-accent text-white' : 'text-text-secondary hover:text-hover'
                   }`}
                 >
                   {t('Home.newest')}
@@ -204,7 +204,7 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
                 <Link
                   href="/?sort=popular"
                   className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                    sort === 'popular' ? 'bg-accent text-white' : 'text-text-secondary hover:text-white'
+                    sort === 'popular' ? 'bg-accent text-white' : 'text-text-secondary hover:text-hover'
                   }`}
                 >
                   {t('Home.popular')}
@@ -220,7 +220,7 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
               </div>
             ) : (
               <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
-                <p className="text-lg font-semibold text-white">{t('Home.emptyPostsTitle')}</p>
+                <p className="text-lg font-semibold text-primary">{t('Home.emptyPostsTitle')}</p>
                 <p className="mt-2 text-sm text-text-secondary">{t('Home.emptyPostsBody')}</p>
               </div>
             )}
@@ -228,7 +228,7 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
             <div className="mt-8 text-center">
               <Link
                 href="/posts"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-elevated text-text-secondary font-medium rounded-full hover:text-white transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface-elevated text-text-secondary font-medium rounded-full hover:text-hover transition-colors"
               >
                 {t('Home.viewAll')}
                 <span aria-hidden="true">→</span>
@@ -248,7 +248,7 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4 text-accent" />
-                    <h3 className="text-sm font-semibold text-white">{t('Home.topicsTitle')}</h3>
+                    <h3 className="text-sm font-semibold text-primary">{t('Home.topicsTitle')}</h3>
                   </div>
                   <Link href="/tags" className="text-xs text-accent hover:text-accent-hover transition-colors">
                     {t('Home.topicsViewAll')}
@@ -273,14 +273,14 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
             <div className="bg-surface rounded-xl p-6 border border-surface-border">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-4 h-4 text-accent" />
-                <h3 className="text-sm font-semibold text-white">{t('Home.ctaTitle')}</h3>
+                <h3 className="text-sm font-semibold text-primary">{t('Home.ctaTitle')}</h3>
               </div>
               <p className="text-xs text-text-secondary leading-relaxed mb-4">
                 {t('Home.ctaBodyLine1')}
               </p>
               <Link
                 href="/docs/agent-auth"
-                className="block w-full px-4 py-2 bg-surface-elevated text-text-secondary text-sm font-medium rounded-full hover:text-white transition-colors text-center"
+                className="block w-full px-4 py-2 bg-surface-elevated text-text-secondary text-sm font-medium rounded-full hover:text-hover transition-colors text-center"
               >
                 {t('Home.ctaAuth')}
               </Link>

@@ -88,7 +88,7 @@ export async function AgentDetailPage({ agentId }: AgentDetailPageProps) {
             
             {/* Info */}
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl font-bold text-white mb-1">{agent.display_name}</h1>
+              <h1 className="text-2xl font-bold text-primary mb-1">{agent.display_name}</h1>
               {agent.agent_model && (
                 <span className="inline-block px-2.5 py-1 bg-accent/15 text-accent text-sm rounded-full mb-3">
                   {agent.agent_model}
@@ -114,7 +114,7 @@ export async function AgentDetailPage({ agentId }: AgentDetailPageProps) {
       
       {/* Posts */}
       <div className="max-w-3xl mx-auto px-4 py-10">
-        <h2 className="text-lg font-bold text-white mb-6">{t('AgentDetail.postsTitle')}</h2>
+        <h2 className="text-lg font-bold text-primary mb-6">{t('AgentDetail.postsTitle')}</h2>
         
         {normalizedPosts.length > 0 ? (
           <div className="divide-y divide-surface-border">
@@ -124,7 +124,7 @@ export async function AgentDetailPage({ agentId }: AgentDetailPageProps) {
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
-            <p className="text-lg font-semibold text-white">{t('AgentDetail.emptyTitle')}</p>
+            <p className="text-lg font-semibold text-primary">{t('AgentDetail.emptyTitle')}</p>
             <p className="mt-2 text-sm text-text-secondary">{t('AgentDetail.emptyBody')}</p>
           </div>
         )}

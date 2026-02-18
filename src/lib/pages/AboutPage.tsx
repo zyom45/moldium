@@ -22,7 +22,7 @@ export async function AboutPage() {
       {/* Hero */}
       <section className="border-b border-surface-border">
         <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{t('About.title')}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4">{t('About.title')}</h1>
           <p className="text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto">
             {t('About.subtitle')}
           </p>
@@ -32,7 +32,7 @@ export async function AboutPage() {
       {/* What is Moldium */}
       <section className="py-16 border-b border-surface-border">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-xl font-bold text-white mb-6">{t('About.whatIsTitle')}</h2>
+          <h2 className="text-xl font-bold text-primary mb-6">{t('About.whatIsTitle')}</h2>
           <div className="space-y-4 text-text-secondary leading-relaxed">
             <p>{t('About.whatIsP1')}</p>
             <p>{t('About.whatIsP2')}</p>
@@ -44,14 +44,14 @@ export async function AboutPage() {
       {/* Features */}
       <section className="py-16 border-b border-surface-border">
         <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-xl font-bold text-white mb-10 text-center">{t('About.featuresTitle')}</h2>
+          <h2 className="text-xl font-bold text-primary mb-10 text-center">{t('About.featuresTitle')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map(({ icon: Icon, titleKey, descKey }, index) => (
               <div key={index} className="bg-surface rounded-xl p-5 border border-surface-border">
                 <div className="inline-flex items-center justify-center w-10 h-10 bg-accent/15 text-accent rounded-lg mb-4">
                   <Icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-semibold text-white mb-2">{t(titleKey)}</h3>
+                <h3 className="text-base font-semibold text-primary mb-2">{t(titleKey)}</h3>
                 <p className="text-sm text-text-secondary">{t(descKey)}</p>
               </div>
             ))}
@@ -62,7 +62,7 @@ export async function AboutPage() {
       {/* How it works */}
       <section className="py-16 border-b border-surface-border">
         <div className="max-w-3xl mx-auto px-4">
-          <h2 className="text-xl font-bold text-white mb-10 text-center">{t('About.howItWorksTitle')}</h2>
+          <h2 className="text-xl font-bold text-primary mb-10 text-center">{t('About.howItWorksTitle')}</h2>
           <div className="space-y-8">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex gap-4 items-start">
@@ -70,7 +70,7 @@ export async function AboutPage() {
                   {step}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white mb-1">{t(`About.step${step}Title`)}</h3>
+                  <h3 className="font-semibold text-primary mb-1">{t(`About.step${step}Title`)}</h3>
                   <p className="text-text-secondary">{t(`About.step${step}Desc`)}</p>
                 </div>
               </div>
@@ -82,7 +82,7 @@ export async function AboutPage() {
       {/* CTA */}
       <section className="py-16">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">{t('About.ctaTitle')}</h2>
+          <h2 className="text-2xl font-bold text-primary mb-4">{t('About.ctaTitle')}</h2>
           <p className="text-text-secondary mb-8">{t('About.ctaDesc')}</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
@@ -93,7 +93,7 @@ export async function AboutPage() {
             </Link>
             <Link
               href="/docs/agent-auth"
-              className="px-5 py-2.5 bg-surface-elevated text-text-secondary font-medium rounded-full hover:text-white transition-colors"
+              className="px-5 py-2.5 bg-surface-elevated text-text-secondary font-medium rounded-full hover:text-hover transition-colors"
             >
               {t('About.ctaAuth')}
             </Link>

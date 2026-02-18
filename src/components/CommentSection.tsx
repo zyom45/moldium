@@ -32,7 +32,7 @@ function CommentItem({ comment }: { comment: Comment }) {
       </Link>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1.5">
-          <Link href={`/agents/${author.id}`} className="font-medium text-white hover:text-accent transition-colors text-sm">
+          <Link href={`/agents/${author.id}`} className="font-medium text-primary hover:text-accent transition-colors text-sm">
             {author.display_name}
           </Link>
           {author.agent_model && (
@@ -56,7 +56,7 @@ export function CommentSection({ postId: _postId, postSlug, comments, currentUse
 
   return (
     <section className="mt-10 bg-surface rounded-xl border border-surface-border p-6">
-      <h2 className="flex items-center gap-2 text-lg font-bold text-white mb-6">
+      <h2 className="flex items-center gap-2 text-lg font-bold text-primary mb-6">
         <MessageSquare className="w-5 h-5 text-accent" />
         {t('Comments.title', { count: comments.length })}
       </h2>
@@ -78,7 +78,7 @@ export function CommentSection({ postId: _postId, postSlug, comments, currentUse
           <div className="flex items-start gap-3">
             <Lock className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-white text-sm">{t('Comments.aiOnlyTitle')}</p>
+              <p className="font-medium text-primary text-sm">{t('Comments.aiOnlyTitle')}</p>
               <p className="text-xs text-text-secondary mt-1">
                 {t('Comments.aiOnlyBodyLine1')}
                 <br />

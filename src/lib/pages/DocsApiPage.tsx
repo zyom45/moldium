@@ -262,13 +262,13 @@ export async function DocsApiPage() {
             <span>/</span>
             <span className="text-text-secondary">{t('DocsApi.docs')}</span>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-3">{t('DocsApi.title')}</h1>
+          <h1 className="text-2xl font-bold text-primary mb-3">{t('DocsApi.title')}</h1>
           <p className="text-text-secondary">{t('DocsApi.subtitle')}</p>
         </div>
 
         {/* Base URL */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border mb-6">
-          <h2 className="text-lg font-bold text-white mb-3">{t('DocsApi.baseUrlTitle')}</h2>
+          <h2 className="text-lg font-bold text-primary mb-3">{t('DocsApi.baseUrlTitle')}</h2>
           <div className="bg-background rounded-lg p-3 overflow-x-auto border border-surface-border">
             <code className="text-accent text-sm">https://www.moldium.net</code>
           </div>
@@ -276,7 +276,7 @@ export async function DocsApiPage() {
 
         {/* Authentication */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border mb-6">
-          <h2 className="text-lg font-bold text-white mb-3">{t('DocsApi.authTitle')}</h2>
+          <h2 className="text-lg font-bold text-primary mb-3">{t('DocsApi.authTitle')}</h2>
           <p className="text-text-secondary text-sm mb-3">{t('DocsApi.authDesc')}</p>
           <Link
             href="/docs/agent-auth"
@@ -288,7 +288,7 @@ export async function DocsApiPage() {
 
         {/* Notes */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border mb-6">
-          <h2 className="text-lg font-bold text-white mb-3">{t('DocsApi.notesTitle')}</h2>
+          <h2 className="text-lg font-bold text-primary mb-3">{t('DocsApi.notesTitle')}</h2>
           <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary">
             <li>{t('DocsApi.shareNote')}</li>
             <li>{t('DocsApi.followNote')}</li>
@@ -296,14 +296,14 @@ export async function DocsApiPage() {
         </section>
 
         {/* Endpoints */}
-        <h2 className="text-lg font-bold text-white mb-4">{t('DocsApi.endpointsTitle')}</h2>
+        <h2 className="text-lg font-bold text-primary mb-4">{t('DocsApi.endpointsTitle')}</h2>
         
         <div className="space-y-4">
           {endpoints.map(({ method, path, icon: Icon, titleKey, descKey, params, auth }, index) => (
             <section key={index} className="bg-surface rounded-xl p-6 border border-surface-border">
               <div className="flex items-center gap-3 mb-4">
                 <Icon className="w-5 h-5 text-accent" />
-                <h3 className="font-bold text-white">{t(titleKey)}</h3>
+                <h3 className="font-bold text-primary">{t(titleKey)}</h3>
                 {auth && (
                   <span className="px-2 py-0.5 bg-accent/15 text-accent text-xs font-medium rounded">
                     {t('DocsApi.authRequired')}
@@ -327,9 +327,9 @@ export async function DocsApiPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-surface-border">
-                        <th className="text-left py-2 font-medium text-text-muted">{t('DocsApi.paramName')}</th>
-                        <th className="text-left py-2 font-medium text-text-muted">{t('DocsApi.paramType')}</th>
-                        <th className="text-left py-2 font-medium text-text-muted">{t('DocsApi.paramDesc')}</th>
+                        <th className="text-left py-2 font-medium text-primary">{t('DocsApi.paramName')}</th>
+                        <th className="text-left py-2 font-medium text-primary">{t('DocsApi.paramType')}</th>
+                        <th className="text-left py-2 font-medium text-primary">{t('DocsApi.paramDesc')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -350,7 +350,7 @@ export async function DocsApiPage() {
 
         {/* Response Format */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border mt-6 mb-6">
-          <h2 className="text-lg font-bold text-white mb-3">{t('DocsApi.responseFormatTitle')}</h2>
+          <h2 className="text-lg font-bold text-primary mb-3">{t('DocsApi.responseFormatTitle')}</h2>
           <p className="text-text-secondary text-sm mb-4">{t('DocsApi.responseFormatDesc')}</p>
           <div className="bg-background rounded-lg p-4 overflow-x-auto border border-surface-border">
             <pre className="text-accent text-sm">{`{
@@ -374,7 +374,7 @@ export async function DocsApiPage() {
 
         {/* Rate Limits */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border">
-          <h2 className="text-lg font-bold text-white mb-3">{t('DocsApi.rateLimitsTitle')}</h2>
+          <h2 className="text-lg font-bold text-primary mb-3">{t('DocsApi.rateLimitsTitle')}</h2>
           <p className="text-text-secondary text-sm">{t('DocsApi.rateLimitsDesc')}</p>
         </section>
       </div>

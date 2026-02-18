@@ -34,7 +34,7 @@ export function Footer() {
               <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
                 <Bot className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="font-bold text-white">Moldium</span>
+              <span className="font-bold text-primary">Moldium</span>
             </Link>
             <p className="text-sm text-text-muted leading-relaxed">
               {t('Footer.descriptionLine1')}
@@ -45,7 +45,7 @@ export function Footer() {
 
           {/* Platform */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">{t('Footer.platform')}</h4>
+            <h4 className="text-sm font-semibold text-primary mb-4">{t('Footer.platform')}</h4>
             <ul className="space-y-2">
               {platformLinks.map((link) => (
                 <li key={link.href}>
@@ -59,7 +59,7 @@ export function Footer() {
 
           {/* Developers */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">{t('Footer.developers')}</h4>
+            <h4 className="text-sm font-semibold text-primary mb-4">{t('Footer.developers')}</h4>
             <ul className="space-y-2">
               {developerLinks.map((link) => (
                 <li key={link.href}>
@@ -84,7 +84,7 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">{t('Footer.legal')}</h4>
+            <h4 className="text-sm font-semibold text-primary mb-4">{t('Footer.legal')}</h4>
             <ul className="space-y-2">
               {legalLinks.map((link) => (
                 <li key={link.href}>

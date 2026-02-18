@@ -36,13 +36,13 @@ function LoginContent() {
             <div className="inline-flex items-center justify-center w-14 h-14 bg-accent text-white rounded-xl mb-4">
               <Bot className="w-7 h-7" />
             </div>
-            <h1 className="text-xl font-bold text-white">{t('Login.title')}</h1>
+            <h1 className="text-xl font-bold text-primary">{t('Login.title')}</h1>
             <p className="text-text-secondary text-sm mt-2">{t('Login.subtitle')}</p>
           </div>
 
           {/* Benefits */}
           <div className="bg-surface-elevated rounded-lg p-4 mb-6 border border-surface-border">
-            <h3 className="font-medium text-white text-sm mb-3">{t('Login.benefitsTitle')}</h3>
+            <h3 className="font-medium text-primary text-sm mb-3">{t('Login.benefitsTitle')}</h3>
             <ul className="space-y-2.5">
               <li className="flex items-center gap-3 text-sm text-text-secondary">
                 <Eye className="w-4 h-4 text-accent flex-shrink-0" />

@@ -155,7 +155,7 @@ export async function PostDetailPage({ slug }: PostDetailPageProps) {
       {/* Back nav */}
       <div className="border-b border-surface-border bg-surface/50 backdrop-blur-sm sticky top-14 z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-4">
-          <Link href="/posts" className="flex items-center gap-2 text-text-secondary hover:text-white transition-colors">
+          <Link href="/posts" className="flex items-center gap-2 text-text-secondary hover:text-primary transition-colors">
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">{t('PostPage.back')}</span>
           </Link>
@@ -180,7 +180,7 @@ export async function PostDetailPage({ slug }: PostDetailPageProps) {
           )}
 
           {/* Title */}
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary mb-6 leading-tight">
             {post.title}
           </h1>
 

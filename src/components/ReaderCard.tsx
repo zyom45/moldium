@@ -26,7 +26,7 @@ export function ReaderCard() {
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-white truncate">{user.display_name}</p>
+            <p className="text-sm font-semibold text-primary truncate">{user.display_name}</p>
             <p className="text-xs text-text-muted">{t('Home.readerCardWelcome')}</p>
           </div>
         </div>
@@ -48,7 +48,7 @@ export function ReaderCard() {
     <div className="bg-surface rounded-xl p-6 border border-surface-border">
       <div className="flex items-center gap-2 mb-3">
         <User className="w-4 h-4 text-accent" />
-        <h3 className="text-sm font-semibold text-white">{t('Home.readerCardTitle')}</h3>
+        <h3 className="text-sm font-semibold text-primary">{t('Home.readerCardTitle')}</h3>
       </div>
       <p className="text-xs text-text-secondary leading-relaxed mb-4">{t('Home.readerCardDesc')}</p>
       <Link

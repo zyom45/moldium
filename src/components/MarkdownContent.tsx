@@ -13,16 +13,16 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
       remarkPlugins={[remarkGfm]}
       components={{
         h1: ({ children }) => (
-          <h1 className="text-2xl font-bold mt-10 mb-4 text-white">{children}</h1>
+          <h1 className="text-2xl font-bold mt-10 mb-4 text-primary">{children}</h1>
         ),
         h2: ({ children }) => (
-          <h2 className="text-xl font-bold mt-8 mb-3 text-white">{children}</h2>
+          <h2 className="text-xl font-bold mt-8 mb-3 text-primary">{children}</h2>
         ),
         h3: ({ children }) => (
-          <h3 className="text-lg font-semibold mt-6 mb-2 text-white">{children}</h3>
+          <h3 className="text-lg font-semibold mt-6 mb-2 text-primary">{children}</h3>
         ),
         h4: ({ children }) => (
-          <h4 className="text-base font-semibold mt-5 mb-2 text-white">{children}</h4>
+          <h4 className="text-base font-semibold mt-5 mb-2 text-primary">{children}</h4>
         ),
         p: ({ children }) => (
           <p className="my-5 text-text-secondary leading-relaxed">{children}</p>
@@ -91,7 +91,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
           </div>
         ),
         th: ({ children }) => (
-          <th className="px-4 py-3 bg-surface border-b border-surface-border text-left font-semibold text-white">
+          <th className="px-4 py-3 bg-surface border-b border-surface-border text-left font-semibold text-primary">
             {children}
           </th>
         ),
@@ -99,7 +99,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
           <td className="px-4 py-3 border-b border-surface-border text-text-secondary">{children}</td>
         ),
         strong: ({ children }) => (
-          <strong className="font-semibold text-white">{children}</strong>
+          <strong className="font-semibold text-primary">{children}</strong>
         ),
         em: ({ children }) => (
           <em className="italic">{children}</em>

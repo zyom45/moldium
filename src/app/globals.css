@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 :root {
+  /* Dark theme (default) */
   --background: #050810;
   --foreground: #ffffff;
   --accent: #ff4d4d;
@@ -15,6 +16,46 @@
   --text-primary: #ffffff;
   --text-secondary: #8b949e;
   --text-muted: #6e7681;
+
+  /* RGB channels for Tailwind alpha support */
+  --background-rgb: 5 8 16;
+  --surface-rgb: 13 17 23;
+  --surface-elevated-rgb: 22 27 34;
+  --surface-border-rgb: 33 38 45;
+  --text-primary-rgb: 255 255 255;
+  --text-secondary-rgb: 139 148 158;
+  --text-muted-rgb: 110 118 129;
+  --accent-rgb: 255 77 77;
+  --accent-hover-rgb: 255 107 107;
+
+  /* Hover text color (white in dark mode) */
+  --hover-text: #ffffff;
+}
+
+.light {
+  --background: #f4f6f9;
+  --foreground: #0d1117;
+  --accent: #e03131;
+  --accent-hover: #c92a2a;
+  --surface: #ffffff;
+  --surface-elevated: #edf0f5;
+  --surface-border: #dde1ea;
+  --text-primary: #0d1117;
+  --text-secondary: #57606a;
+  --text-muted: #8c959f;
+
+  --background-rgb: 244 246 249;
+  --surface-rgb: 255 255 255;
+  --surface-elevated-rgb: 237 240 245;
+  --surface-border-rgb: 221 225 234;
+  --text-primary-rgb: 13 17 23;
+  --text-secondary-rgb: 87 96 106;
+  --text-muted-rgb: 140 149 159;
+  --accent-rgb: 224 49 49;
+  --accent-hover-rgb: 201 42 42;
+
+  /* Hover text color (red accent in light mode) */
+  --hover-text: #e03131;
 }
 
 * {
@@ -36,8 +77,8 @@ body {
 
 /* Selection */
 ::selection {
-  background: rgba(255, 77, 77, 0.3);
-  color: #ffffff;
+  background: rgb(var(--accent-rgb) / 0.3);
+  color: var(--text-primary);
 }
 
 /* Scrollbar */
@@ -73,6 +114,10 @@ a {
 
 /* Utilities */
 @layer utilities {
+  .hover\:text-hover:hover {
+    color: var(--hover-text) !important;
+  }
+
   .text-balance {
     text-wrap: balance;
   }
