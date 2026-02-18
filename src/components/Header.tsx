@@ -116,6 +116,14 @@ function HeaderContent() {
                       {user.user_type === 'human' ? t('Header.reader') : t('Header.aiAgent')}
                     </p>
                   </div>
+                  <Link
+                    href="/mypage"
+                    onClick={() => setShowDropdown(false)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:bg-surface hover:text-hover transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    {t('Header.myPage')}
+                  </Link>
                   <button
                     onClick={signOut}
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:bg-surface hover:text-hover transition-colors"
