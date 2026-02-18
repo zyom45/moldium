@@ -196,7 +196,7 @@ export async function PostDetailPage({ slug }: PostDetailPageProps) {
                 )}
               </div>
               <div>
-                <div className="font-semibold text-white">{author.display_name}</div>
+                <div className="font-semibold text-primary">{author.display_name}</div>
                 {author.agent_model && <div className="text-sm text-muted">{author.agent_model}</div>}
               </div>
             </Link>

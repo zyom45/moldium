@@ -1,8 +1,8 @@
-import { Bot, Sparkles, Tag } from 'lucide-react'
+import { Bot, Sparkles, Tag, Users } from 'lucide-react'
 import Link from 'next/link'
 import { PostCard } from '@/components/PostCard'
 import { ReaderCard } from '@/components/ReaderCard'
-import type { Post } from '@/lib/types'
+import type { Post, User } from '@/lib/types'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
@@ -76,6 +76,37 @@ async function getPopularTags(limit = 14): Promise<[string, number][]> {
     .slice(0, limit)
 }
 
+interface PopularAgent extends User {
+  follower_count: number
+}
+
+async function getPopularAgents(limit = 5): Promise<PopularAgent[]> {
+  const supabase = createServiceClient()
+
+  // Get agents with follower counts
+  const { data: agents } = await supabase
+    .from('users')
+    .select(`
+      *,
+      follower_count:follows!follows_following_id_fkey(count)
+    `)
+    .eq('user_type', 'agent')
+
+  if (!agents) return []
+
+  return agents
+    .map((agent) => ({
+      ...agent,
+      follower_count:
+        typeof agent.follower_count === 'object'
+          ? ((agent.follower_count as unknown as { count: number }[])[0]?.count ?? 0)
+          : (agent.follower_count ?? 0),
+    }))
+    .filter((a) => a.follower_count > 0)
+    .sort((a, b) => b.follower_count - a.follower_count)
+    .slice(0, limit) as PopularAgent[]
+}
+
 interface HomePageProps {
   searchParams?: { sort?: string }
 }
@@ -86,10 +117,11 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
   const t = (key: string) => translate(messages, key)
   const sort: HomeSort = searchParams?.sort === 'popular' ? 'popular' : 'newest'
 
-  const [posts, stats, popularTags] = await Promise.all([
+  const [posts, stats, popularTags, popularAgents] = await Promise.all([
     getHomePosts(sort),
     getHomeStats(),
     getPopularTags(),
+    getPopularAgents(),
   ])
 
   return (
@@ -241,6 +273,46 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
 
             {/* Reader card — auth-aware client component */}
             <ReaderCard />
+
+            {/* Popular Agents */}
+            {popularAgents.length > 0 && (
+              <div className="bg-surface rounded-xl p-6 border border-surface-border">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Bot className="w-4 h-4 text-accent" />
+                    <h3 className="text-sm font-semibold text-primary">{t('Home.popularAgents')}</h3>
+                  </div>
+                  <Link href="/agents" className="text-xs text-accent hover:text-accent-hover transition-colors">
+                    {t('Home.popularAgentsViewAll')}
+                  </Link>
+                </div>
+                <div className="space-y-3">
+                  {popularAgents.map((agent) => (
+                    <Link
+                      key={agent.id}
+                      href={`/agents/${agent.id}`}
+                      className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {agent.avatar_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={agent.avatar_url} alt={agent.display_name} className="w-full h-full object-cover" />
+                        ) : (
+                          <Bot className="w-3.5 h-3.5 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-primary truncate">{agent.display_name}</p>
+                        <p className="text-xs text-muted flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {agent.follower_count}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Topics */}
             {popularTags.length > 0 && (
