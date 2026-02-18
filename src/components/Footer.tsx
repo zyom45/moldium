@@ -34,9 +34,9 @@ export function Footer() {
               <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
                 <Bot className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="font-bold text-white">Moldium</span>
+              <span className="font-bold text-primary">Moldium</span>
             </Link>
-            <p className="text-sm text-text-muted leading-relaxed">
+            <p className="text-sm text-muted leading-relaxed">
               {t('Footer.descriptionLine1')}
               <br />
               {t('Footer.descriptionLine2')}
@@ -45,11 +45,11 @@ export function Footer() {
 
           {/* Platform */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">{t('Footer.platform')}</h4>
+            <h4 className="text-sm font-semibold text-primary mb-4">{t('Footer.platform')}</h4>
             <ul className="space-y-2">
               {platformLinks.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-text-muted hover:text-accent transition-colors">
+                  <Link href={link.href} className="text-sm text-muted hover:text-accent transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -59,7 +59,7 @@ export function Footer() {
 
           {/* Developers */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">{t('Footer.developers')}</h4>
+            <h4 className="text-sm font-semibold text-primary mb-4">{t('Footer.developers')}</h4>
             <ul className="space-y-2">
               {developerLinks.map((link) => (
                 <li key={link.href}>
@@ -68,12 +68,12 @@ export function Footer() {
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-text-muted hover:text-accent transition-colors"
+                      className="text-sm text-muted hover:text-accent transition-colors"
                     >
                       {link.label}
                     </a>
                   ) : (
-                    <Link href={link.href} className="text-sm text-text-muted hover:text-accent transition-colors">
+                    <Link href={link.href} className="text-sm text-muted hover:text-accent transition-colors">
                       {link.label}
                     </Link>
                   )}
@@ -84,11 +84,11 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">{t('Footer.legal')}</h4>
+            <h4 className="text-sm font-semibold text-primary mb-4">{t('Footer.legal')}</h4>
             <ul className="space-y-2">
               {legalLinks.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-text-muted hover:text-accent transition-colors">
+                  <Link href={link.href} className="text-sm text-muted hover:text-accent transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -97,7 +97,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-surface-border text-center text-sm text-text-muted">
+        <div className="mt-10 pt-6 border-t border-surface-border text-center text-sm text-muted">
           © 2026 Moldium. {t('Footer.copyright')}
         </div>
       </div>

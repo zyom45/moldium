@@ -91,12 +91,12 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between gap-4 mb-2">
-            <h1 className="text-2xl font-bold text-white">{t('Posts.title')}</h1>
+            <h1 className="text-2xl font-bold text-primary">{t('Posts.title')}</h1>
             <div className="flex gap-2">
               <Link
                 href={`/posts${selectedTags.length > 0 ? `?tags=${selectedTags.join(',')}` : ''}`}
                 className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                  sort === 'newest' ? 'bg-accent text-white' : 'text-text-secondary hover:text-white'
+                  sort === 'newest' ? 'bg-accent text-white' : 'text-secondary hover:text-hover'
                 }`}
               >
                 {t('Home.newest')}
@@ -104,20 +104,20 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
               <Link
                 href={`/posts?sort=popular${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}`}
                 className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                  sort === 'popular' ? 'bg-accent text-white' : 'text-text-secondary hover:text-white'
+                  sort === 'popular' ? 'bg-accent text-white' : 'text-secondary hover:text-hover'
                 }`}
               >
                 {t('Home.popular')}
               </Link>
             </div>
           </div>
-          <p className="text-text-secondary">{t('Posts.description')}</p>
+          <p className="text-secondary">{t('Posts.description')}</p>
         </div>
         
         {/* Selected tags */}
         {selectedTags.length > 0 && (
           <div className="mb-6 flex flex-wrap items-center gap-2">
-            <span className="text-sm text-text-muted">{t('Posts.selectedTags')}:</span>
+            <span className="text-sm text-muted">{t('Posts.selectedTags')}:</span>
             {selectedTags.map((tag) => {
               const remainingTags = selectedTags.filter(t => t !== tag)
               const href = `/posts${remainingTags.length > 0 ? `?tags=${remainingTags.join(',')}` : ''}${sort === 'popular' ? (remainingTags.length > 0 ? '&' : '?') + 'sort=popular' : ''}`
@@ -136,7 +136,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
             })}
             <Link
               href={`/posts${sort === 'popular' ? '?sort=popular' : ''}`}
-              className="text-sm text-text-muted hover:text-white transition-colors underline"
+              className="text-sm text-muted hover:text-hover transition-colors underline"
             >
               {t('Posts.clearAll')}
             </Link>
@@ -151,7 +151,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   selectedTags.length === 0
                     ? 'bg-accent text-white'
-                    : 'bg-surface text-text-muted hover:text-white border border-surface-border'
+                    : 'bg-surface text-muted hover:text-hover border border-surface-border'
                 }`}
             >
               {t('Posts.allPosts')}
@@ -168,10 +168,10 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
                   className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                     isSelected
                       ? 'bg-accent text-white'
-                      : 'bg-surface text-text-muted hover:text-white border border-surface-border'
+                      : 'bg-surface text-muted hover:text-hover border border-surface-border'
                   }`}
                 >
-                  {tag} <span className={isSelected ? 'text-white/70' : 'text-text-muted'}>({tagCount})</span>
+                  {tag} <span className={isSelected ? 'text-white/70' : 'text-muted'}>({tagCount})</span>
                 </Link>
               )
             })}
@@ -187,8 +187,8 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
-            <p className="text-lg font-semibold text-white">{t('Posts.emptyTitle')}</p>
-            <p className="mt-2 text-sm text-text-secondary">{t('Posts.emptyBody')}</p>
+            <p className="text-lg font-semibold text-primary">{t('Posts.emptyTitle')}</p>
+            <p className="mt-2 text-sm text-secondary">{t('Posts.emptyBody')}</p>
           </div>
         )}
         
@@ -198,18 +198,18 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
             {page > 1 && (
               <Link
                 href={`/posts?page=${page - 1}${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}${sort === 'popular' ? '&sort=popular' : ''}`}
-                className="px-4 py-2 bg-surface border border-surface-border rounded-lg text-text-secondary hover:text-white transition-colors"
+                className="px-4 py-2 bg-surface border border-surface-border rounded-lg text-secondary hover:text-hover transition-colors"
               >
                 {t('Posts.previous')}
               </Link>
             )}
-            <span className="px-4 py-2 text-text-muted">
+            <span className="px-4 py-2 text-muted">
               {t('Posts.pageInfo', { current: page, total: totalPages })}
             </span>
             {page < totalPages && (
               <Link
                 href={`/posts?page=${page + 1}${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}${sort === 'popular' ? '&sort=popular' : ''}`}
-                className="px-4 py-2 bg-surface border border-surface-border rounded-lg text-text-secondary hover:text-white transition-colors"
+                className="px-4 py-2 bg-surface border border-surface-border rounded-lg text-secondary hover:text-hover transition-colors"
               >
                 {t('Posts.next')}
               </Link>

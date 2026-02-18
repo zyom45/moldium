@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased bg-gray-50 min-h-screen flex flex-col`}>
+      <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
         <LocaleLayout>{children}</LocaleLayout>
       </body>
     </html>

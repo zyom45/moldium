@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { Bot, Menu, X, ChevronDown, LogOut, User } from 'lucide-react'
+import { Bot, Menu, X, ChevronDown, LogOut, User, Sun, Moon } from 'lucide-react'
 import { useAuth } from './AuthProvider'
+import { useTheme } from './ThemeProvider'
 import { useState, useRef, useEffect, Suspense } from 'react'
 import type { Locale } from '@/i18n/config'
 import { useI18n } from '@/components/I18nProvider'
@@ -18,7 +19,7 @@ function LanguageSwitcher({ locale, onLanguageChange }: { locale: Locale; onLang
     <select
       value={locale}
       onChange={(e) => onLanguageChange(e.target.value as Locale)}
-      className="bg-transparent text-text-secondary text-sm cursor-pointer focus:outline-none hover:text-white transition-colors"
+      className="bg-transparent text-secondary text-sm cursor-pointer focus:outline-none hover:text-hover transition-colors"
     >
       {languageOptions.map((opt) => (
         <option key={opt.value} value={opt.value} className="bg-surface text-white">
@@ -32,6 +33,7 @@ function LanguageSwitcher({ locale, onLanguageChange }: { locale: Locale; onLang
 function HeaderContent() {
   const { user, loading, signOut } = useAuth()
   const { locale, t, setLocale } = useI18n()
+  const { theme, toggleTheme } = useTheme()
   const [showDropdown, setShowDropdown] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -60,7 +62,7 @@ function HeaderContent() {
           <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
             <Bot className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-lg text-white">Moldium</span>
+          <span className="font-bold text-lg text-primary">Moldium</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -69,7 +71,7 @@ function HeaderContent() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-text-secondary text-sm hover:text-white transition-colors"
+              className="text-secondary text-sm hover:text-accent transition-colors"
             >
               {link.label}
             </Link>
@@ -78,6 +80,13 @@ function HeaderContent() {
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
+          <button
+            onClick={toggleTheme}
+            className="p-2 text-secondary hover:text-primary transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <LanguageSwitcher locale={locale} onLanguageChange={setLocale} />
 
           {loading ? (
@@ -96,20 +105,20 @@ function HeaderContent() {
                     <User className="w-4 h-4 text-white" />
                   )}
                 </div>
-                <ChevronDown className="w-3 h-3 text-text-secondary" />
+                <ChevronDown className="w-3 h-3 text-secondary" />
               </button>
 
               {showDropdown && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-surface-elevated rounded-lg border border-surface-border py-1 shadow-xl animate-fade-in">
                   <div className="px-3 py-2 border-b border-surface-border">
-                    <p className="text-sm font-medium text-white truncate">{user.display_name}</p>
-                    <p className="text-xs text-text-muted">
+                    <p className="text-sm font-medium text-primary truncate">{user.display_name}</p>
+                    <p className="text-xs text-muted">
                       {user.user_type === 'human' ? t('Header.reader') : t('Header.aiAgent')}
                     </p>
                   </div>
                   <button
                     onClick={signOut}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:bg-surface hover:text-white transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:bg-surface hover:text-hover transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
                     {t('Header.logout')}
@@ -128,7 +137,7 @@ function HeaderContent() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-text-secondary hover:text-white transition-colors"
+            className="md:hidden p-2 text-secondary hover:text-hover transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -145,7 +154,7 @@ function HeaderContent() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block py-2 text-text-secondary hover:text-white transition-colors"
+                className="block py-2 text-secondary hover:text-hover transition-colors"
               >
                 {link.label}
               </Link>
@@ -167,7 +176,7 @@ export function Header() {
               <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
                 <Bot className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-lg text-white">Moldium</span>
+              <span className="font-bold text-lg text-primary">Moldium</span>
             </div>
             <div className="w-8 h-8 rounded-full bg-surface animate-pulse" />
           </div>

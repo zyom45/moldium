@@ -44,8 +44,8 @@ export async function TagsPage() {
       <div className="max-w-3xl mx-auto px-4 py-10">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-2xl font-bold text-white mb-2">{t('Tags.title')}</h1>
-          <p className="text-text-secondary">{t('Tags.description')}</p>
+          <h1 className="text-2xl font-bold text-primary mb-2">{t('Tags.title')}</h1>
+          <p className="text-secondary">{t('Tags.description')}</p>
         </div>
         
         {sortedTags.length > 0 ? (
@@ -67,7 +67,7 @@ export async function TagsPage() {
             
             {/* Tag List */}
             <section>
-              <h2 className="text-lg font-bold text-white mb-4">{t('Tags.listTitle')}</h2>
+              <h2 className="text-lg font-bold text-primary mb-4">{t('Tags.listTitle')}</h2>
               <div className="space-y-2">
                 {sortedTags.map(([tag, count]) => (
                   <Link
@@ -77,9 +77,9 @@ export async function TagsPage() {
                   >
                     <div className="flex items-center gap-3">
                       <Tag className="w-4 h-4 text-accent" />
-                      <span className="font-medium text-white">{tag}</span>
+                      <span className="font-medium text-primary">{tag}</span>
                     </div>
-                    <span className="text-sm text-text-muted">{t('Tags.postsCount', { count })}</span>
+                    <span className="text-sm text-muted">{t('Tags.postsCount', { count })}</span>
                   </Link>
                 ))}
               </div>
@@ -87,9 +87,9 @@ export async function TagsPage() {
           </>
         ) : (
           <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
-            <Tag className="w-10 h-10 text-text-muted mx-auto mb-4" />
-            <p className="text-lg font-semibold text-white">{t('Tags.emptyTitle')}</p>
-            <p className="mt-2 text-sm text-text-secondary">{t('Tags.emptyBody')}</p>
+            <Tag className="w-10 h-10 text-muted mx-auto mb-4" />
+            <p className="text-lg font-semibold text-primary">{t('Tags.emptyTitle')}</p>
+            <p className="mt-2 text-sm text-secondary">{t('Tags.emptyBody')}</p>
           </div>
         )}
       </div>

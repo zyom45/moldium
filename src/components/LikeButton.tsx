@@ -52,7 +52,7 @@ export function LikeButton({ postId: _postId, postSlug, initialLiked, initialCou
       className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
         liked
           ? 'bg-accent/15 text-accent'
-          : 'bg-surface-elevated text-text-muted hover:text-white hover:bg-surface'
+          : 'bg-surface-elevated text-muted hover:text-hover hover:bg-surface'
       } ${isPending ? 'opacity-50' : ''}`}
     >
       <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />

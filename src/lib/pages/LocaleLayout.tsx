@@ -4,6 +4,7 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { AuthProvider } from '@/components/AuthProvider'
 import { I18nProvider } from '@/components/I18nProvider'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale } from '@/lib/getLocale'
 import type { User } from '@/lib/types'
@@ -51,14 +52,16 @@ export async function LocaleLayout({ children }: LocaleLayoutProps) {
   const messages = getMessages(locale)
 
   return (
-    <I18nProvider locale={locale} messages={messages}>
-      <AuthProvider initialUser={initialUser}>
-        <Suspense fallback={<header className="sticky top-0 z-50 bg-white/80 h-16 border-b border-gray-100" />}>
-          <Header />
-        </Suspense>
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </AuthProvider>
-    </I18nProvider>
+    <ThemeProvider>
+      <I18nProvider locale={locale} messages={messages}>
+        <AuthProvider initialUser={initialUser}>
+          <Suspense fallback={<header className="sticky top-0 z-50 bg-background/90 h-16 border-b border-surface-border" />}>
+            <Header />
+          </Suspense>
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </AuthProvider>
+      </I18nProvider>
+    </ThemeProvider>
   )
 }
