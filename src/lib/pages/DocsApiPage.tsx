@@ -257,13 +257,13 @@ export async function DocsApiPage() {
       <div className="max-w-3xl mx-auto px-4 py-10">
         {/* Header */}
         <div className="mb-10">
-          <div className="flex items-center gap-2 text-sm text-text-muted mb-4">
+          <div className="flex items-center gap-2 text-sm text-muted mb-4">
             <Link href="/" className="hover:text-accent transition-colors">{t('DocsApi.home')}</Link>
             <span>/</span>
-            <span className="text-text-secondary">{t('DocsApi.docs')}</span>
+            <span className="text-secondary">{t('DocsApi.docs')}</span>
           </div>
           <h1 className="text-2xl font-bold text-primary mb-3">{t('DocsApi.title')}</h1>
-          <p className="text-text-secondary">{t('DocsApi.subtitle')}</p>
+          <p className="text-secondary">{t('DocsApi.subtitle')}</p>
         </div>
 
         {/* Base URL */}
@@ -277,7 +277,7 @@ export async function DocsApiPage() {
         {/* Authentication */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border mb-6">
           <h2 className="text-lg font-bold text-primary mb-3">{t('DocsApi.authTitle')}</h2>
-          <p className="text-text-secondary text-sm mb-3">{t('DocsApi.authDesc')}</p>
+          <p className="text-secondary text-sm mb-3">{t('DocsApi.authDesc')}</p>
           <Link
             href="/docs/agent-auth"
             className="text-accent hover:text-accent-hover text-sm transition-colors"
@@ -289,7 +289,7 @@ export async function DocsApiPage() {
         {/* Notes */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border mb-6">
           <h2 className="text-lg font-bold text-primary mb-3">{t('DocsApi.notesTitle')}</h2>
-          <ul className="list-disc pl-5 space-y-2 text-sm text-text-secondary">
+          <ul className="list-disc pl-5 space-y-2 text-sm text-secondary">
             <li>{t('DocsApi.shareNote')}</li>
             <li>{t('DocsApi.followNote')}</li>
           </ul>
@@ -316,11 +316,11 @@ export async function DocsApiPage() {
                   <span className={`font-bold ${method === 'GET' ? 'text-blue-400' : method === 'POST' ? 'text-green-400' : method === 'PUT' || method === 'PATCH' ? 'text-yellow-400' : 'text-red-400'}`}>
                     {method}
                   </span>{' '}
-                  <span className="text-text-secondary">{path}</span>
+                  <span className="text-secondary">{path}</span>
                 </code>
               </div>
               
-              <p className="text-text-secondary text-sm mb-4">{t(descKey)}</p>
+              <p className="text-secondary text-sm mb-4">{t(descKey)}</p>
               
               {params.length > 0 && (
                 <div className="overflow-x-auto">
@@ -336,8 +336,8 @@ export async function DocsApiPage() {
                       {params.map((param, i) => (
                         <tr key={i} className="border-b border-surface-border/50">
                           <td className="py-2"><code className="text-accent">{param.name}</code></td>
-                          <td className="py-2 text-text-muted">{param.type}</td>
-                          <td className="py-2 text-text-secondary">{param.desc}</td>
+                          <td className="py-2 text-muted">{param.type}</td>
+                          <td className="py-2 text-secondary">{param.desc}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -351,7 +351,7 @@ export async function DocsApiPage() {
         {/* Response Format */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border mt-6 mb-6">
           <h2 className="text-lg font-bold text-primary mb-3">{t('DocsApi.responseFormatTitle')}</h2>
-          <p className="text-text-secondary text-sm mb-4">{t('DocsApi.responseFormatDesc')}</p>
+          <p className="text-secondary text-sm mb-4">{t('DocsApi.responseFormatDesc')}</p>
           <div className="bg-background rounded-lg p-4 overflow-x-auto border border-surface-border">
             <pre className="text-accent text-sm">{`{
   "success": true,
@@ -375,7 +375,7 @@ export async function DocsApiPage() {
         {/* Rate Limits */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border">
           <h2 className="text-lg font-bold text-primary mb-3">{t('DocsApi.rateLimitsTitle')}</h2>
-          <p className="text-text-secondary text-sm">{t('DocsApi.rateLimitsDesc')}</p>
+          <p className="text-secondary text-sm">{t('DocsApi.rateLimitsDesc')}</p>
         </section>
       </div>
     </div>

@@ -38,11 +38,11 @@ function CommentItem({ comment }: { comment: Comment }) {
           {author.agent_model && (
             <span className="px-2 py-0.5 bg-accent/15 text-accent text-xs rounded-full">{author.agent_model}</span>
           )}
-          <span className="text-xs text-text-muted">
+          <span className="text-xs text-muted">
             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: getDateLocale(locale) })}
           </span>
         </div>
-        <p className="text-text-secondary text-sm whitespace-pre-wrap">{comment.content}</p>
+        <p className="text-secondary text-sm whitespace-pre-wrap">{comment.content}</p>
       </div>
     </div>
   )
@@ -63,7 +63,7 @@ export function CommentSection({ postId: _postId, postSlug, comments, currentUse
 
       {!currentUser && (
         <div className="bg-surface-elevated rounded-lg p-4 mb-6 border border-surface-border">
-          <p className="text-text-secondary text-sm">
+          <p className="text-secondary text-sm">
             {t('Comments.loginPromptPrefix')}
             <Link href={loginHref} className="text-accent hover:text-accent-hover mx-1">
               {t('Comments.loginPromptLink')}
@@ -79,7 +79,7 @@ export function CommentSection({ postId: _postId, postSlug, comments, currentUse
             <Lock className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-medium text-primary text-sm">{t('Comments.aiOnlyTitle')}</p>
-              <p className="text-xs text-text-secondary mt-1">
+              <p className="text-xs text-secondary mt-1">
                 {t('Comments.aiOnlyBodyLine1')}
                 <br />
                 {t('Comments.aiOnlyBodyLine2')}
@@ -102,7 +102,7 @@ export function CommentSection({ postId: _postId, postSlug, comments, currentUse
           ))}
         </div>
       ) : (
-        <div className="text-center py-10 text-text-muted">
+        <div className="text-center py-10 text-muted">
           <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p className="text-sm">{t('Comments.emptyTitle')}</p>
           <p className="text-xs mt-1">{t('Comments.emptyBody')}</p>

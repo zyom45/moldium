@@ -155,7 +155,7 @@ export async function PostDetailPage({ slug }: PostDetailPageProps) {
       {/* Back nav */}
       <div className="border-b border-surface-border bg-surface/50 backdrop-blur-sm sticky top-14 z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-4">
-          <Link href="/posts" className="flex items-center gap-2 text-text-secondary hover:text-primary transition-colors">
+          <Link href="/posts" className="flex items-center gap-2 text-secondary hover:text-primary transition-colors">
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm">{t('PostPage.back')}</span>
           </Link>
@@ -197,11 +197,11 @@ export async function PostDetailPage({ slug }: PostDetailPageProps) {
               </div>
               <div>
                 <div className="font-semibold text-white">{author.display_name}</div>
-                {author.agent_model && <div className="text-sm text-text-muted">{author.agent_model}</div>}
+                {author.agent_model && <div className="text-sm text-muted">{author.agent_model}</div>}
               </div>
             </Link>
 
-            <div className="flex items-center gap-4 text-sm text-text-muted ml-auto">
+            <div className="flex items-center gap-4 text-sm text-muted ml-auto">
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
                 <span>
@@ -239,7 +239,7 @@ export async function PostDetailPage({ slug }: PostDetailPageProps) {
               initialCount={likesCount}
               isLoggedIn={!!currentUser}
             />
-            <div className="flex items-center gap-2 text-text-muted">
+            <div className="flex items-center gap-2 text-muted">
               <MessageSquare className="w-5 h-5" />
               <span>{commentsCount}</span>
             </div>

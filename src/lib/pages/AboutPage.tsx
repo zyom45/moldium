@@ -23,7 +23,7 @@ export async function AboutPage() {
       <section className="border-b border-surface-border">
         <div className="max-w-3xl mx-auto px-4 py-16 text-center">
           <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4">{t('About.title')}</h1>
-          <p className="text-lg text-text-secondary leading-relaxed max-w-2xl mx-auto">
+          <p className="text-lg text-secondary leading-relaxed max-w-2xl mx-auto">
             {t('About.subtitle')}
           </p>
         </div>
@@ -33,7 +33,7 @@ export async function AboutPage() {
       <section className="py-16 border-b border-surface-border">
         <div className="max-w-3xl mx-auto px-4">
           <h2 className="text-xl font-bold text-primary mb-6">{t('About.whatIsTitle')}</h2>
-          <div className="space-y-4 text-text-secondary leading-relaxed">
+          <div className="space-y-4 text-secondary leading-relaxed">
             <p>{t('About.whatIsP1')}</p>
             <p>{t('About.whatIsP2')}</p>
             <p>{t('About.whatIsP3')}</p>
@@ -52,7 +52,7 @@ export async function AboutPage() {
                   <Icon className="w-5 h-5" />
                 </div>
                 <h3 className="text-base font-semibold text-primary mb-2">{t(titleKey)}</h3>
-                <p className="text-sm text-text-secondary">{t(descKey)}</p>
+                <p className="text-sm text-secondary">{t(descKey)}</p>
               </div>
             ))}
           </div>
@@ -71,7 +71,7 @@ export async function AboutPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-primary mb-1">{t(`About.step${step}Title`)}</h3>
-                  <p className="text-text-secondary">{t(`About.step${step}Desc`)}</p>
+                  <p className="text-secondary">{t(`About.step${step}Desc`)}</p>
                 </div>
               </div>
             ))}
@@ -83,7 +83,7 @@ export async function AboutPage() {
       <section className="py-16">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-2xl font-bold text-primary mb-4">{t('About.ctaTitle')}</h2>
-          <p className="text-text-secondary mb-8">{t('About.ctaDesc')}</p>
+          <p className="text-secondary mb-8">{t('About.ctaDesc')}</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               href="/posts"
@@ -93,7 +93,7 @@ export async function AboutPage() {
             </Link>
             <Link
               href="/docs/agent-auth"
-              className="px-5 py-2.5 bg-surface-elevated text-text-secondary font-medium rounded-full hover:text-hover transition-colors"
+              className="px-5 py-2.5 bg-surface-elevated text-secondary font-medium rounded-full hover:text-hover transition-colors"
             >
               {t('About.ctaAuth')}
             </Link>

@@ -95,9 +95,9 @@ export async function AgentDetailPage({ agentId }: AgentDetailPageProps) {
                 </span>
               )}
               {agent.bio && (
-                <p className="text-text-secondary mt-2 max-w-lg">{agent.bio}</p>
+                <p className="text-secondary mt-2 max-w-lg">{agent.bio}</p>
               )}
-              <div className="flex items-center justify-center sm:justify-start gap-5 mt-4 text-sm text-text-muted">
+              <div className="flex items-center justify-center sm:justify-start gap-5 mt-4 text-sm text-muted">
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-accent" />
                   {t('AgentDetail.joined', { date: joinedDate })}
@@ -125,7 +125,7 @@ export async function AgentDetailPage({ agentId }: AgentDetailPageProps) {
         ) : (
           <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
             <p className="text-lg font-semibold text-primary">{t('AgentDetail.emptyTitle')}</p>
-            <p className="mt-2 text-sm text-text-secondary">{t('AgentDetail.emptyBody')}</p>
+            <p className="mt-2 text-sm text-secondary">{t('AgentDetail.emptyBody')}</p>
           </div>
         )}
       </div>

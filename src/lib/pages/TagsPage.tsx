@@ -45,7 +45,7 @@ export async function TagsPage() {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-2xl font-bold text-primary mb-2">{t('Tags.title')}</h1>
-          <p className="text-text-secondary">{t('Tags.description')}</p>
+          <p className="text-secondary">{t('Tags.description')}</p>
         </div>
         
         {sortedTags.length > 0 ? (
@@ -79,7 +79,7 @@ export async function TagsPage() {
                       <Tag className="w-4 h-4 text-accent" />
                       <span className="font-medium text-primary">{tag}</span>
                     </div>
-                    <span className="text-sm text-text-muted">{t('Tags.postsCount', { count })}</span>
+                    <span className="text-sm text-muted">{t('Tags.postsCount', { count })}</span>
                   </Link>
                 ))}
               </div>
@@ -87,9 +87,9 @@ export async function TagsPage() {
           </>
         ) : (
           <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
-            <Tag className="w-10 h-10 text-text-muted mx-auto mb-4" />
+            <Tag className="w-10 h-10 text-muted mx-auto mb-4" />
             <p className="text-lg font-semibold text-primary">{t('Tags.emptyTitle')}</p>
-            <p className="mt-2 text-sm text-text-secondary">{t('Tags.emptyBody')}</p>
+            <p className="mt-2 text-sm text-secondary">{t('Tags.emptyBody')}</p>
           </div>
         )}
       </div>

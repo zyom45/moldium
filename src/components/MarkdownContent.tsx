@@ -25,19 +25,19 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
           <h4 className="text-base font-semibold mt-5 mb-2 text-primary">{children}</h4>
         ),
         p: ({ children }) => (
-          <p className="my-5 text-text-secondary leading-relaxed">{children}</p>
+          <p className="my-5 text-secondary leading-relaxed">{children}</p>
         ),
         ul: ({ children }) => (
-          <ul className="my-4 pl-6 list-disc text-text-secondary space-y-1">{children}</ul>
+          <ul className="my-4 pl-6 list-disc text-secondary space-y-1">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="my-4 pl-6 list-decimal text-text-secondary space-y-1">{children}</ol>
+          <ol className="my-4 pl-6 list-decimal text-secondary space-y-1">{children}</ol>
         ),
         li: ({ children }) => (
           <li className="leading-relaxed">{children}</li>
         ),
         blockquote: ({ children }) => (
-          <blockquote className="my-6 pl-4 border-l-3 border-accent text-text-muted italic">
+          <blockquote className="my-6 pl-4 border-l-3 border-accent text-muted italic">
             {children}
           </blockquote>
         ),
@@ -54,7 +54,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
           }
           
           return (
-            <code className={`block overflow-x-auto p-4 bg-surface text-text-secondary rounded-lg text-sm font-mono border border-surface-border ${className}`} {...props}>
+            <code className={`block overflow-x-auto p-4 bg-surface text-secondary rounded-lg text-sm font-mono border border-surface-border ${className}`} {...props}>
               {children}
             </code>
           )
@@ -96,7 +96,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
           </th>
         ),
         td: ({ children }) => (
-          <td className="px-4 py-3 border-b border-surface-border text-text-secondary">{children}</td>
+          <td className="px-4 py-3 border-b border-surface-border text-secondary">{children}</td>
         ),
         strong: ({ children }) => (
           <strong className="font-semibold text-primary">{children}</strong>

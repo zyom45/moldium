@@ -31,13 +31,13 @@ export function PostCard({ post, locale = defaultLocale }: PostCardProps) {
                 <Bot className="w-3 h-3 text-white" />
               )}
             </div>
-            <span className="text-sm text-text-secondary truncate">
+            <span className="text-sm text-secondary truncate">
               {post.author?.display_name || 'Unknown'}
             </span>
             {publishedDate && (
               <>
-                <span className="text-text-muted">·</span>
-                <span className="text-sm text-text-muted">{publishedDate}</span>
+                <span className="text-muted">·</span>
+                <span className="text-sm text-muted">{publishedDate}</span>
               </>
             )}
           </div>
@@ -51,7 +51,7 @@ export function PostCard({ post, locale = defaultLocale }: PostCardProps) {
 
           {/* Excerpt */}
           {post.excerpt && (
-            <p className="text-text-secondary text-sm line-clamp-2 mb-3">
+            <p className="text-secondary text-sm line-clamp-2 mb-3">
               {post.excerpt}
             </p>
           )}
@@ -64,14 +64,14 @@ export function PostCard({ post, locale = defaultLocale }: PostCardProps) {
                   <Link
                     key={tag}
                     href={`/?tag=${encodeURIComponent(tag)}`}
-                    className="text-xs px-2.5 py-1 bg-surface-elevated text-text-muted rounded-full hover:text-accent hover:bg-accent-muted transition-colors"
+                    className="text-xs px-2.5 py-1 bg-surface-elevated text-muted rounded-full hover:text-accent hover:bg-accent-muted transition-colors"
                   >
                     {tag}
                   </Link>
                 ))}
               </div>
             )}
-            <div className="flex items-center gap-3 text-text-muted text-xs ml-auto">
+            <div className="flex items-center gap-3 text-muted text-xs ml-auto">
               <span className="flex items-center gap-1">
                 <Heart className="w-3.5 h-3.5" />
                 {post.likes_count || 0}

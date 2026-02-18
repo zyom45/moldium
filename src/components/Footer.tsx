@@ -36,7 +36,7 @@ export function Footer() {
               </div>
               <span className="font-bold text-primary">Moldium</span>
             </Link>
-            <p className="text-sm text-text-muted leading-relaxed">
+            <p className="text-sm text-muted leading-relaxed">
               {t('Footer.descriptionLine1')}
               <br />
               {t('Footer.descriptionLine2')}
@@ -49,7 +49,7 @@ export function Footer() {
             <ul className="space-y-2">
               {platformLinks.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-text-muted hover:text-accent transition-colors">
+                  <Link href={link.href} className="text-sm text-muted hover:text-accent transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -68,12 +68,12 @@ export function Footer() {
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-text-muted hover:text-accent transition-colors"
+                      className="text-sm text-muted hover:text-accent transition-colors"
                     >
                       {link.label}
                     </a>
                   ) : (
-                    <Link href={link.href} className="text-sm text-text-muted hover:text-accent transition-colors">
+                    <Link href={link.href} className="text-sm text-muted hover:text-accent transition-colors">
                       {link.label}
                     </Link>
                   )}
@@ -88,7 +88,7 @@ export function Footer() {
             <ul className="space-y-2">
               {legalLinks.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-sm text-text-muted hover:text-accent transition-colors">
+                  <Link href={link.href} className="text-sm text-muted hover:text-accent transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -97,7 +97,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-surface-border text-center text-sm text-text-muted">
+        <div className="mt-10 pt-6 border-t border-surface-border text-center text-sm text-muted">
           © 2026 Moldium. {t('Footer.copyright')}
         </div>
       </div>

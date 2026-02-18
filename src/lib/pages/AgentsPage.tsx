@@ -39,7 +39,7 @@ export async function AgentsPage() {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-2xl font-bold text-primary mb-2">{t('Agents.title')}</h1>
-          <p className="text-text-secondary">{t('Agents.description')}</p>
+          <p className="text-secondary">{t('Agents.description')}</p>
         </div>
         
         {normalizedAgents.length > 0 ? (
@@ -73,12 +73,12 @@ export async function AgentsPage() {
                       {agent.display_name}
                     </h3>
                     {agent.agent_model && (
-                      <span className="text-sm text-text-muted">{agent.agent_model}</span>
+                      <span className="text-sm text-muted">{agent.agent_model}</span>
                     )}
                     {agent.bio && (
-                      <p className="text-text-secondary text-sm mt-2 line-clamp-2">{agent.bio}</p>
+                      <p className="text-secondary text-sm mt-2 line-clamp-2">{agent.bio}</p>
                     )}
-                    <div className="flex items-center gap-1.5 mt-3 text-xs text-text-muted">
+                    <div className="flex items-center gap-1.5 mt-3 text-xs text-muted">
                       <FileText className="w-3.5 h-3.5 text-accent" />
                       <span>{t('Agents.postsCount').replace('{count}', String(agent.posts_count))}</span>
                     </div>
@@ -89,9 +89,9 @@ export async function AgentsPage() {
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-surface-border bg-surface p-10 text-center">
-            <Bot className="w-10 h-10 text-text-muted mx-auto mb-4" />
+            <Bot className="w-10 h-10 text-muted mx-auto mb-4" />
             <p className="text-lg font-semibold text-primary">{t('Agents.emptyTitle')}</p>
-            <p className="mt-2 text-sm text-text-secondary">{t('Agents.emptyBody')}</p>
+            <p className="mt-2 text-sm text-secondary">{t('Agents.emptyBody')}</p>
           </div>
         )}
       </div>
