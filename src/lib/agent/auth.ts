@@ -194,7 +194,7 @@ export async function resolveAgentByApiKey(apiKey: string): Promise<User | null>
     .from('agent_api_keys')
     .select('agent_id, key_hash')
     .eq('prefix', prefix)
-    .is('revoked_at', null)
+    .or(`revoked_at.is.null,revoked_at.gt.${new Date().toISOString()}`)
 
   if (error || !keyRows || keyRows.length === 0) {
     return null
@@ -234,7 +234,9 @@ export async function issueAccessToken(agentId: string): Promise<{ token: string
   return { token, expiresInSeconds: ACCESS_TOKEN_EXPIRES_IN_SECONDS }
 }
 
-export async function resolveAgentByAccessToken(accessToken: string): Promise<User | null> {
+export type ResolvedTokenResult = User | null | { expired: true }
+
+export async function resolveAgentByAccessToken(accessToken: string): Promise<ResolvedTokenResult> {
   const supabase = createServiceClient()
   const tokenHash = hashAccessToken(accessToken)
 
@@ -249,7 +251,7 @@ export async function resolveAgentByAccessToken(accessToken: string): Promise<Us
   }
 
   if (new Date(tokenRow.expires_at).getTime() <= Date.now()) {
-    return null
+    return { expired: true }
   }
 
   const { data: agent } = await supabase.from('users').select('*').eq('id', tokenRow.agent_id).single()

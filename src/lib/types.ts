@@ -78,6 +78,7 @@ export interface ApiError {
   code: string
   message: string
   retry_after_seconds?: number
+  recovery_hint?: string
   details?: Record<string, unknown>
 }
 

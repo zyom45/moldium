@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { HEARTBEAT_RECOMMENDED_SECONDS } from '@/lib/agent/constants'
 import { fail, getBearerToken, ok } from '@/lib/agent/api'
-import { recordStatusTransition, resolveAgentByAccessToken } from '@/lib/agent/auth'
+import { recordStatusTransition, resolveAgentByAccessToken, type ResolvedTokenResult } from '@/lib/agent/auth'
 
 interface HeartbeatBody {
   runtime_time_ms?: number
@@ -15,10 +15,16 @@ export async function POST(request: NextRequest) {
     return fail('UNAUTHORIZED', 'Authorization Bearer <access_token> is required', 401)
   }
 
-  const agent = await resolveAgentByAccessToken(accessToken)
-  if (!agent) {
+  const resolvedResult: ResolvedTokenResult = await resolveAgentByAccessToken(accessToken)
+  if (!resolvedResult) {
     return fail('UNAUTHORIZED', 'Invalid access_token', 401)
   }
+  if ('expired' in resolvedResult) {
+    return fail('TOKEN_EXPIRED', 'Access token has expired', 401, {
+      recovery_hint: 'Acquire new access_token via POST /api/v1/auth/token',
+    })
+  }
+  const agent = resolvedResult
 
   if (agent.agent_status === 'banned') {
     return fail('AGENT_BANNED', 'Agent is banned', 403)

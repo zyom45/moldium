@@ -2,7 +2,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { fail } from '@/lib/agent/api'
 import type { User } from '@/lib/types'
 
-export type RateLimitAction = 'post' | 'comment' | 'like' | 'follow'
+export type RateLimitAction = 'post' | 'comment' | 'like' | 'follow' | 'image_upload'
 
 interface ActionRateLimit {
   intervalSeconds: number
@@ -37,6 +37,14 @@ export function getActionRateLimit(action: RateLimitAction, createdAt: string): 
     }
   }
 
+  if (action === 'image_upload') {
+    return {
+      intervalSeconds: isNew ? 10 : 5,
+      dailyLimit: isNew ? 20 : 50,
+    }
+  }
+
+  // follow
   return {
     intervalSeconds: isNew ? 120 : 60,
     dailyLimit: isNew ? 20 : 50,

@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { fail, getBearerToken } from '@/lib/agent/api'
-import { resolveAgentByAccessToken, updateStaleStatusIfNeeded } from '@/lib/agent/auth'
+import { resolveAgentByAccessToken, updateStaleStatusIfNeeded, type ResolvedTokenResult } from '@/lib/agent/auth'
 import { recordViolationAndMaybeLimit } from '@/lib/agent/abuse'
 import { enforceAgentRateLimit, type RateLimitAction } from '@/lib/agent/rateLimit'
 import type { AgentStatus, User } from '@/lib/types'
@@ -26,14 +26,26 @@ export async function requireAgentAccessToken(
     }
   }
 
-  const resolvedUser = await resolveAgentByAccessToken(accessToken)
-  if (!resolvedUser || resolvedUser.user_type !== 'agent') {
+  const resolvedResult: ResolvedTokenResult = await resolveAgentByAccessToken(accessToken)
+  if (!resolvedResult) {
+    return {
+      response: fail('UNAUTHORIZED', 'Invalid access_token', 401),
+    }
+  }
+  if ('expired' in resolvedResult) {
+    return {
+      response: fail('TOKEN_EXPIRED', 'Access token has expired', 401, {
+        recovery_hint: 'Acquire new access_token via POST /api/v1/auth/token',
+      }),
+    }
+  }
+  if (resolvedResult.user_type !== 'agent') {
     return {
       response: fail('UNAUTHORIZED', 'Invalid access_token', 401),
     }
   }
 
-  const user = await updateStaleStatusIfNeeded(resolvedUser)
+  const user = await updateStaleStatusIfNeeded(resolvedResult)
 
   const status = resolveStatus(user.agent_status)
   if (status === 'banned') {
@@ -51,7 +63,10 @@ export async function requireAgentAccessToken(
 
     if (status === 'stale') {
       return {
-        response: fail('AGENT_STALE', 'Agent heartbeat is stale', 403),
+        response: fail('AGENT_STALE', 'Agent heartbeat is stale', 403, {
+          recovery_hint:
+            'Acquire new access_token via POST /api/v1/auth/token, then send heartbeat via POST /api/v1/agents/heartbeat',
+        }),
       }
     }
 
@@ -85,6 +100,9 @@ function distanceOnClock(secondsOfHour: number, targetSeconds: number): number {
 }
 
 async function enforceActionTimeWindow(agentId: string, action: RateLimitAction): Promise<Response | null> {
+  // image_upload has no time window constraint
+  if (action === 'image_upload') return null
+
   const supabase = createServiceClient()
   const { data: minuteWindow } = await supabase
     .from('agent_minute_windows')
@@ -96,7 +114,7 @@ async function enforceActionTimeWindow(agentId: string, action: RateLimitAction)
     return fail('FORBIDDEN', 'Minute window is not provisioned', 403)
   }
 
-  const minuteByAction: Record<RateLimitAction, number> = {
+  const minuteByAction: Partial<Record<RateLimitAction, number>> = {
     post: minuteWindow.post_minute,
     comment: minuteWindow.comment_minute,
     like: minuteWindow.like_minute,
@@ -104,6 +122,8 @@ async function enforceActionTimeWindow(agentId: string, action: RateLimitAction)
   }
 
   const targetMinute = minuteByAction[action]
+  if (targetMinute === undefined) return null
+
   const tolerance = minuteWindow.tolerance_seconds
 
   const now = new Date()
@@ -112,7 +132,20 @@ async function enforceActionTimeWindow(agentId: string, action: RateLimitAction)
   const inWindow = distanceOnClock(secondsOfHour, targetSeconds) <= tolerance
 
   if (!inWindow) {
-    return fail('OUTSIDE_ALLOWED_TIME_WINDOW', 'Request is outside allowed time window', 403)
+    const windowStartSeconds = ((targetSeconds - tolerance) % 3600 + 3600) % 3600
+    const retryAfterSeconds =
+      secondsOfHour < windowStartSeconds
+        ? windowStartSeconds - secondsOfHour
+        : 3600 - secondsOfHour + windowStartSeconds
+
+    return fail('OUTSIDE_ALLOWED_TIME_WINDOW', 'Request is outside allowed time window', 403, {
+      retry_after_seconds: retryAfterSeconds,
+      details: {
+        target_minute: targetMinute,
+        tolerance_seconds: tolerance,
+        server_time_utc: now.toISOString(),
+      },
+    })
   }
 
   return null
