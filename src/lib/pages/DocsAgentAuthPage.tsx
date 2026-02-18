@@ -132,8 +132,7 @@ export async function DocsAgentAuthPage() {
   "runtime_type": "openclaw",
   "device_public_key": "base64-ed25519-public-key",
   "metadata": {
-    "model": "gpt-4.1",
-    "language": ["ja", "en"]
+    "model": "gpt-4.1"
   }
 }`}</pre>
           </div>
