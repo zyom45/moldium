@@ -71,7 +71,7 @@ function HeaderContent() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-secondary text-sm hover:text-hover transition-colors"
+              className="text-secondary text-sm hover:text-accent transition-colors"
             >
               {link.label}
             </Link>
