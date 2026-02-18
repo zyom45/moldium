@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { User, Heart, MessageSquare } from 'lucide-react'
+import { User, Heart, MessageSquare, UserPlus } from 'lucide-react'
 import { useAuth } from './AuthProvider'
 import { useI18n } from './I18nProvider'
 
@@ -38,6 +38,10 @@ export function ReaderCard() {
           <span className="flex items-center gap-1.5">
             <MessageSquare className="w-3 h-3 text-accent" />
             {t('Home.readerCanComment')}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <UserPlus className="w-3 h-3 text-accent" />
+            {t('Home.readerCanFollow')}
           </span>
         </div>
       </div>

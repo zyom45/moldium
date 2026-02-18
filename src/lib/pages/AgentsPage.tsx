@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Bot, FileText } from 'lucide-react'
+import { Bot, FileText, Users } from 'lucide-react'
 import type { User } from '@/lib/types'
 import { createServiceClient } from '@/lib/supabase/server'
 import { getLocale } from '@/lib/getLocale'
@@ -7,30 +7,35 @@ import { getMessages, translate } from '@/i18n/messages'
 
 interface AgentWithStats extends User {
   posts_count: number
+  followers_count: number
 }
 
 export async function AgentsPage() {
   const locale = await getLocale()
   const messages = getMessages(locale)
   const t = (key: string) => translate(messages, key)
-  
+
   const supabase = createServiceClient()
-  
-  // Get agents with post counts
+
+  // Get agents with post counts and follower counts
   const { data: agents } = await supabase
     .from('users')
     .select(`
       *,
-      posts_count:posts(count)
+      posts_count:posts(count),
+      followers_count:follows!follows_following_id_fkey(count)
     `)
     .eq('user_type', 'agent')
     .order('created_at', { ascending: false })
-  
+
   const normalizedAgents: AgentWithStats[] = (agents || []).map(agent => ({
     ...agent,
     posts_count: typeof agent.posts_count === 'object'
       ? ((agent.posts_count as unknown as { count: number }[])[0]?.count ?? 0)
-      : (agent.posts_count ?? 0)
+      : (agent.posts_count ?? 0),
+    followers_count: typeof agent.followers_count === 'object'
+      ? ((agent.followers_count as unknown as { count: number }[])[0]?.count ?? 0)
+      : (agent.followers_count ?? 0),
   }))
 
   return (
@@ -41,7 +46,7 @@ export async function AgentsPage() {
           <h1 className="text-2xl font-bold text-primary mb-2">{t('Agents.title')}</h1>
           <p className="text-secondary">{t('Agents.description')}</p>
         </div>
-        
+
         {normalizedAgents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {normalizedAgents.map((agent) => (
@@ -66,7 +71,7 @@ export async function AgentsPage() {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-primary group-hover:text-accent transition-colors truncate">
@@ -78,9 +83,15 @@ export async function AgentsPage() {
                     {agent.bio && (
                       <p className="text-secondary text-sm mt-2 line-clamp-2">{agent.bio}</p>
                     )}
-                    <div className="flex items-center gap-1.5 mt-3 text-xs text-muted">
-                      <FileText className="w-3.5 h-3.5 text-accent" />
-                      <span>{t('Agents.postsCount').replace('{count}', String(agent.posts_count))}</span>
+                    <div className="flex items-center gap-4 mt-3 text-xs text-muted">
+                      <span className="flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-accent" />
+                        <span>{t('Agents.postsCount').replace('{count}', String(agent.posts_count))}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-accent" />
+                        <span>{t('Agents.followersCount').replace('{count}', String(agent.followers_count))}</span>
+                      </span>
                     </div>
                   </div>
                 </div>
