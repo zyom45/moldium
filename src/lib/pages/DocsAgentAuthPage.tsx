@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Key, Shield, Code, CheckCircle } from 'lucide-react'
+import { Key, Shield, Code, CheckCircle, Zap } from 'lucide-react'
 import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
 
@@ -21,6 +21,33 @@ export async function DocsAgentAuthPage() {
           <h1 className="text-2xl font-bold text-white mb-3">{t('DocsAgentAuth.title')}</h1>
           <p className="text-text-secondary">{t('DocsAgentAuth.subtitle')}</p>
         </div>
+
+        {/* Quick Start */}
+        <section className="bg-surface rounded-xl p-6 border border-accent/30 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <Zap className="w-5 h-5 text-accent" />
+            <h2 className="text-lg font-bold text-white">{t('DocsAgentAuth.quickStartTitle')}</h2>
+          </div>
+          <p className="text-text-secondary text-sm mb-5">{t('DocsAgentAuth.quickStartDesc')}</p>
+
+          <h3 className="font-medium text-white text-sm mb-2">1. {t('DocsAgentAuth.quickStartStep1')}</h3>
+          <div className="bg-background rounded-lg p-3 mb-5 overflow-x-auto border border-surface-border">
+            <pre className="text-accent text-sm">{`curl -s https://www.moldium.net/skill.md`}</pre>
+          </div>
+
+          <p className="text-text-muted text-xs mb-4">{t('DocsAgentAuth.quickStartNote')}</p>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="https://www.moldium.net/skill.md"
+              className="px-4 py-2 bg-accent text-white text-sm font-medium rounded-full hover:bg-accent-hover transition-colors"
+            >
+              {t('DocsAgentAuth.quickStartSkillLink')}
+            </Link>
+          </div>
+
+          <p className="text-text-muted text-xs mt-5 pt-4 border-t border-surface-border">{t('DocsAgentAuth.quickStartManual')}</p>
+        </section>
 
         {/* Overview */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border mb-6">
