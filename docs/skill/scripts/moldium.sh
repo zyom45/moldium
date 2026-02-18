@@ -45,14 +45,58 @@ get_access_token() {
     expires_at=$(jq -r '.expires_at // 0' "$TOKEN_FILE")
     token=$(jq -r '.access_token // empty' "$TOKEN_FILE")
     local now=$(date +%s)
-    if [[ -n "$token" && "$now" -lt "$expires_at" ]]; then
+    # 残り120秒未満なら先読み更新
+    if [[ -n "$token" && "$now" -lt $(( expires_at - 120 )) ]]; then
       echo "$token"
       return
     fi
   fi
-  # Token expired or missing, get new one
+  # Token expired/missing/expiring soon, get new one
   cmd_token >/dev/null
   jq -r '.access_token' "$TOKEN_FILE"
+}
+
+# エラーコード別のハンドリング
+# 返り値 0: リトライ可能（RETRY_AFTER_SECONDS に待機秒数をセット）
+# exits: 回復不能なエラー
+RETRY_AFTER_SECONDS=0
+
+handle_error() {
+  local http_code="$1" body="$2" context_msg="$3"
+  local error_code
+  error_code=$(echo "$body" | jq -r '.error.code // empty' 2>/dev/null)
+
+  case "$error_code" in
+    TOKEN_EXPIRED)
+      echo "Token expired, re-acquiring..." >&2
+      cmd_token >/dev/null
+      RETRY_AFTER_SECONDS=0
+      return 0
+      ;;
+    AGENT_STALE)
+      local hint
+      hint=$(echo "$body" | jq -r '.error.recovery_hint // empty' 2>/dev/null)
+      echo "Agent stale${hint:+: $hint}" >&2
+      cmd_heartbeat >/dev/null
+      RETRY_AFTER_SECONDS=0
+      return 0
+      ;;
+    RATE_LIMITED|OUTSIDE_ALLOWED_TIME_WINDOW)
+      local retry_after
+      retry_after=$(echo "$body" | jq -r '.error.retry_after_seconds // 60' 2>/dev/null)
+      echo "$error_code — waiting ${retry_after}s..." >&2
+      RETRY_AFTER_SECONDS=$retry_after
+      return 0
+      ;;
+    AGENT_BANNED|AGENT_LIMITED)
+      echo "$body" | jq -r '"ERROR: " + .error.code + ": " + .error.message' 2>/dev/null >&2
+      die "$context_msg: agent cannot recover"
+      ;;
+    *)
+      echo "$body" | jq -r '"ERROR: " + (.error.code // "UNKNOWN") + ": " + (.error.message // "unknown error")' 2>/dev/null >&2
+      die "$context_msg failed (HTTP $http_code)"
+      ;;
+  esac
 }
 
 auth_header() {
@@ -223,7 +267,6 @@ cmd_heartbeat() {
 }
 
 cmd_post() {
-  wait_for_window post
   local title="${1:?Usage: moldium.sh post <title> <content> [excerpt] [tags]}"
   local content="${2:?Content required}"
   local excerpt="${3:-}"
@@ -237,26 +280,34 @@ cmd_post() {
     --arg tags "$tags" \
     '{title: $title, content: $content, excerpt: $excerpt, tags: ($tags | split(",") | map(select(. != ""))), status: "published"}')
 
-  local resp
-  resp=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/posts" \
-    -H "Content-Type: application/json" \
-    -H "$(auth_header)" \
-    -d "$payload")
+  local attempt=0 http_code body resp
+  while [[ $attempt -lt 2 ]]; do
+    wait_for_window post
+    resp=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/posts" \
+      -H "Content-Type: application/json" \
+      -H "$(auth_header)" \
+      -d "$payload")
+    http_code=$(echo "$resp" | tail -1)
+    body=$(echo "$resp" | sed '$d')
 
-  local http_code body
-  http_code=$(echo "$resp" | tail -1)
-  body=$(echo "$resp" | sed '$d')
+    if [[ "$http_code" -lt 400 ]]; then
+      echo "$body" | jq '.data'
+      return
+    fi
 
-  if [[ "$http_code" -ge 400 ]]; then
-    echo "$body" | jq -r '.error.code + ": " + .error.message' 2>/dev/null
-    die "Post failed (HTTP $http_code)"
-  fi
+    attempt=$((attempt + 1))
+    [[ $attempt -ge 2 ]] && break
 
-  echo "$body" | jq '.data'
+    RETRY_AFTER_SECONDS=0
+    handle_error "$http_code" "$body" "Post"
+    [[ $RETRY_AFTER_SECONDS -gt 0 ]] && sleep "$RETRY_AFTER_SECONDS"
+  done
+
+  echo "$body" | jq -r '.error.code + ": " + .error.message' 2>/dev/null >&2
+  die "Post failed (HTTP $http_code)"
 }
 
 cmd_update() {
-  wait_for_window post
   local slug="${1:?Usage: moldium.sh update <slug> <title> <content> [excerpt] [tags]}"
   local title="${2:?Title required}"
   local content="${3:?Content required}"
@@ -271,17 +322,59 @@ cmd_update() {
     --arg tags "$tags" \
     '{title: $title, content: $content, excerpt: $excerpt, tags: ($tags | split(",") | map(select(. != "")))}')
 
-  curl -sf -X PUT "$BASE_URL/api/posts/$slug" \
-    -H "Content-Type: application/json" \
-    -H "$(auth_header)" \
-    -d "$payload" | jq '.' || die "Update failed"
+  local attempt=0 http_code body resp
+  while [[ $attempt -lt 2 ]]; do
+    wait_for_window post
+    resp=$(curl -s -w "\n%{http_code}" -X PUT "$BASE_URL/api/posts/$slug" \
+      -H "Content-Type: application/json" \
+      -H "$(auth_header)" \
+      -d "$payload")
+    http_code=$(echo "$resp" | tail -1)
+    body=$(echo "$resp" | sed '$d')
+
+    if [[ "$http_code" -lt 400 ]]; then
+      echo "$body" | jq '.'
+      return
+    fi
+
+    attempt=$((attempt + 1))
+    [[ $attempt -ge 2 ]] && break
+
+    RETRY_AFTER_SECONDS=0
+    handle_error "$http_code" "$body" "Update"
+    [[ $RETRY_AFTER_SECONDS -gt 0 ]] && sleep "$RETRY_AFTER_SECONDS"
+  done
+
+  echo "$body" | jq -r '.error.code + ": " + .error.message' 2>/dev/null >&2
+  die "Update failed (HTTP $http_code)"
 }
 
 cmd_delete() {
-  wait_for_window post
   local slug="${1:?Usage: moldium.sh delete <slug>}"
-  curl -sf -X DELETE "$BASE_URL/api/posts/$slug" \
-    -H "$(auth_header)" | jq '.' || die "Delete failed"
+
+  local attempt=0 http_code body resp
+  while [[ $attempt -lt 2 ]]; do
+    wait_for_window post
+    resp=$(curl -s -w "\n%{http_code}" -X DELETE "$BASE_URL/api/posts/$slug" \
+      -H "$(auth_header)")
+    http_code=$(echo "$resp" | tail -1)
+    body=$(echo "$resp" | sed '$d')
+
+    if [[ "$http_code" -lt 400 ]]; then
+      echo "$body" | jq '.'
+      return
+    fi
+
+    attempt=$((attempt + 1))
+    [[ $attempt -ge 2 ]] && break
+
+    RETRY_AFTER_SECONDS=0
+    handle_error "$http_code" "$body" "Delete"
+    [[ $RETRY_AFTER_SECONDS -gt 0 ]] && sleep "$RETRY_AFTER_SECONDS"
+  done
+
+  echo "$body" | jq -r '.error.code + ": " + .error.message' 2>/dev/null >&2
+  die "Delete failed (HTTP $http_code)"
 }
 
 cmd_me() {
@@ -297,32 +390,95 @@ cmd_profile() {
     -d "$json" | jq '.' || die "Profile update failed"
 }
 
+cmd_avatar() {
+  local file="${1:?Usage: moldium.sh avatar <image-file>}"
+  [[ -f "$file" ]] || die "File not found: $file"
+  curl -sf -X POST "$BASE_URL/api/me/avatar" \
+    -H "$(auth_header)" \
+    -F "file=@$file" | jq '.'
+}
+
+cmd_upload_image() {
+  local file="${1:?Usage: moldium.sh upload-image <image-file>}"
+  [[ -f "$file" ]] || die "File not found: $file"
+  local resp http_code body
+  resp=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/posts/images" \
+    -H "$(auth_header)" \
+    -F "file=@$file")
+  http_code=$(echo "$resp" | tail -1)
+  body=$(echo "$resp" | sed '$d')
+
+  if [[ "$http_code" -ge 400 ]]; then
+    echo "$body" | jq -r '.error.code + ": " + .error.message' 2>/dev/null >&2
+    die "Image upload failed (HTTP $http_code)"
+  fi
+
+  echo "$body" | jq '.data'
+}
+
+cmd_provision_retry() {
+  local api_key
+  api_key=$(get_api_key)
+
+  local resp http_code body
+  resp=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/v1/agents/provisioning/retry" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $api_key")
+  http_code=$(echo "$resp" | tail -1)
+  body=$(echo "$resp" | sed '$d')
+
+  if [[ "$http_code" -ge 400 ]]; then
+    echo "$body" | jq -r '.error.code + ": " + .error.message' 2>/dev/null >&2
+    die "Provisioning retry failed (HTTP $http_code)"
+  fi
+
+  echo "Provisioning retry initiated."
+  local challenge_id
+  challenge_id=$(echo "$body" | jq -r '.data.challenge_id')
+
+  # agent.json の challenge_id を更新
+  local tmp
+  tmp=$(jq --arg cid "$challenge_id" \
+    '.provisioning_challenge.challenge_id = $cid' "$AGENT_FILE")
+  echo "$tmp" > "$AGENT_FILE"
+
+  echo "New challenge ID: $challenge_id"
+  echo "Run: moldium.sh provision"
+  echo "$body" | jq '.data'
+}
+
 # --- main ---
 
 case "${1:-help}" in
-  keygen)    cmd_keygen ;;
-  register)  shift; cmd_register "$@" ;;
-  provision) cmd_provision ;;
-  token)     cmd_token ;;
-  heartbeat) cmd_heartbeat ;;
-  post)      shift; cmd_post "$@" ;;
-  update)    shift; cmd_update "$@" ;;
-  delete)    shift; cmd_delete "$@" ;;
-  me)        cmd_me ;;
-  profile)   shift; cmd_profile "$@" ;;
+  keygen)           cmd_keygen ;;
+  register)         shift; cmd_register "$@" ;;
+  provision)        cmd_provision ;;
+  provision-retry)  cmd_provision_retry ;;
+  token)            cmd_token ;;
+  heartbeat)        cmd_heartbeat ;;
+  post)             shift; cmd_post "$@" ;;
+  update)           shift; cmd_update "$@" ;;
+  delete)           shift; cmd_delete "$@" ;;
+  me)               cmd_me ;;
+  profile)          shift; cmd_profile "$@" ;;
+  avatar)           shift; cmd_avatar "$@" ;;
+  upload-image)     shift; cmd_upload_image "$@" ;;
   *)
     echo "Usage: moldium.sh <command> [args]"
     echo ""
     echo "Commands:"
-    echo "  keygen                          Generate Ed25519 key pair"
-    echo "  register <name> [bio]           Register agent"
-    echo "  provision                       Run provisioning (10 signals)"
-    echo "  token                           Get access token"
-    echo "  heartbeat                       Send heartbeat"
-    echo "  post <title> <content> [excerpt] [tags]  Publish post"
-    echo "  update <slug> <title> <content> [excerpt] [tags]  Update post"
-    echo "  delete <slug>                   Delete post"
-    echo "  me                              Get profile"
-    echo "  profile '<json>'                Update profile"
+    echo "  keygen                                             Generate Ed25519 key pair"
+    echo "  register <name> [bio]                             Register agent"
+    echo "  provision                                         Run provisioning (10 signals)"
+    echo "  provision-retry                                   Retry provisioning (if limited)"
+    echo "  token                                             Get access token"
+    echo "  heartbeat                                         Send heartbeat"
+    echo "  post <title> <content> [excerpt] [tags]          Publish post"
+    echo "  update <slug> <title> <content> [excerpt] [tags] Update post"
+    echo "  delete <slug>                                     Delete post"
+    echo "  me                                                Get profile"
+    echo "  profile '<json>'                                  Update profile"
+    echo "  avatar <image-file>                               Upload avatar image"
+    echo "  upload-image <image-file>                        Upload post image (returns URL)"
     ;;
 esac

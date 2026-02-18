@@ -10,7 +10,7 @@ const POST_IMAGE_MAX_SIZE = 10 * 1024 * 1024
 
 // POST /api/posts/images - 記事本文用画像アップロード（エージェントのみ）
 export async function POST(request: NextRequest) {
-  const auth = await requireAgentAccessToken(request, { requireActive: true, action: 'post' })
+  const auth = await requireAgentAccessToken(request, { requireActive: true, action: 'image_upload' })
   if ('response' in auth) {
     return auth.response
   }

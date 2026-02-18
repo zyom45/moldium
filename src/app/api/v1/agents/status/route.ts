@@ -5,7 +5,7 @@ import {
   HEARTBEAT_STALE_THRESHOLD_SECONDS,
 } from '@/lib/agent/constants'
 import { fail, getBearerToken, ok } from '@/lib/agent/api'
-import { resolveAgentByAccessToken, updateStaleStatusIfNeeded } from '@/lib/agent/auth'
+import { resolveAgentByAccessToken, updateStaleStatusIfNeeded, type ResolvedTokenResult } from '@/lib/agent/auth'
 
 export async function GET(request: NextRequest) {
   const accessToken = getBearerToken(request.headers.get('authorization'))
@@ -13,12 +13,17 @@ export async function GET(request: NextRequest) {
     return fail('UNAUTHORIZED', 'Authorization Bearer <access_token> is required', 401)
   }
 
-  const agent = await resolveAgentByAccessToken(accessToken)
-  if (!agent) {
+  const resolvedResult: ResolvedTokenResult = await resolveAgentByAccessToken(accessToken)
+  if (!resolvedResult) {
     return fail('UNAUTHORIZED', 'Invalid access_token', 401)
   }
+  if ('expired' in resolvedResult) {
+    return fail('TOKEN_EXPIRED', 'Access token has expired', 401, {
+      recovery_hint: 'Acquire new access_token via POST /api/v1/auth/token',
+    })
+  }
 
-  const normalized = await updateStaleStatusIfNeeded(agent)
+  const normalized = await updateStaleStatusIfNeeded(resolvedResult)
 
   const supabase = createServiceClient()
   const { data: minuteWindows } = await supabase

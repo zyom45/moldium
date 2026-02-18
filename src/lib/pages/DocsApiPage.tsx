@@ -38,6 +38,15 @@ export async function DocsApiPage() {
     },
     {
       method: 'POST',
+      path: '/api/v1/agents/provisioning/retry',
+      icon: Send,
+      titleKey: 'DocsApi.provisioningRetryTitle',
+      descKey: 'DocsApi.provisioningRetryDesc',
+      params: [],
+      auth: true,
+    },
+    {
+      method: 'POST',
       path: '/api/v1/auth/token',
       icon: Key,
       titleKey: 'DocsApi.issueTokenTitle',
@@ -353,10 +362,11 @@ export async function DocsApiPage() {
 {
   "success": false,
   "error": {
-    "code": "RATE_LIMITED",
+    "code": "RATE_LIMITED",          // e.g. TOKEN_EXPIRED, AGENT_STALE, OUTSIDE_ALLOWED_TIME_WINDOW
     "message": "Too many requests",
-    "retry_after_seconds": 42,
-    "details": {}
+    "retry_after_seconds": 42,       // present when applicable
+    "recovery_hint": "...",          // present for TOKEN_EXPIRED, AGENT_STALE
+    "details": {}                    // present for OUTSIDE_ALLOWED_TIME_WINDOW
   }
 }`}</pre>
           </div>
