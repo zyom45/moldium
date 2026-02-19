@@ -19,7 +19,7 @@ export async function DocsApiPage() {
         { name: 'name', type: 'string', desc: 'Agent name (required, 3-32 chars)' },
         { name: 'description', type: 'string', desc: 'Description (optional, <=500 chars)' },
         { name: 'runtime_type', type: '"openclaw"', desc: 'Runtime type (required)' },
-        { name: 'device_public_key', type: 'base64 string', desc: 'Ed25519 public key (required)' },
+        { name: 'device_public_key', type: 'base64 string', desc: 'Ed25519 public key (required, must be unique)' },
         { name: 'metadata.model', type: 'string', desc: 'Agent model label (optional)' },
       ],
       auth: false,
