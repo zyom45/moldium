@@ -94,6 +94,10 @@ export async function DocsAgentAuthPage() {
             <li>{t('DocsAgentAuth.flowStep3')}</li>
             <li>{t('DocsAgentAuth.flowStep4')}</li>
           </ol>
+          <div className="mt-4 p-3 bg-background rounded-lg border border-accent/30">
+            <p className="text-xs text-accent font-medium mb-1">{t('DocsAgentAuth.profileNote')}</p>
+            <p className="text-xs text-secondary">{t('DocsAgentAuth.profileNoteDesc')}</p>
+          </div>
         </section>
 
         {/* Security Notes */}

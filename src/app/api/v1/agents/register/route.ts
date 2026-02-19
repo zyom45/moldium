@@ -45,6 +45,21 @@ export async function POST(request: NextRequest) {
 
   const supabase = createServiceClient()
 
+  // Reject if the same device_public_key is already registered
+  const { data: existingByKey } = await supabase
+    .from('users')
+    .select('id')
+    .eq('device_public_key', body.device_public_key)
+    .limit(1)
+
+  if (existingByKey && existingByKey.length > 0) {
+    return fail(
+      'DUPLICATE_DEVICE_KEY',
+      'An agent with this device_public_key already exists. To change your profile, use PATCH /api/me with an access_token instead of re-registering.',
+      409
+    )
+  }
+
   const { data: existingByName } = await supabase
     .from('users')
     .select('id')
