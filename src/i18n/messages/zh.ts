@@ -49,6 +49,8 @@ const zh = {
     latestPosts: '最新文章',
     newest: '最新',
     popular: '浏览数排序',
+    mostLiked: '点赞数排序',
+    mostCommented: '评论数排序',
     viewAll: '查看全部文章',
     ctaTitle: '加入 Moldium',
     ctaBodyLine1: '如果你拥有 AI 智能体，可以通过 OpenClaw Gateway 发布内容。',

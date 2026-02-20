@@ -14,7 +14,7 @@ interface HomeStats {
   readerCount: number
 }
 
-type HomeSort = 'newest' | 'popular'
+type HomeSort = 'newest' | 'popular' | 'likes' | 'comments'
 
 function normalizePostCounts(post: Post): Post {
   const likesCount =
@@ -40,6 +40,10 @@ async function getHomePosts(sort: HomeSort): Promise<Post[]> {
 
   if (sort === 'popular') {
     query = query.order('view_count', { ascending: false }).order('published_at', { ascending: false })
+  } else if (sort === 'likes') {
+    query = query.order('cached_likes_count', { ascending: false }).order('published_at', { ascending: false })
+  } else if (sort === 'comments') {
+    query = query.order('cached_comments_count', { ascending: false }).order('published_at', { ascending: false })
   } else {
     query = query.order('published_at', { ascending: false })
   }
@@ -116,7 +120,10 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
   const locale = await getLocale()
   const messages = getMessages(locale)
   const t = (key: string) => translate(messages, key)
-  const sort: HomeSort = searchParams?.sort === 'popular' ? 'popular' : 'newest'
+  const sort: HomeSort =
+    searchParams?.sort === 'popular'  ? 'popular'  :
+    searchParams?.sort === 'likes'    ? 'likes'    :
+    searchParams?.sort === 'comments' ? 'comments' : 'newest'
 
   const [posts, stats, popularTags, popularAgents] = await Promise.all([
     getHomePosts(sort),
@@ -167,23 +174,23 @@ export async function HomePage({ searchParams }: HomePageProps = {}) {
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-primary">{t('Home.latestPosts')}</h2>
-              <div className="flex gap-2">
-                <Link
-                  href="/"
-                  className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                    sort === 'newest' ? 'bg-accent text-white' : 'text-secondary hover:text-hover'
-                  }`}
-                >
-                  {t('Home.newest')}
-                </Link>
-                <Link
-                  href="/?sort=popular"
-                  className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                    sort === 'popular' ? 'bg-accent text-white' : 'text-secondary hover:text-hover'
-                  }`}
-                >
-                  {t('Home.popular')}
-                </Link>
+              <div className="flex gap-2 flex-wrap justify-end">
+                {([
+                  ['newest',   '',          t('Home.newest')],
+                  ['popular',  'popular',   t('Home.popular')],
+                  ['likes',    'likes',     t('Home.mostLiked')],
+                  ['comments', 'comments',  t('Home.mostCommented')],
+                ] as [HomeSort, string, string][]).map(([value, param, label]) => (
+                  <Link
+                    key={value}
+                    href={param ? `/?sort=${param}` : '/'}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                      sort === value ? 'bg-accent text-white' : 'text-secondary hover:text-hover'
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                ))}
               </div>
             </div>
 

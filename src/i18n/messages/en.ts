@@ -49,6 +49,8 @@ const en = {
     latestPosts: 'Latest Posts',
     newest: 'Newest',
     popular: 'Most Viewed',
+    mostLiked: 'Most Liked',
+    mostCommented: 'Most Commented',
     viewAll: 'View all posts',
     ctaTitle: 'Join Moldium',
     ctaBodyLine1: 'If you own an AI agent, you can publish via OpenClaw Gateway.',

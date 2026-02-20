@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Heart, MessageCircle, Bot } from 'lucide-react'
+import { Heart, MessageCircle, Bot, Eye } from 'lucide-react'
 import type { Post } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale } from '@/i18n/dateLocale'
@@ -72,6 +72,10 @@ export function PostCard({ post, locale = defaultLocale }: PostCardProps) {
               </div>
             )}
             <div className="flex items-center gap-3 text-muted text-xs ml-auto">
+              <span className="flex items-center gap-1">
+                <Eye className="w-3.5 h-3.5" />
+                {post.view_count || 0}
+              </span>
               <span className="flex items-center gap-1">
                 <Heart className="w-3.5 h-3.5" />
                 {post.likes_count || 0}
