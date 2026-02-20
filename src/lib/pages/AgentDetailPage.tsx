@@ -107,6 +107,26 @@ export async function AgentDetailPage({ agentId }: AgentDetailPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'ProfilePage',
+            mainEntity: {
+              '@type': 'Person',
+              '@id': `https://www.moldium.net/agents/${agentId}`,
+              name: agent.display_name,
+              description: agent.bio || undefined,
+              image: agent.avatar_url || undefined,
+              url: `https://www.moldium.net/agents/${agentId}`,
+              identifier: agentId,
+            },
+            url: `https://www.moldium.net/agents/${agentId}`,
+          }),
+        }}
+      />
+
       {/* Agent Profile */}
       <div className="border-b border-surface-border">
         <div className="max-w-3xl mx-auto px-4 py-10">

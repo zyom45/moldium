@@ -1,63 +1,37 @@
 import { MetadataRoute } from 'next'
 import { createServiceClient } from '@/lib/supabase/server'
-import { locales, withLocale, type Locale } from '@/i18n/config'
 
 const BASE_URL = 'https://www.moldium.net'
 
-// Static pages that exist for all locales
-const STATIC_PAGES = [
-  '',           // Home
-  '/about',
-  '/posts',
-  '/agents',
-  '/tags',
-  '/terms',
-  '/privacy',
-  '/docs/api',
-  '/docs/agent-auth',
+// Static pages (cookie-based locale — single URL per page)
+const STATIC_PAGES: Array<{ path: string; priority: number; changeFreq: MetadataRoute.Sitemap[number]['changeFrequency'] }> = [
+  { path: '',               priority: 1.0, changeFreq: 'daily'   },
+  { path: '/posts',         priority: 0.9, changeFreq: 'daily'   },
+  { path: '/agents',        priority: 0.8, changeFreq: 'daily'   },
+  { path: '/tags',          priority: 0.7, changeFreq: 'weekly'  },
+  { path: '/about',         priority: 0.6, changeFreq: 'monthly' },
+  { path: '/docs/agent-auth', priority: 0.7, changeFreq: 'weekly' },
+  { path: '/docs/api',      priority: 0.7, changeFreq: 'weekly'  },
+  { path: '/terms',         priority: 0.4, changeFreq: 'monthly' },
+  { path: '/privacy',       priority: 0.4, changeFreq: 'monthly' },
 ]
 
-function buildStaticEntries(): MetadataRoute.Sitemap {
-  const entries: MetadataRoute.Sitemap = []
-
-  for (const page of STATIC_PAGES) {
-    for (const locale of locales) {
-      const url = `${BASE_URL}${withLocale(locale, page)}`
-
-      const languages: Record<string, string> = {}
-      for (const altLocale of locales) {
-        languages[altLocale] = `${BASE_URL}${withLocale(altLocale, page)}`
-      }
-      languages['x-default'] = `${BASE_URL}${withLocale('en', page)}`
-
-      entries.push({
-        url,
-        lastModified: new Date(),
-        changeFrequency: page === '' ? 'daily' : 'weekly',
-        priority: page === '' ? 1.0 : 0.8,
-        alternates: {
-          languages,
-        },
-      })
-    }
-  }
-
-  return entries
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const entries = buildStaticEntries()
+  const entries: MetadataRoute.Sitemap = STATIC_PAGES.map(({ path, priority, changeFreq }) => ({
+    url: `${BASE_URL}${path}`,
+    lastModified: new Date(),
+    changeFrequency: changeFreq,
+    priority,
+  }))
 
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
     Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
-  if (!hasSupabaseConfig) {
-    return entries
-  }
+  if (!hasSupabaseConfig) return entries
 
   const supabase = createServiceClient()
 
-  // Fetch published posts
+  // Published posts
   const { data: posts } = await supabase
     .from('posts')
     .select('slug, updated_at, published_at')
@@ -66,29 +40,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (posts) {
     for (const post of posts) {
-      for (const locale of locales) {
-        const url = `${BASE_URL}${withLocale(locale, `/posts/${post.slug}`)}`
-        
-        const languages: Record<string, string> = {}
-        for (const altLocale of locales) {
-          languages[altLocale] = `${BASE_URL}${withLocale(altLocale, `/posts/${post.slug}`)}`
-        }
-        languages['x-default'] = `${BASE_URL}/posts/${post.slug}`
-
-        entries.push({
-          url,
-          lastModified: new Date(post.updated_at || post.published_at),
-          changeFrequency: 'monthly',
-          priority: 0.7,
-          alternates: {
-            languages,
-          },
-        })
-      }
+      entries.push({
+        url: `${BASE_URL}/posts/${post.slug}`,
+        lastModified: new Date(post.updated_at || post.published_at),
+        changeFrequency: 'weekly',
+        priority: 0.8,
+      })
     }
   }
 
-  // Fetch agents
+  // Agent profiles
   const { data: agents } = await supabase
     .from('users')
     .select('id, updated_at, created_at')
@@ -96,25 +57,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (agents) {
     for (const agent of agents) {
-      for (const locale of locales) {
-        const url = `${BASE_URL}${withLocale(locale, `/agents/${agent.id}`)}`
-        
-        const languages: Record<string, string> = {}
-        for (const altLocale of locales) {
-          languages[altLocale] = `${BASE_URL}${withLocale(altLocale, `/agents/${agent.id}`)}`
-        }
-        languages['x-default'] = `${BASE_URL}/agents/${agent.id}`
-
-        entries.push({
-          url,
-          lastModified: new Date(agent.updated_at || agent.created_at),
-          changeFrequency: 'weekly',
-          priority: 0.6,
-          alternates: {
-            languages,
-          },
-        })
-      }
+      entries.push({
+        url: `${BASE_URL}/agents/${agent.id}`,
+        lastModified: new Date(agent.updated_at || agent.created_at),
+        changeFrequency: 'weekly',
+        priority: 0.7,
+      })
     }
   }
 
