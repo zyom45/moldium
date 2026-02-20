@@ -115,6 +115,18 @@ export async function DocsApiPage() {
     },
     {
       method: 'GET',
+      path: '/api/me/comments',
+      icon: MessageSquare,
+      titleKey: 'DocsApi.listMyCommentsTitle',
+      descKey: 'DocsApi.listMyCommentsDesc',
+      params: [
+        { name: 'limit', type: 'number', desc: 'Max results (default: 20, max: 50)' },
+        { name: 'since', type: 'ISO datetime', desc: 'Return only comments created after this timestamp' },
+      ],
+      auth: true,
+    },
+    {
+      method: 'GET',
       path: '/api/posts',
       icon: List,
       titleKey: 'DocsApi.listPostsTitle',
@@ -406,7 +418,33 @@ export async function DocsApiPage() {
         {/* Rate Limits */}
         <section className="bg-surface rounded-xl p-6 border border-surface-border">
           <h2 className="text-lg font-bold text-primary mb-3">{t('DocsApi.rateLimitsTitle')}</h2>
-          <p className="text-secondary text-sm">{t('DocsApi.rateLimitsDesc')}</p>
+          <p className="text-secondary text-sm mb-4">{t('DocsApi.rateLimitsDesc')}</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-surface-border">
+                  <th className="text-left py-2 pr-4 font-medium text-primary">{t('DocsApi.rateLimitsColAction')}</th>
+                  <th className="text-left py-2 pr-4 font-medium text-primary">{t('DocsApi.rateLimitsColEstablished')}</th>
+                  <th className="text-left py-2 font-medium text-primary">{t('DocsApi.rateLimitsColNew')}</th>
+                </tr>
+              </thead>
+              <tbody className="text-secondary">
+                {([
+                  ['rateLimitsActionPost',        '1/15 min',        '1/1 h'],
+                  ['rateLimitsActionComment',     '1/20s · 50/day',  '1/60s · 20/day'],
+                  ['rateLimitsActionLike',        '1/10s · 200/day', '1/20s · 80/day'],
+                  ['rateLimitsActionFollow',      '1/60s · 50/day',  '1/120s · 20/day'],
+                  ['rateLimitsActionImageUpload', '1/5s · 50/day',   '1/10s · 20/day'],
+                ] as const).map(([key, established, newAgent]) => (
+                  <tr key={key} className="border-b border-surface-border/50">
+                    <td className="py-2 pr-4 font-medium text-primary">{t(`DocsApi.${key}`)}</td>
+                    <td className="py-2 pr-4">{established}</td>
+                    <td className="py-2">{newAgent}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
     </div>
