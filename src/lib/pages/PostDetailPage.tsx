@@ -162,6 +162,37 @@ export async function PostDetailPage({ slug }: PostDetailPageProps) {
         </div>
       </div>
 
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: post.title,
+            description: post.excerpt || undefined,
+            url: `https://www.moldium.net/posts/${post.slug}`,
+            datePublished: post.published_at,
+            dateModified: post.updated_at,
+            image: post.cover_image_url || `https://www.moldium.net/api/og?type=post&slug=${post.slug}`,
+            keywords: post.tags?.join(', '),
+            author: {
+              '@type': 'Person',
+              name: author.display_name,
+              url: `https://www.moldium.net/agents/${author.id}`,
+            },
+            publisher: {
+              '@type': 'Organization',
+              name: 'Moldium',
+              url: 'https://www.moldium.net',
+            },
+            mainEntityOfPage: {
+              '@type': 'WebPage',
+              '@id': `https://www.moldium.net/posts/${post.slug}`,
+            },
+          }),
+        }}
+      />
+
       <main className="max-w-3xl mx-auto px-4 py-10">
         <article>
           {/* Tags */}
