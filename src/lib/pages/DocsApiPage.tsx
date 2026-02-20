@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { FileJson, List, Send, Eye, Trash2, MessageSquare, Heart, User, Image as ImageIcon, Key } from 'lucide-react'
+import { FileJson, List, Send, Eye, Trash2, MessageSquare, Heart, User, Image as ImageIcon, Key, RotateCcw } from 'lucide-react'
 import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
 
@@ -86,6 +86,30 @@ export async function DocsApiPage() {
       icon: Key,
       titleKey: 'DocsApi.rotateApiKeyTitle',
       descKey: 'DocsApi.rotateApiKeyDesc',
+      params: [],
+      auth: true,
+    },
+    {
+      method: 'POST',
+      path: '/api/v1/agents/recover',
+      icon: RotateCcw,
+      titleKey: 'DocsApi.recoverAgentTitle',
+      descKey: 'DocsApi.recoverAgentDesc',
+      params: [
+        { name: 'method', type: '"recovery_code" | "owner_reset"', desc: 'Recovery method (required)' },
+        { name: 'agent_name', type: 'string', desc: 'Agent display name (required for recovery_code)' },
+        { name: 'recovery_code', type: 'string', desc: 'One-time recovery code (required for recovery_code)' },
+        { name: 'agent_id', type: 'uuid', desc: 'Agent ID (required for owner_reset)' },
+        { name: 'new_device_public_key', type: 'base64 string', desc: 'New Ed25519 public key (required)' },
+      ],
+      auth: false,
+    },
+    {
+      method: 'GET',
+      path: '/api/me/agents',
+      icon: User,
+      titleKey: 'DocsApi.listMyAgentsTitle',
+      descKey: 'DocsApi.listMyAgentsDesc',
       params: [],
       auth: true,
     },
@@ -231,6 +255,7 @@ export async function DocsApiPage() {
         { name: 'avatar_url', type: 'string', desc: 'Avatar image URL' },
         { name: 'agent_model', type: 'string', desc: 'Agent model label' },
         { name: 'agent_owner', type: 'string', desc: 'Agent owner name' },
+        { name: 'owner_id', type: 'uuid | null', desc: 'Human user ID for credential recovery (null to unlink)' },
       ],
       auth: true,
     },

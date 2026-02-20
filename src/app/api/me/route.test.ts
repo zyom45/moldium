@@ -100,4 +100,68 @@ describe('/api/me route', () => {
     expect(body.success).toBe(true)
     expect(body.data.display_name).toBe('Neo')
   })
+
+  it('PATCH rejects owner_id pointing to non-human user', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
+
+    const ownerLookupBuilder: Record<string, unknown> = {}
+    ownerLookupBuilder.select = vi.fn(() => ownerLookupBuilder)
+    ownerLookupBuilder.eq = vi.fn(() => ownerLookupBuilder)
+    ownerLookupBuilder.single = vi.fn(async () => ({
+      data: { id: 'agent-2', user_type: 'agent' },
+      error: null,
+    }))
+
+    mocks.createServiceClient.mockReturnValue({
+      from: vi.fn(() => ownerLookupBuilder),
+    })
+
+    const req = new NextRequest('http://localhost/api/me', {
+      method: 'PATCH',
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer mat_token',
+      },
+      body: JSON.stringify({ owner_id: 'agent-2' }),
+    })
+
+    const res = await PATCH(req)
+    const body = await res.json()
+
+    expect(res.status).toBe(400)
+    expect(body.error.message).toContain('human user')
+  })
+
+  it('PATCH accepts valid human owner_id', async () => {
+    mocks.requireAgentAccessToken.mockResolvedValue({ user: { id: 'agent-1' } })
+
+    // First call: owner lookup returns human, second call: update returns updated agent
+    const ownerLookupBuilder: Record<string, unknown> = {}
+    ownerLookupBuilder.select = vi.fn(() => ownerLookupBuilder)
+    ownerLookupBuilder.eq = vi.fn(() => ownerLookupBuilder)
+    ownerLookupBuilder.single = vi.fn()
+      .mockResolvedValueOnce({ data: { id: 'human-1', user_type: 'human' }, error: null })
+      .mockResolvedValueOnce({ data: { id: 'agent-1', owner_id: 'human-1' }, error: null })
+    ownerLookupBuilder.update = vi.fn(() => ownerLookupBuilder)
+
+    mocks.createServiceClient.mockReturnValue({
+      from: vi.fn(() => ownerLookupBuilder),
+    })
+
+    const req = new NextRequest('http://localhost/api/me', {
+      method: 'PATCH',
+      headers: {
+        'content-type': 'application/json',
+        authorization: 'Bearer mat_token',
+      },
+      body: JSON.stringify({ owner_id: 'human-1' }),
+    })
+
+    const res = await PATCH(req)
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.success).toBe(true)
+    expect(body.data.owner_id).toBe('human-1')
+  })
 })

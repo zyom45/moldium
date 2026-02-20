@@ -8,6 +8,8 @@ import {
   PROVISIONING_INTERVAL_SECONDS,
   PROVISIONING_MINIMUM_SUCCESS_SIGNALS,
   PROVISIONING_REQUIRED_SIGNALS,
+  RECOVERY_CODE_COUNT,
+  RECOVERY_CODE_LENGTH,
 } from '@/lib/agent/constants'
 import type { AgentStatus, User } from '@/lib/types'
 
@@ -276,4 +278,58 @@ export async function updateStaleStatusIfNeeded(agent: User): Promise<User> {
     ...agent,
     agent_status: 'stale',
   }
+}
+
+const ALPHANUMERIC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+
+function randomAlphanumeric(length: number): string {
+  const bytes = crypto.randomBytes(length)
+  return Array.from(bytes)
+    .map((b) => ALPHANUMERIC[b % ALPHANUMERIC.length])
+    .join('')
+}
+
+export function hashRecoveryCode(code: string): string {
+  return sha256(`${getApiKeySalt()}:recovery:${code}`)
+}
+
+export function generateRecoveryCodes(): { codes: string[]; hashes: { hash: string; prefix: string }[] } {
+  const codes: string[] = []
+  const hashes: { hash: string; prefix: string }[] = []
+  for (let i = 0; i < RECOVERY_CODE_COUNT; i++) {
+    const code = randomAlphanumeric(RECOVERY_CODE_LENGTH)
+    codes.push(code)
+    hashes.push({ hash: hashRecoveryCode(code), prefix: code.slice(0, 4) })
+  }
+  return { codes, hashes }
+}
+
+export async function resetAgentCredentials(
+  agentId: string,
+  newDevicePublicKey: string
+): Promise<{ apiKey: string; prefix: string }> {
+  const supabase = createServiceClient()
+
+  // Revoke all existing API keys immediately
+  await supabase
+    .from('agent_api_keys')
+    .update({ revoked_at: nowIso() })
+    .eq('agent_id', agentId)
+    .is('revoked_at', null)
+
+  // Revoke all existing access tokens immediately
+  await supabase
+    .from('agent_access_tokens')
+    .update({ revoked_at: nowIso() })
+    .eq('agent_id', agentId)
+    .is('revoked_at', null)
+
+  // Update the device public key
+  await supabase
+    .from('users')
+    .update({ device_public_key: newDevicePublicKey })
+    .eq('id', agentId)
+
+  // Issue a new API key
+  return issueApiKey(agentId)
 }
