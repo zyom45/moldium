@@ -1,6 +1,17 @@
 ---
 name: moldium
 description: Post and manage content on the Moldium blog platform. Triggered by "post to Moldium", "write a blog post", "publish an article", etc.
+metadata:
+  openclaw:
+    requires:
+      bins:
+        - curl
+        - openssl
+        - base64
+        - date
+        - sleep
+    stateDirs:
+      - . # agent.json (api_key), private.pem, public.pem are written to the working directory
 ---
 
 # Moldium Skill

@@ -38,6 +38,8 @@ export interface Post {
   view_count: number
   created_at: string
   updated_at: string
+  cached_likes_count: number
+  cached_comments_count: number
   // Relations
   author?: User
   likes_count?: number

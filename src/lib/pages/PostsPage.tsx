@@ -7,7 +7,7 @@ import { getMessages, translate } from '@/i18n/messages'
 import { parseTags } from '@/lib/utils/parseTags'
 
 const POSTS_PER_PAGE = 15
-type PostsSort = 'newest' | 'popular'
+type PostsSort = 'newest' | 'popular' | 'likes' | 'comments'
 
 function normalizePostCounts(post: Post): Post {
   const likesCount =
@@ -37,7 +37,10 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
   
   const page = Math.max(1, parseInt(searchParams?.page || '1', 10))
   const selectedTags = parseTags(searchParams?.tag, searchParams?.tags)
-  const sort: PostsSort = searchParams?.sort === 'popular' ? 'popular' : 'newest'
+  const sort: PostsSort =
+    searchParams?.sort === 'popular'  ? 'popular'  :
+    searchParams?.sort === 'likes'    ? 'likes'    :
+    searchParams?.sort === 'comments' ? 'comments' : 'newest'
   
   const supabase = createServiceClient()
   
@@ -54,9 +57,11 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
     .range((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE - 1)
 
   if (sort === 'popular') {
-    query = query
-      .order('view_count', { ascending: false })
-      .order('published_at', { ascending: false })
+    query = query.order('view_count', { ascending: false }).order('published_at', { ascending: false })
+  } else if (sort === 'likes') {
+    query = query.order('cached_likes_count', { ascending: false }).order('published_at', { ascending: false })
+  } else if (sort === 'comments') {
+    query = query.order('cached_comments_count', { ascending: false }).order('published_at', { ascending: false })
   } else {
     query = query.order('published_at', { ascending: false })
   }
@@ -84,6 +89,9 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
   
   const totalPages = Math.ceil((count || 0) / POSTS_PER_PAGE)
   const normalizedPosts = (posts as Post[] || []).map(normalizePostCounts)
+  const sortParam = sort !== 'newest' ? `sort=${sort}` : ''
+  const sortQs = sortParam ? `&${sortParam}` : ''   // append after other params
+  const sortQsFirst = sortParam ? `?${sortParam}` : '' // first param
   
   return (
     <div className="min-h-screen bg-background">
@@ -92,23 +100,27 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
         <div className="mb-8">
           <div className="flex items-center justify-between gap-4 mb-2">
             <h1 className="text-2xl font-bold text-primary">{t('Posts.title')}</h1>
-            <div className="flex gap-2">
-              <Link
-                href={`/posts${selectedTags.length > 0 ? `?tags=${selectedTags.join(',')}` : ''}`}
-                className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                  sort === 'newest' ? 'bg-accent text-white' : 'text-secondary hover:text-hover'
-                }`}
-              >
-                {t('Home.newest')}
-              </Link>
-              <Link
-                href={`/posts?sort=popular${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}`}
-                className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                  sort === 'popular' ? 'bg-accent text-white' : 'text-secondary hover:text-hover'
-                }`}
-              >
-                {t('Home.popular')}
-              </Link>
+            <div className="flex gap-2 flex-wrap justify-end">
+              {([
+                ['newest',   '',          t('Home.newest')],
+                ['popular',  'popular',   t('Home.popular')],
+                ['likes',    'likes',     t('Home.mostLiked')],
+                ['comments', 'comments',  t('Home.mostCommented')],
+              ] as const).map(([value, param, label]) => {
+                const tagPart = selectedTags.length > 0 ? `${param ? '&' : '?'}tags=${selectedTags.join(',')}` : ''
+                const href = param ? `/posts?sort=${param}${tagPart}` : `/posts${tagPart || ''}`
+                return (
+                  <Link
+                    key={value}
+                    href={href}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                      sort === value ? 'bg-accent text-white' : 'text-secondary hover:text-hover'
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                )
+              })}
             </div>
           </div>
           <p className="text-secondary">{t('Posts.description')}</p>
@@ -120,7 +132,9 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
             <span className="text-sm text-muted">{t('Posts.selectedTags')}:</span>
             {selectedTags.map((tag) => {
               const remainingTags = selectedTags.filter(t => t !== tag)
-              const href = `/posts${remainingTags.length > 0 ? `?tags=${remainingTags.join(',')}` : ''}${sort === 'popular' ? (remainingTags.length > 0 ? '&' : '?') + 'sort=popular' : ''}`
+              const href = remainingTags.length > 0
+                ? `/posts?tags=${remainingTags.join(',')}${sortQs}`
+                : `/posts${sortQsFirst}`
               return (
                 <Link
                   key={tag}
@@ -135,7 +149,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
               )
             })}
             <Link
-              href={`/posts${sort === 'popular' ? '?sort=popular' : ''}`}
+              href={`/posts${sortQsFirst}`}
               className="text-sm text-muted hover:text-hover transition-colors underline"
             >
               {t('Posts.clearAll')}
@@ -147,7 +161,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
         {sortedTags.length > 0 && (
           <div className="mb-8 flex flex-wrap gap-2">
               <Link
-                href={`/posts${sort === 'popular' ? '?sort=popular' : ''}`}
+                href={`/posts${sortQsFirst}`}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   selectedTags.length === 0
                     ? 'bg-accent text-white'
@@ -159,8 +173,8 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
             {sortedTags.slice(0, 8).map(([tag, tagCount]) => {
               const isSelected = selectedTags.includes(tag)
               const href = isSelected
-                ? `/posts?tags=${selectedTags.filter(t => t !== tag).join(',')}${sort === 'popular' ? '&sort=popular' : ''}`
-                : `/posts?tags=${[...selectedTags, tag].join(',')}${sort === 'popular' ? '&sort=popular' : ''}`
+                ? `/posts?tags=${selectedTags.filter(t => t !== tag).join(',')}${sortQs}`
+                : `/posts?tags=${[...selectedTags, tag].join(',')}${sortQs}`
               return (
                 <Link
                   key={tag}
@@ -197,7 +211,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
           <div className="mt-10 flex justify-center items-center gap-3">
             {page > 1 && (
               <Link
-                href={`/posts?page=${page - 1}${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}${sort === 'popular' ? '&sort=popular' : ''}`}
+                href={`/posts?page=${page - 1}${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}${sortQs}`}
                 className="px-4 py-2 bg-surface border border-surface-border rounded-lg text-secondary hover:text-hover transition-colors"
               >
                 {t('Posts.previous')}
@@ -208,7 +222,7 @@ export async function PostsPage({ searchParams }: PostsPageProps) {
             </span>
             {page < totalPages && (
               <Link
-                href={`/posts?page=${page + 1}${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}${sort === 'popular' ? '&sort=popular' : ''}`}
+                href={`/posts?page=${page + 1}${selectedTags.length > 0 ? `&tags=${selectedTags.join(',')}` : ''}${sortQs}`}
                 className="px-4 py-2 bg-surface border border-surface-border rounded-lg text-secondary hover:text-hover transition-colors"
               >
                 {t('Posts.next')}

@@ -61,10 +61,9 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
   }, [])
 
   const signOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
     setUser(null)
     setSupabaseUser(null)
+    await fetch('/auth/signout', { method: 'POST' })
     window.location.href = '/'
   }
 
