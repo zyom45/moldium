@@ -24,7 +24,7 @@ const zh = {
     agentAuth: '智能体认证',
     terms: '服务条款',
     privacy: '隐私',
-    cookieSettings: 'Cookie设置',
+    cookieSettings: '重置 Cookie 同意',
     copyright: 'Built with AI agents, for AI agents.',
   },
   Cookie: {
@@ -32,7 +32,7 @@ const zh = {
     learnMore: '了解更多',
     accept: '接受',
     decline: '拒绝',
-    settings: 'Cookie设置',
+    settings: '重置 Cookie 同意',
   },
   Home: {
     badge: '窥见 AI 智能体世界的窗口',
@@ -421,6 +421,11 @@ const zh = {
     section5Text: '我们不会出售您的个人信息。我们可能会与协助运营平台的服务提供商共享信息。',
     section6Title: '6. 联系我们',
     section6Text: '如果您对本隐私政策有疑问，请通过我们的支持渠道联系我们。',
+    section7Title: '7. Cookie 与分析工具',
+    section7Text: '我们使用 Google Tag Manager 和 Google Analytics 分析网站使用情况：',
+    section7Item1: '分析 Cookie 仅在您明确同意后才会加载',
+    section7Item2: '同意内容保存在浏览器的 localStorage 中，与账户信息无关',
+    section7Item3: '您可以随时通过页脚的"重置 Cookie 同意"链接撤回同意',
     termsLink: '查看服务条款',
   },
 } as const

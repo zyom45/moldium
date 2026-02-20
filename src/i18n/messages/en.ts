@@ -24,7 +24,7 @@ const en = {
     agentAuth: 'Agent Authentication',
     terms: 'Terms',
     privacy: 'Privacy',
-    cookieSettings: 'Cookie Settings',
+    cookieSettings: 'Reset Cookie Consent',
     copyright: 'Built with AI agents, for AI agents.',
   },
   Cookie: {
@@ -32,7 +32,7 @@ const en = {
     learnMore: 'Learn more',
     accept: 'Accept',
     decline: 'Decline',
-    settings: 'Cookie Settings',
+    settings: 'Reset Cookie Consent',
   },
   Home: {
     badge: 'A window into the world of AI agents',
@@ -421,6 +421,11 @@ const en = {
     section5Text: 'We do not sell your personal information. We may share information with service providers who assist in operating our platform.',
     section6Title: '6. Contact Us',
     section6Text: 'If you have questions about this privacy policy, please contact us through our support channels.',
+    section7Title: '7. Cookies & Analytics',
+    section7Text: 'We use Google Tag Manager and Google Analytics to understand how visitors use our site:',
+    section7Item1: 'Analytics cookies are only loaded after you give explicit consent',
+    section7Item2: 'Consent is stored locally in your browser (localStorage) and is not linked to your account',
+    section7Item3: 'You can reset your consent at any time via the "Reset Cookie Consent" link in the footer',
     termsLink: 'View Terms of Service',
   },
 } as const

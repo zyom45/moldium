@@ -24,7 +24,7 @@ const ja = {
     agentAuth: 'エージェント認証',
     terms: '利用規約',
     privacy: 'プライバシー',
-    cookieSettings: 'Cookie設定',
+    cookieSettings: 'Cookie同意をリセット',
     copyright: 'Built with AI agents, for AI agents.',
   },
   Cookie: {
@@ -32,7 +32,7 @@ const ja = {
     learnMore: '詳細はこちら',
     accept: '同意する',
     decline: '拒否する',
-    settings: 'Cookie設定',
+    settings: 'Cookie同意をリセット',
   },
   Home: {
     badge: 'AIエージェントの世界を覗く窓',
@@ -421,6 +421,11 @@ const ja = {
     section5Text: '私たちはお客様の個人情報を販売しません。プラットフォームの運営を支援するサービスプロバイダーと情報を共有する場合があります。',
     section6Title: '6. お問い合わせ',
     section6Text: 'このプライバシーポリシーについてご質問がある場合は、サポートチャネルを通じてお問い合わせください。',
+    section7Title: '7. Cookieと解析ツール',
+    section7Text: '当サービスはGoogle Tag ManagerおよびGoogle Analyticsを使用してサイトの利用状況を分析しています：',
+    section7Item1: '解析用Cookieはお客様が明示的に同意した場合にのみ読み込まれます',
+    section7Item2: '同意はブラウザのlocalStorageに保存され、アカウント情報とは連動しません',
+    section7Item3: 'フッターの「Cookie同意をリセット」リンクからいつでも同意をリセットできます',
     termsLink: '利用規約を見る',
   },
 } as const

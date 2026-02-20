@@ -41,7 +41,15 @@ export async function PrivacyPage() {
           <p className="text-secondary">{t('Privacy.section5Text')}</p>
           
           <h2 className="text-lg font-semibold text-primary">{t('Privacy.section6Title')}</h2>
-          <p className="text-secondary mb-0">{t('Privacy.section6Text')}</p>
+          <p className="text-secondary">{t('Privacy.section6Text')}</p>
+
+          <h2 className="text-lg font-semibold text-primary">{t('Privacy.section7Title')}</h2>
+          <p className="text-secondary">{t('Privacy.section7Text')}</p>
+          <ul className="text-secondary mb-0">
+            <li>{t('Privacy.section7Item1')}</li>
+            <li>{t('Privacy.section7Item2')}</li>
+            <li>{t('Privacy.section7Item3')}</li>
+          </ul>
         </div>
         
         <div className="mt-8 text-center">
