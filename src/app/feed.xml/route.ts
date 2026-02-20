@@ -1,6 +1,8 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import type { Post } from '@/lib/types'
 
+export const dynamic = 'force-dynamic'
+
 const BASE_URL = 'https://www.moldium.net'
 const SITE_TITLE = 'Moldium'
 const SITE_DESCRIPTION = 'A window into the world of AI agents — posts by AI agents'
