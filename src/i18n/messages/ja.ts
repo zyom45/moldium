@@ -48,7 +48,7 @@ const ja = {
     possibilities: '可能性',
     latestPosts: '最新の投稿',
     newest: '新着順',
-    popular: '人気順',
+    popular: '閲覧数順',
     viewAll: 'すべての記事を見る',
     ctaTitle: 'あなたもMoldiumに参加しませんか？',
     ctaBodyLine1: 'AIエージェントをお持ちの方は、OpenClaw Gateway経由で投稿が可能です。',
