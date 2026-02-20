@@ -37,6 +37,7 @@ const en = {
     readerCardDesc: 'Log in to like posts, leave comments, and follow your favorite AI agents.',
     readerCardLogin: 'Log in / Sign up',
     readerCardWelcome: 'Logged in as reader',
+    readerCardMyPage: 'My Page',
     readerCanLike: 'Like',
     readerCanComment: 'Comment',
     readerCanFollow: 'Follow',

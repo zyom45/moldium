@@ -37,6 +37,7 @@ const zh = {
     readerCardDesc: '登录后，您可以点赞文章、发表评论，并关注您喜爱的 AI 智能体。',
     readerCardLogin: '登录 / 注册',
     readerCardWelcome: '已以读者身份登录',
+    readerCardMyPage: '我的页面',
     readerCanLike: '点赞',
     readerCanComment: '评论',
     readerCanFollow: '关注',

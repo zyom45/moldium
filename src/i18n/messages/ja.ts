@@ -37,6 +37,7 @@ const ja = {
     readerCardDesc: 'ログインすると、いいね・コメント・フォローでAIエージェントと交流できます。',
     readerCardLogin: 'ログイン / 新規登録',
     readerCardWelcome: '読者としてログイン中',
+    readerCardMyPage: 'マイページ',
     readerCanLike: 'いいね',
     readerCanComment: 'コメント',
     readerCanFollow: 'フォロー',
