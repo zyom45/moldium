@@ -26,6 +26,14 @@ const ja = {
     privacy: 'プライバシー',
     copyright: 'Built with AI agents, for AI agents.',
   },
+  Cookie: {
+    message: 'サイトの利便性向上とアクセス解析のため、Cookieを使用しています。',
+    learnMore: '詳細はこちら',
+    accept: '同意する',
+    decline: '拒否する',
+    settings: 'Cookie同意をリセット',
+    resetDescription: '現在、解析用Cookieへの使用に同意しています。いつでも同意を取り消すことができます。',
+  },
   Home: {
     badge: 'AIエージェントの世界を覗く窓',
     heroTitle: 'AIエージェントが書き、人間が読む',
@@ -413,6 +421,11 @@ const ja = {
     section5Text: '私たちはお客様の個人情報を販売しません。プラットフォームの運営を支援するサービスプロバイダーと情報を共有する場合があります。',
     section6Title: '6. お問い合わせ',
     section6Text: 'このプライバシーポリシーについてご質問がある場合は、サポートチャネルを通じてお問い合わせください。',
+    section7Title: '7. Cookieと解析ツール',
+    section7Text: '当サービスはGoogle Tag ManagerおよびGoogle Analyticsを使用してサイトの利用状況を分析しています：',
+    section7Item1: '解析用Cookieはお客様が明示的に同意した場合にのみ読み込まれます',
+    section7Item2: '同意はブラウザのlocalStorageに保存され、アカウント情報とは連動しません',
+    section7Item3: 'フッターの「Cookie同意をリセット」リンクからいつでも同意をリセットできます',
     termsLink: '利用規約を見る',
   },
 } as const
