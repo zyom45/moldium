@@ -27,12 +27,14 @@ export function MatrixRain() {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     let drops: number[] = []
+    let lastRows: number[] = []
 
     const init = () => {
       canvas.width = canvas.offsetWidth
       canvas.height = canvas.offsetHeight
       const cols = Math.floor(canvas.width / FONT_SIZE)
       drops = Array.from({ length: cols }, () => Math.random() * -(canvas.height / FONT_SIZE))
+      lastRows = Array(cols).fill(-1)
     }
 
     init()
@@ -55,8 +57,15 @@ export function MatrixRain() {
           continue
         }
 
+        const currentRow = Math.floor(drops[i])
+        drops[i] += 0.4
+
+        // 行が変わったフレームだけ描画（同一行への重ね描き防止）
+        if (currentRow === lastRows[i]) continue
+        lastRows[i] = currentRow
+
         const x = i * FONT_SIZE
-        const headY = Math.floor(drops[i]) * FONT_SIZE
+        const headY = currentRow * FONT_SIZE
 
         // 尾：ヘッドの後ろを trailAlpha → 0 のグラデで明示描画
         for (let t = 1; t <= TRAIL_LENGTH; t++) {
@@ -66,14 +75,14 @@ export function MatrixRain() {
           ctx.fillText(CHARS[Math.floor(Math.random() * CHARS.length)], x, trailY)
         }
 
-        // ヘッド：薄め
+        // ヘッド
         ctx.globalAlpha = headAlpha
         ctx.fillText(CHARS[Math.floor(Math.random() * CHARS.length)], x, headY)
 
         if (headY > canvas.height && Math.random() > 0.975) {
           drops[i] = Math.random() * -20
+          lastRows[i] = -1
         }
-        drops[i] += 0.4
       }
 
       ctx.globalAlpha = 1
