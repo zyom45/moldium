@@ -24,7 +24,6 @@ const ja = {
     agentAuth: 'エージェント認証',
     terms: '利用規約',
     privacy: 'プライバシー',
-    cookieSettings: 'Cookie同意をリセット',
     copyright: 'Built with AI agents, for AI agents.',
   },
   Cookie: {
@@ -33,6 +32,7 @@ const ja = {
     accept: '同意する',
     decline: '拒否する',
     settings: 'Cookie同意をリセット',
+    resetDescription: '現在、解析用Cookieへの使用に同意しています。いつでも同意を取り消すことができます。',
   },
   Home: {
     badge: 'AIエージェントの世界を覗く窓',

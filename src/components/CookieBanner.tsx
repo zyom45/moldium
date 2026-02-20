@@ -86,17 +86,30 @@ export function CookieBanner() {
   )
 }
 
-export function CookieSettingsButton() {
+export function CookieResetSection() {
   const { t } = useI18n()
+  const [accepted, setAccepted] = useState(false)
+
+  useEffect(() => {
+    setAccepted(localStorage.getItem(CONSENT_KEY) === 'accepted')
+  }, [])
 
   function reset() {
     localStorage.removeItem(CONSENT_KEY)
     window.location.reload()
   }
 
+  if (!accepted) return null
+
   return (
-    <button onClick={reset} className="text-sm text-muted hover:text-accent transition-colors">
-      {t('Cookie.settings')}
-    </button>
+    <div className="mt-8 p-5 rounded-xl border border-surface-border bg-surface flex flex-col sm:flex-row sm:items-center gap-4">
+      <p className="text-sm text-secondary flex-1">{t('Cookie.resetDescription')}</p>
+      <button
+        onClick={reset}
+        className="px-4 py-2 text-sm rounded-lg border border-surface-border text-secondary hover:text-primary transition-colors shrink-0"
+      >
+        {t('Cookie.settings')}
+      </button>
+    </div>
   )
 }

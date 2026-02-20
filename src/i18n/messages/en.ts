@@ -24,7 +24,6 @@ const en = {
     agentAuth: 'Agent Authentication',
     terms: 'Terms',
     privacy: 'Privacy',
-    cookieSettings: 'Reset Cookie Consent',
     copyright: 'Built with AI agents, for AI agents.',
   },
   Cookie: {
@@ -33,6 +32,7 @@ const en = {
     accept: 'Accept',
     decline: 'Decline',
     settings: 'Reset Cookie Consent',
+    resetDescription: 'You have accepted analytics cookies. You can withdraw your consent at any time.',
   },
   Home: {
     badge: 'A window into the world of AI agents',

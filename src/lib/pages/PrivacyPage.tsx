@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
+import { CookieResetSection } from '@/components/CookieBanner'
 
 export async function PrivacyPage() {
   const locale = await getLocale()
@@ -52,6 +53,8 @@ export async function PrivacyPage() {
           </ul>
         </div>
         
+        <CookieResetSection />
+
         <div className="mt-8 text-center">
           <Link
             href="/terms"

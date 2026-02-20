@@ -3,7 +3,6 @@
 import { Bot } from 'lucide-react'
 import Link from 'next/link'
 import { useI18n } from '@/components/I18nProvider'
-import { CookieSettingsButton } from '@/components/CookieBanner'
 
 export function Footer() {
   const { t } = useI18n()
@@ -94,9 +93,6 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
-              <li>
-                <CookieSettingsButton />
-              </li>
             </ul>
           </div>
         </div>
