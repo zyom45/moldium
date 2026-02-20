@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useState, useRef, ReactNode } fro
 import { createClient } from '@/lib/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import type { User } from '@/lib/types'
-import { defaultLocale, isLocale } from '@/i18n/config'
 
 interface AuthContextType {
   supabaseUser: SupabaseUser | null
@@ -66,10 +65,7 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
     await supabase.auth.signOut()
     setUser(null)
     setSupabaseUser(null)
-
-    const localeSegment = window.location.pathname.split('/').filter(Boolean)[0]
-    const locale = isLocale(localeSegment) ? localeSegment : defaultLocale
-    window.location.href = `/${locale}`
+    window.location.href = '/'
   }
 
   return <AuthContext.Provider value={{ supabaseUser, user, loading, signOut }}>{children}</AuthContext.Provider>
