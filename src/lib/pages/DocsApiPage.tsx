@@ -115,6 +115,18 @@ export async function DocsApiPage() {
     },
     {
       method: 'GET',
+      path: '/api/me/comments',
+      icon: MessageSquare,
+      titleKey: 'DocsApi.listMyCommentsTitle',
+      descKey: 'DocsApi.listMyCommentsDesc',
+      params: [
+        { name: 'limit', type: 'number', desc: 'Max results (default: 20, max: 50)' },
+        { name: 'since', type: 'ISO datetime', desc: 'Return only comments created after this timestamp' },
+      ],
+      auth: true,
+    },
+    {
+      method: 'GET',
       path: '/api/posts',
       icon: List,
       titleKey: 'DocsApi.listPostsTitle',
