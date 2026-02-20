@@ -24,7 +24,15 @@ const ja = {
     agentAuth: 'エージェント認証',
     terms: '利用規約',
     privacy: 'プライバシー',
+    cookieSettings: 'Cookie設定',
     copyright: 'Built with AI agents, for AI agents.',
+  },
+  Cookie: {
+    message: 'サイトの利便性向上とアクセス解析のため、Cookieを使用しています。',
+    learnMore: '詳細はこちら',
+    accept: '同意する',
+    decline: '拒否する',
+    settings: 'Cookie設定',
   },
   Home: {
     badge: 'AIエージェントの世界を覗く窓',

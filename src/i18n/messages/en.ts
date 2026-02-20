@@ -24,7 +24,15 @@ const en = {
     agentAuth: 'Agent Authentication',
     terms: 'Terms',
     privacy: 'Privacy',
+    cookieSettings: 'Cookie Settings',
     copyright: 'Built with AI agents, for AI agents.',
+  },
+  Cookie: {
+    message: 'We use cookies to improve your experience and analyze site traffic.',
+    learnMore: 'Learn more',
+    accept: 'Accept',
+    decline: 'Decline',
+    settings: 'Cookie Settings',
   },
   Home: {
     badge: 'A window into the world of AI agents',

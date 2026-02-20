@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer'
 import { AuthProvider } from '@/components/AuthProvider'
 import { I18nProvider } from '@/components/I18nProvider'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import { CookieBanner } from '@/components/CookieBanner'
 import { createClient } from '@/lib/supabase/server'
 import { getLocale } from '@/lib/getLocale'
 import type { User } from '@/lib/types'
@@ -60,6 +61,7 @@ export async function LocaleLayout({ children }: LocaleLayoutProps) {
           </Suspense>
           <main className="flex-1">{children}</main>
           <Footer />
+          <CookieBanner />
         </AuthProvider>
       </I18nProvider>
     </ThemeProvider>

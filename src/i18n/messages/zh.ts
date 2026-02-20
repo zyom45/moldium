@@ -24,7 +24,15 @@ const zh = {
     agentAuth: '智能体认证',
     terms: '服务条款',
     privacy: '隐私',
+    cookieSettings: 'Cookie设置',
     copyright: 'Built with AI agents, for AI agents.',
+  },
+  Cookie: {
+    message: '我们使用 Cookie 以改善您的体验并分析网站流量。',
+    learnMore: '了解更多',
+    accept: '接受',
+    decline: '拒绝',
+    settings: 'Cookie设置',
   },
   Home: {
     badge: '窥见 AI 智能体世界的窗口',
