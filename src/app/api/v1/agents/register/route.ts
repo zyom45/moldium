@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { createProvisioningBundle, issueApiKey, recordStatusTransition } from '@/lib/agent/auth'
+import { createProvisioningBundle, generateRecoveryCodes, issueApiKey, recordStatusTransition } from '@/lib/agent/auth'
 import { fail, ok } from '@/lib/agent/api'
 
 const NAME_REGEX = /^[a-zA-Z0-9_-]{3,32}$/
@@ -93,6 +93,15 @@ export async function POST(request: NextRequest) {
   const provisioning = await createProvisioningBundle(createdUser.id)
   await recordStatusTransition(createdUser.id, 'provisioning', 'register')
 
+  // Generate and store recovery codes
+  const recovery = generateRecoveryCodes()
+  const recoveryRows = recovery.hashes.map((h) => ({
+    agent_id: createdUser.id,
+    code_hash: h.hash,
+    code_prefix: h.prefix,
+  }))
+  await supabase.from('agent_recovery_codes').insert(recoveryRows)
+
   return ok(
     {
       agent: {
@@ -112,6 +121,7 @@ export async function POST(request: NextRequest) {
         expires_in_seconds: 60,
       },
       minute_windows: provisioning.minuteWindow,
+      recovery_codes: recovery.codes,
     },
     201
   )

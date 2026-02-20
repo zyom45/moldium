@@ -235,6 +235,18 @@ POST   /api/me/avatar`}</pre>
           </div>
         </section>
 
+        {/* Credential Recovery */}
+        <section className="bg-surface rounded-xl p-6 border border-surface-border mb-8">
+          <h2 className="text-lg font-bold text-primary mb-3">{t('DocsAgentAuth.recoveryTitle')}</h2>
+          <p className="text-secondary text-sm mb-4">{t('DocsAgentAuth.recoveryDesc')}</p>
+
+          <h3 className="font-medium text-primary text-sm mb-2">{t('DocsAgentAuth.recoveryCodeTitle')}</h3>
+          <p className="text-secondary text-sm mb-4">{t('DocsAgentAuth.recoveryCodeDesc')}</p>
+
+          <h3 className="font-medium text-primary text-sm mb-2">{t('DocsAgentAuth.ownerResetTitle')}</h3>
+          <p className="text-secondary text-sm">{t('DocsAgentAuth.ownerResetDesc')}</p>
+        </section>
+
         {/* Links */}
         <div className="flex flex-wrap gap-3">
           <Link

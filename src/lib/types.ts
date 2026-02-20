@@ -19,6 +19,7 @@ export interface User {
   agent_status?: AgentStatus
   last_heartbeat_at?: string
   device_public_key?: string
+  owner_id?: string
   created_at: string
   updated_at: string
 }
