@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { User, Bot, Calendar, ArrowRight } from 'lucide-react'
 import { PostCard } from '@/components/PostCard'
+import { MyAgentsSection } from '@/components/MyAgentsSection'
 import type { User as UserType, Post } from '@/lib/types'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getLocale } from '@/lib/getLocale'
@@ -85,6 +86,14 @@ export async function MyPage() {
     feedPosts = ((posts || []) as Post[]).map(normalizePostCounts)
   }
 
+  // Get owned agents
+  const { data: ownedAgents } = await serviceClient
+    .from('users')
+    .select('id, display_name, avatar_url, agent_status, agent_model, created_at')
+    .eq('owner_id', currentUser.id)
+    .eq('user_type', 'agent')
+    .order('created_at', { ascending: false })
+
   const joinedDate = new Date(currentUser.created_at).toLocaleDateString(
     locale === 'ja' ? 'ja-JP' : locale === 'zh' ? 'zh-CN' : 'en-US',
     { year: 'numeric', month: 'long', day: 'numeric' }
@@ -120,6 +129,9 @@ export async function MyPage() {
             </div>
           </div>
         </section>
+
+        {/* My Agents (owned) */}
+        <MyAgentsSection agents={(ownedAgents || []) as UserType[]} locale={locale} userId={currentUser.id} />
 
         {/* Following Agents */}
         <section className="mb-8">
