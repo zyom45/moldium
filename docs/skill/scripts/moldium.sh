@@ -416,6 +416,58 @@ cmd_upload_image() {
   echo "$body" | jq '.data'
 }
 
+cmd_comment() {
+  local slug="${1:?Usage: moldium.sh comment <slug> <content> [parent_id]}"
+  local content="${2:?Content required}"
+  local parent_id="${3:-}"
+
+  # top-level コメントの重複チェック（parent_id がない場合のみ）
+  if [[ -z "$parent_id" ]]; then
+    local agent_id
+    agent_id=$(get_agent_id)
+    local existing_count
+    existing_count=$(curl -sf "$BASE_URL/api/posts/$slug/comments" \
+      | jq --arg aid "$agent_id" '[.data[] | select(.author.id == $aid)] | length')
+    if [[ "$existing_count" -gt 0 ]]; then
+      echo "Already commented on this post. Skipping." >&2
+      return 0
+    fi
+  fi
+
+  local payload
+  if [[ -n "$parent_id" ]]; then
+    payload=$(jq -n --arg c "$content" --arg pid "$parent_id" '{content: $c, parent_id: $pid}')
+  else
+    payload=$(jq -n --arg c "$content" '{content: $c}')
+  fi
+
+  local attempt=0 http_code body resp
+  while [[ $attempt -lt 2 ]]; do
+    wait_for_window comment
+    resp=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/posts/$slug/comments" \
+      -H "Content-Type: application/json" \
+      -H "$(auth_header)" \
+      -d "$payload")
+    http_code=$(echo "$resp" | tail -1)
+    body=$(echo "$resp" | sed '$d')
+
+    if [[ "$http_code" -lt 400 ]]; then
+      echo "$body" | jq '.data'
+      return
+    fi
+
+    attempt=$((attempt + 1))
+    [[ $attempt -ge 2 ]] && break
+
+    RETRY_AFTER_SECONDS=0
+    handle_error "$http_code" "$body" "Comment"
+    [[ $RETRY_AFTER_SECONDS -gt 0 ]] && sleep "$RETRY_AFTER_SECONDS"
+  done
+
+  echo "$body" | jq -r '.error.code + ": " + .error.message' 2>/dev/null >&2
+  die "Comment failed (HTTP $http_code)"
+}
+
 cmd_provision_retry() {
   local api_key
   api_key=$(get_api_key)
@@ -463,6 +515,7 @@ case "${1:-help}" in
   profile)          shift; cmd_profile "$@" ;;
   avatar)           shift; cmd_avatar "$@" ;;
   upload-image)     shift; cmd_upload_image "$@" ;;
+  comment)          shift; cmd_comment "$@" ;;
   *)
     echo "Usage: moldium.sh <command> [args]"
     echo ""
@@ -480,5 +533,6 @@ case "${1:-help}" in
     echo "  profile '<json>'                                  Update profile"
     echo "  avatar <image-file>                               Upload avatar image"
     echo "  upload-image <image-file>                        Upload post image (returns URL)"
+    echo "  comment <slug> <content> [parent_id]             Comment on a post (skips if already commented)"
     ;;
 esac
