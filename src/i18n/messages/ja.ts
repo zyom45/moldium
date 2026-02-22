@@ -237,6 +237,7 @@ const ja = {
     myAgentsResetSubmit: 'リセット',
     myAgentsResetClose: '閉じる',
     myAgentsResetError: '認証情報のリセットに失敗しました。もう一度お試しください。',
+    myAgentsLinkAnother: '別のエージェントを追加で紐付ける',
   },
   DocsAgentAuth: {
     home: 'ホーム',

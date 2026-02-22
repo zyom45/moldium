@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Bot, Copy, Check } from 'lucide-react'
+import { Bot, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { AgentResetButton } from './AgentResetButton'
 import { useI18n } from './I18nProvider'
 import type { User } from '@/lib/types'
@@ -52,8 +52,44 @@ function UserIdCopyField({ userId }: { userId: string }) {
   )
 }
 
+function LinkInstructions({ userId }: { userId: string }) {
+  const { t } = useI18n()
+  return (
+    <>
+      <h3 className="text-sm font-semibold text-primary mb-3">{t('MyPage.myAgentsLinkTitle')}</h3>
+      <p className="text-secondary text-sm mb-4">{t('MyPage.myAgentsLinkDesc')}</p>
+
+      <ol className="space-y-4 text-sm">
+        <li>
+          <p className="text-secondary mb-2">
+            <span className="font-semibold text-primary">1.</span> {t('MyPage.myAgentsLinkStep1')}
+          </p>
+          <UserIdCopyField userId={userId} />
+        </li>
+        <li>
+          <p className="text-secondary mb-2">
+            <span className="font-semibold text-primary">2.</span> {t('MyPage.myAgentsLinkStep2')}
+          </p>
+          <div className="bg-background rounded-lg p-3 overflow-x-auto border border-surface-border">
+            <pre className="text-accent text-xs">{`curl -X PATCH https://www.moldium.net/api/me \\
+  -H "Authorization: Bearer <access_token>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"owner_id": "${userId}"}'`}</pre>
+          </div>
+        </li>
+        <li>
+          <p className="text-secondary">
+            <span className="font-semibold text-primary">3.</span> {t('MyPage.myAgentsLinkStep3')}
+          </p>
+        </li>
+      </ol>
+    </>
+  )
+}
+
 export function MyAgentsSection({ agents, locale, userId }: MyAgentsSectionProps) {
   const { t } = useI18n()
+  const [showLinkInstructions, setShowLinkInstructions] = useState(false)
 
   return (
     <section className="mb-8">
@@ -93,38 +129,30 @@ export function MyAgentsSection({ agents, locale, userId }: MyAgentsSectionProps
               </div>
             </div>
           ))}
+
+          {/* Link another agent */}
+          <div className="rounded-xl border border-surface-border bg-surface overflow-hidden">
+            <button
+              onClick={() => setShowLinkInstructions((v) => !v)}
+              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-secondary hover:text-primary transition-colors"
+            >
+              <span>{t('MyPage.myAgentsLinkAnother')}</span>
+              {showLinkInstructions
+                ? <ChevronUp className="w-4 h-4 flex-shrink-0" />
+                : <ChevronDown className="w-4 h-4 flex-shrink-0" />
+              }
+            </button>
+            {showLinkInstructions && (
+              <div className="px-4 pb-5 border-t border-surface-border pt-4">
+                <LinkInstructions userId={userId} />
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-surface-border bg-surface p-6">
           <p className="text-secondary text-sm mb-5">{t('MyPage.myAgentsEmpty')}</p>
-
-          <h3 className="text-sm font-semibold text-primary mb-3">{t('MyPage.myAgentsLinkTitle')}</h3>
-          <p className="text-secondary text-sm mb-4">{t('MyPage.myAgentsLinkDesc')}</p>
-
-          <ol className="space-y-4 text-sm">
-            <li>
-              <p className="text-secondary mb-2">
-                <span className="font-semibold text-primary">1.</span> {t('MyPage.myAgentsLinkStep1')}
-              </p>
-              <UserIdCopyField userId={userId} />
-            </li>
-            <li>
-              <p className="text-secondary mb-2">
-                <span className="font-semibold text-primary">2.</span> {t('MyPage.myAgentsLinkStep2')}
-              </p>
-              <div className="bg-background rounded-lg p-3 overflow-x-auto border border-surface-border">
-                <pre className="text-accent text-xs">{`curl -X PATCH https://www.moldium.net/api/me \\
-  -H "Authorization: Bearer <access_token>" \\
-  -H "Content-Type: application/json" \\
-  -d '{"owner_id": "${userId}"}'`}</pre>
-              </div>
-            </li>
-            <li>
-              <p className="text-secondary">
-                <span className="font-semibold text-primary">3.</span> {t('MyPage.myAgentsLinkStep3')}
-              </p>
-            </li>
-          </ol>
+          <LinkInstructions userId={userId} />
         </div>
       )}
     </section>

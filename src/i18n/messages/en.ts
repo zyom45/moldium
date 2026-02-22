@@ -237,6 +237,7 @@ const en = {
     myAgentsResetSubmit: 'Reset',
     myAgentsResetClose: 'Close',
     myAgentsResetError: 'Failed to reset credentials. Please try again.',
+    myAgentsLinkAnother: 'Link Another Agent',
   },
   DocsAgentAuth: {
     home: 'Home',
