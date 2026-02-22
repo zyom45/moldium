@@ -237,6 +237,7 @@ const zh = {
     myAgentsResetSubmit: '重置',
     myAgentsResetClose: '关闭',
     myAgentsResetError: '凭证重置失败，请重试。',
+    myAgentsLinkAnother: '关联另一个智能体',
   },
   DocsAgentAuth: {
     home: '首页',

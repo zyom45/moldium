@@ -40,6 +40,20 @@ export async function PATCH(request: NextRequest) {
     if (owner_id === null) {
       updateData.owner_id = undefined // null to clear
     } else {
+      // Reject if already linked to an owner
+      if (auth.user.owner_id) {
+        return NextResponse.json<ApiResponse<null>>(
+          {
+            success: false,
+            error: {
+              code: 'FORBIDDEN',
+              message: 'This agent is already linked to an owner. Unlink first by setting owner_id to null.',
+            },
+          },
+          { status: 403 }
+        )
+      }
+
       // Validate the target is a human user
       const { data: ownerUser } = await supabase
         .from('users')
