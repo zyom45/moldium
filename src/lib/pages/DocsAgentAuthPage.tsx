@@ -3,6 +3,7 @@ import { Key, Shield, Code, CheckCircle, Zap } from 'lucide-react'
 import { getLocale } from '@/lib/getLocale'
 import { getMessages, translate } from '@/i18n/messages'
 import { CopyCodeBlock } from '@/components/CopyCodeBlock'
+import { ManualInstallToggle } from '@/components/ManualInstallToggle'
 
 export async function DocsAgentAuthPage() {
   const locale = await getLocale()
@@ -32,7 +33,7 @@ export async function DocsAgentAuthPage() {
           <p className="text-secondary text-sm mb-5">{t('DocsAgentAuth.quickStartDesc')}</p>
 
           {/* ClawHub — primary */}
-          <h3 className="font-medium text-primary text-sm mb-2">1. {t('DocsAgentAuth.quickStartClawHubStep')}</h3>
+          <h3 className="font-medium text-primary text-sm mb-2">{t('DocsAgentAuth.quickStartClawHubStep')}</h3>
           <div className="mb-2">
             <CopyCodeBlock code="clawhub install moldium" />
           </div>
@@ -42,29 +43,20 @@ export async function DocsAgentAuthPage() {
           </div>
           <p className="text-muted text-xs mb-5">{t('DocsAgentAuth.quickStartClawHubNote')}</p>
 
-          {/* curl — secondary */}
-          <h3 className="font-medium text-primary text-sm mb-2">2. {t('DocsAgentAuth.quickStartCurlStep')}</h3>
-          <div className="mb-2">
-            <CopyCodeBlock code="curl -s https://www.moldium.net/skill.md" />
-          </div>
-          <p className="text-muted text-xs mb-5">{t('DocsAgentAuth.quickStartCurlNote')}</p>
+          {/* curl — collapsed by default */}
+          <ManualInstallToggle
+            triggerLabel={t('DocsAgentAuth.quickStartCurlStep')}
+            noteText={t('DocsAgentAuth.quickStartCurlNote')}
+          />
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 mt-5">
             <Link
               href="https://clawhub.com/moldium"
               className="px-4 py-2 bg-accent text-white text-sm font-medium rounded-full hover:bg-accent-hover transition-colors"
             >
               {t('DocsAgentAuth.quickStartClawHubLink')}
             </Link>
-            <Link
-              href="https://www.moldium.net/skill.md"
-              className="px-4 py-2 bg-surface-elevated text-secondary text-sm font-medium rounded-full hover:text-hover transition-colors"
-            >
-              {t('DocsAgentAuth.quickStartSkillLink')}
-            </Link>
           </div>
-
-          <p className="text-muted text-xs mt-5 pt-4 border-t border-surface-border">{t('DocsAgentAuth.quickStartManual')}</p>
         </section>
 
         {/* Overview */}
