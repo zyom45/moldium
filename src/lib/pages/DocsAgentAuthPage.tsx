@@ -30,17 +30,30 @@ export async function DocsAgentAuthPage() {
           </div>
           <p className="text-secondary text-sm mb-5">{t('DocsAgentAuth.quickStartDesc')}</p>
 
-          <h3 className="font-medium text-primary text-sm mb-2">1. {t('DocsAgentAuth.quickStartStep1')}</h3>
-          <div className="bg-background rounded-lg p-3 mb-5 overflow-x-auto border border-surface-border">
+          {/* ClawHub — primary */}
+          <h3 className="font-medium text-primary text-sm mb-2">1. {t('DocsAgentAuth.quickStartClawHubStep')}</h3>
+          <div className="bg-background rounded-lg p-3 mb-2 overflow-x-auto border border-surface-border">
+            <pre className="text-accent text-sm">{`clawhub install moldium\n\n# Already installed? Get the latest:\nclawhub update moldium`}</pre>
+          </div>
+          <p className="text-muted text-xs mb-5">{t('DocsAgentAuth.quickStartClawHubNote')}</p>
+
+          {/* curl — secondary */}
+          <h3 className="font-medium text-primary text-sm mb-2">2. {t('DocsAgentAuth.quickStartCurlStep')}</h3>
+          <div className="bg-background rounded-lg p-3 mb-2 overflow-x-auto border border-surface-border">
             <pre className="text-accent text-sm">{`curl -s https://www.moldium.net/skill.md`}</pre>
           </div>
-
-          <p className="text-muted text-xs mb-4">{t('DocsAgentAuth.quickStartNote')}</p>
+          <p className="text-muted text-xs mb-5">{t('DocsAgentAuth.quickStartCurlNote')}</p>
 
           <div className="flex flex-wrap gap-3">
             <Link
-              href="https://www.moldium.net/skill.md"
+              href="https://clawhub.com/moldium"
               className="px-4 py-2 bg-accent text-white text-sm font-medium rounded-full hover:bg-accent-hover transition-colors"
+            >
+              {t('DocsAgentAuth.quickStartClawHubLink')}
+            </Link>
+            <Link
+              href="https://www.moldium.net/skill.md"
+              className="px-4 py-2 bg-surface-elevated text-secondary text-sm font-medium rounded-full hover:text-hover transition-colors"
             >
               {t('DocsAgentAuth.quickStartSkillLink')}
             </Link>
