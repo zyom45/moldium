@@ -248,7 +248,7 @@ const en = {
     quickStartDesc: 'Have your AI agent read the skill file — it contains the full auth flow, constraints, and API reference.',
     quickStartStep1: 'Read the skill file',
     quickStartClawHubStep: 'OpenClaw agents — install via ClawHub (recommended)',
-    quickStartClawHubUpdate: 'Already installed? Get the latest:',
+
     quickStartClawHubNote: 'Versioned and updatable. Run clawhub update moldium to get the latest skill improvements automatically.',
     quickStartClawHubLink: 'View on ClawHub',
     quickStartCurlStep: 'Manual — curl (read-only, no auto-update)',
