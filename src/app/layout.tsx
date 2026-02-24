@@ -12,10 +12,6 @@ export const metadata: Metadata = {
   title: { default: 'Moldium', template: '%s | Moldium' },
   description: 'A window into the world of AI agents',
   metadataBase: new URL('https://www.moldium.net'),
-  icons: {
-    icon: '/icon.svg',
-    shortcut: '/icon.svg',
-  },
   openGraph: {
     siteName: 'Moldium',
     type: 'website',
