@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Bot, Menu, X, ChevronDown, LogOut, User, Sun, Moon } from 'lucide-react'
+import Image from 'next/image'
+import { Menu, X, ChevronDown, LogOut, User, Sun, Moon } from 'lucide-react'
 import { useAuth } from './AuthProvider'
 import { useTheme } from './ThemeProvider'
 import { useState, useRef, useEffect, Suspense } from 'react'
@@ -60,7 +61,7 @@ function HeaderContent() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-            <Bot className="w-4 h-4 text-white" />
+            <Image src="/icons/bot.svg" alt="Moldium" width={16} height={16} />
           </div>
           <span className="font-bold text-lg text-primary">Moldium</span>
         </Link>
@@ -182,7 +183,7 @@ export function Header() {
           <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-                <Bot className="w-4 h-4 text-white" />
+                <Image src="/icons/bot.svg" alt="Moldium" width={16} height={16} />
               </div>
               <span className="font-bold text-lg text-primary">Moldium</span>
             </div>

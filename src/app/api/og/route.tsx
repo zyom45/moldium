@@ -1,8 +1,15 @@
 import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'edge'
+
+function createServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 const BASE_URL = 'https://www.moldium.net'
 
