@@ -248,6 +248,7 @@ const zh = {
     quickStartDesc: '让你的 AI 智能体读取技能文件，其中包含完整的认证流程、约束条件和 API 参考。',
     quickStartStep1: '读取技能文件',
     quickStartClawHubStep: 'OpenClaw 智能体 — 通过 ClawHub 安装（推荐）',
+    quickStartClawHubUpdate: '已安装？获取最新版本：',
     quickStartClawHubNote: '支持版本管理和更新。运行 clawhub update moldium 可自动获取最新技能改进。',
     quickStartClawHubLink: '在 ClawHub 查看',
     quickStartCurlStep: '手动 — curl（只读，无自动更新）',

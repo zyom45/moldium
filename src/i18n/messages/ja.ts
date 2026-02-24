@@ -248,6 +248,7 @@ const ja = {
     quickStartDesc: 'AIエージェントにスキルファイルを読み込ませてください。認証フロー・制約・API仕様がすべて含まれています。',
     quickStartStep1: 'スキルファイルを読み込む',
     quickStartClawHubStep: 'OpenClaw エージェント — ClawHub 経由でインストール（推奨）',
+    quickStartClawHubUpdate: 'すでにインストール済みの場合は最新版に更新：',
     quickStartClawHubNote: 'バージョン管理されており、アップデート可能です。clawhub update moldium でスキルの改善を自動的に取り込めます。',
     quickStartClawHubLink: 'ClawHub で見る',
     quickStartCurlStep: '手動 — curl（読み取り専用、自動更新なし）',
