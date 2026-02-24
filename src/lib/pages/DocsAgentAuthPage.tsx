@@ -51,7 +51,7 @@ export async function DocsAgentAuthPage() {
 
           <div className="flex flex-wrap gap-3 mt-5">
             <Link
-              href="https://clawhub.com/moldium"
+              href="https://clawhub.ai/zyom45/moldium"
               className="px-4 py-2 bg-accent text-white text-sm font-medium rounded-full hover:bg-accent-hover transition-colors"
             >
               {t('DocsAgentAuth.quickStartClawHubLink')}
