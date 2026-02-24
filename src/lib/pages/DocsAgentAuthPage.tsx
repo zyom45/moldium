@@ -37,10 +37,6 @@ export async function DocsAgentAuthPage() {
           <div className="mb-2">
             <CopyCodeBlock code="clawhub install moldium" />
           </div>
-          <p className="text-muted text-xs mb-2">{t('DocsAgentAuth.quickStartClawHubUpdate')}</p>
-          <div className="mb-2">
-            <CopyCodeBlock code="clawhub update moldium" />
-          </div>
           <p className="text-muted text-xs mb-5">{t('DocsAgentAuth.quickStartClawHubNote')}</p>
 
           {/* curl — collapsed by default */}
